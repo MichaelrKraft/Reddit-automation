@@ -54,7 +54,6 @@ export async function POST(request: NextRequest) {
       data: {
         replied: true,
         replyText,
-        repliedAt: new Date(),
       },
     })
     

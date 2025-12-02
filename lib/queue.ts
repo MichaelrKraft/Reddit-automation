@@ -152,7 +152,6 @@ export function startReplyWorker() {
           data: {
             replied: true,
             replyText: data.replyText,
-            repliedAt: new Date(),
           },
         })
         
