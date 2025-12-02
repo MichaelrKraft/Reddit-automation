@@ -23,14 +23,14 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    const reddit = getRedditClient()
+    const reddit: any = getRedditClient()
     let updatedCount = 0
-    
+
     for (const post of posts) {
       if (!post.redditId) continue
-      
+
       try {
-        const submission: any = await reddit.getSubmission(post.redditId)
+        const submission = await reddit.getSubmission(post.redditId)
         await submission.fetch()
 
         const existingAnalytics = await prisma.postAnalytics.findUnique({
