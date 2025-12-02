@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
       if (!post.redditId) continue
       
       try {
-        const submission = await reddit.getSubmission(post.redditId)
+        const submission: any = await reddit.getSubmission(post.redditId)
         await submission.fetch()
-        
+
         const existingAnalytics = await prisma.postAnalytics.findUnique({
           where: { postId: post.id },
         })
