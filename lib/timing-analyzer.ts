@@ -10,17 +10,21 @@ interface PostTimingData {
 }
 
 export class TimingAnalyzer {
-  private redditClient: any
+  private redditClient: any = null
 
-  constructor() {
-    this.redditClient = getRedditClient()
+  // Lazy initialization - only create Reddit client when actually needed
+  private getClient(): any {
+    if (!this.redditClient) {
+      this.redditClient = getRedditClient()
+    }
+    return this.redditClient
   }
 
   async analyzeSubredditActivity(subredditName: string, limit: number = 100): Promise<void> {
     console.log(`📊 Analyzing activity patterns for r/${subredditName}...`)
 
     try {
-      const subreddit = await this.redditClient.getSubreddit(subredditName)
+      const subreddit = await this.getClient().getSubreddit(subredditName)
       const hotPosts = await subreddit.getHot({ limit })
       const newPosts = await subreddit.getNew({ limit })
       const topPosts = await subreddit.getTop({ time: 'week', limit })
