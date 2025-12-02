@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.35.5",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.18.0",
     "@types/ioredis": "^4.28.10",
