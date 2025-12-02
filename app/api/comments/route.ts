@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       const existing = await prisma.comment.findFirst({
         where: { redditId: comment.id },
       })
-      
+
       if (!existing) {
         const saved = await prisma.comment.create({
           data: {
@@ -65,12 +65,6 @@ export async function POST(request: NextRequest) {
             postId: post.id,
             author: comment.author.name,
             content: comment.body,
-            score: comment.score,
-            createdAt: new Date(comment.created_utc * 1000),
-            parentId: comment.parent_id.startsWith('t1_') 
-              ? comment.parent_id.substring(3) 
-              : null,
-            depth: comment.depth,
           },
         })
         savedComments.push(saved)
