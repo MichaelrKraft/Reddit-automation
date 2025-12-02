@@ -143,7 +143,7 @@ export function startReplyWorker() {
       try {
         console.log(`Processing reply to comment: ${data.commentId}`)
         
-        const reddit = await import('./reddit').then(m => m.getRedditClient())
+        const reddit: any = await import('./reddit').then(m => m.getRedditClient())
         const redditComment = await reddit.getComment(data.redditCommentId)
         const reply = await redditComment.reply(data.replyText)
         

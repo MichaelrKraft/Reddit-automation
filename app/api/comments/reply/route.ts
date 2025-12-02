@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const reddit = getRedditClient()
+    const reddit: any = getRedditClient()
     const redditComment = await reddit.getComment(comment.redditId)
     const reply = await redditComment.reply(replyText)
     
