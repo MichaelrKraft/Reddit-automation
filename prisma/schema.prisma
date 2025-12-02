@@ -9,17 +9,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User (linked to Clerk)
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  plan      String   @default("free")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  redditAccounts RedditAccount[]
+}
+
 // Reddit Account
 model RedditAccount {
   id        String   @id @default(cuid())
-  username  String   @unique
+  username  String
   connected Boolean  @default(true)
   karma     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   posts     Post[]
   campaigns Campaign[]
+
+  @@unique([userId, username])
 }
 
 // Marketing Campaign
