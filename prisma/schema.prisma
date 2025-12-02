@@ -1,0 +1,145 @@
+// Prisma Schema for Reddit Automation Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Reddit Account
+model RedditAccount {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  connected Boolean  @default(true)
+  karma     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts     Post[]
+  campaigns Campaign[]
+}
+
+// Marketing Campaign
+model Campaign {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("active") // active, paused, completed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  accountId String
+  account   RedditAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  posts     Post[]
+}
+
+// Subreddit
+model Subreddit {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  displayName   String
+  subscribers   Int      @default(0)
+  relevance     Float    @default(0) // 0-1 relevance score
+  lastChecked   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  posts Post[]
+}
+
+// Post (Scheduled or Completed)
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  postType    String   @default("text") // text, link, image
+  status      String   @default("scheduled") // scheduled, posted, failed
+  scheduledAt DateTime?
+  postedAt    DateTime?
+  redditId    String?  @unique // Reddit post ID after posting
+  url         String?  // URL to the Reddit post
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  accountId   String
+  account     RedditAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  
+  campaignId  String?
+  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  
+  subredditId String
+  subreddit   Subreddit @relation(fields: [subredditId], references: [id], onDelete: Cascade)
+
+  analytics   PostAnalytics?
+  comments    Comment[]
+}
+
+// Post Analytics
+model PostAnalytics {
+  id           String   @id @default(cuid())
+  upvotes      Int      @default(0)
+  downvotes    Int      @default(0)
+  score        Int      @default(0)
+  commentCount Int      @default(0)
+  engagement   Float    @default(0) // Calculated engagement rate
+  lastUpdated  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  postId String @unique
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+// Comment (for auto-replies)
+model Comment {
+  id          String   @id @default(cuid())
+  redditId    String   @unique // Reddit comment ID
+  content     String   @db.Text
+  author      String
+  replied     Boolean  @default(false)
+  replyText   String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+// Subreddit Activity Pattern (for optimal posting time analysis)
+model SubredditActivity {
+  id              String   @id @default(cuid())
+  subredditName   String
+  dayOfWeek       Int      // 0-6 (Sunday-Saturday)
+  hourOfDay       Int      // 0-23
+  avgScore        Float    @default(0)
+  avgComments     Float    @default(0)
+  postCount       Int      @default(0)
+  engagementRate  Float    @default(0)
+  sampleSize      Int      @default(0)
+  lastAnalyzed    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([subredditName, dayOfWeek, hourOfDay])
+  @@index([subredditName])
+}
+
+// Optimal Time Recommendation
+model OptimalTimeRecommendation {
+  id              String   @id @default(cuid())
+  subredditName   String
+  dayOfWeek       Int      // 0-6
+  hourOfDay       Int      // 0-23
+  confidenceScore Float    @default(0) // 0-1 confidence
+  avgEngagement   Float    @default(0)
+  rank            Int      @default(0) // 1 = best time, 2 = second best, etc.
+  calculatedAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([subredditName, rank])
+  @@index([subredditName])
+}

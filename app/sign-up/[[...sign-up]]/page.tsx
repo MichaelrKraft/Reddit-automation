@@ -1,0 +1,27 @@
+import { SignUp } from '@clerk/nextjs'
+
+export default function SignUpPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-bg-primary">
+      <div className="dot-grid-background"><div className="dot-grid"></div></div>
+      <div className="relative z-10">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold shimmer-text mb-2">Red Rider</h1>
+          <p className="text-text-secondary">Create your account</p>
+        </div>
+        <SignUp appearance={{
+          elements: {
+            formButtonPrimary: 'bg-orange-500 hover:bg-orange-600',
+            card: 'bg-gray-900 border border-gray-700',
+            headerTitle: 'text-white',
+            headerSubtitle: 'text-gray-400',
+            socialButtonsBlockButton: 'bg-gray-800 border-gray-600 text-white hover:bg-gray-700',
+            formFieldLabel: 'text-gray-300',
+            formFieldInput: 'bg-gray-800 border-gray-600 text-white',
+            footerActionLink: 'text-orange-400 hover:text-orange-300',
+          }
+        }} />
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,87 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { getRedditClient } from '@/lib/reddit'
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { postId } = body
+    
+    let posts
+    
+    if (postId) {
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+      })
+      posts = post ? [post] : []
+    } else {
+      posts = await prisma.post.findMany({
+        where: {
+          status: 'posted',
+          redditId: { not: null },
+        },
+      })
+    }
+    
+    const reddit = getRedditClient()
+    let updatedCount = 0
+    
+    for (const post of posts) {
+      if (!post.redditId) continue
+      
+      try {
+        const submission = await reddit.getSubmission(post.redditId)
+        await submission.fetch()
+        
+        const existingAnalytics = await prisma.postAnalytics.findUnique({
+          where: { postId: post.id },
+        })
+        
+        const upvotes = submission.ups || 0
+        const downvotes = submission.downs || 0
+        const score = submission.score || 0
+        const commentCount = submission.num_comments || 0
+        const engagement = upvotes + downvotes + commentCount
+        
+        if (existingAnalytics) {
+          await prisma.postAnalytics.update({
+            where: { postId: post.id },
+            data: {
+              upvotes,
+              downvotes,
+              score,
+              commentCount,
+              engagement,
+              lastUpdated: new Date(),
+            },
+          })
+        } else {
+          await prisma.postAnalytics.create({
+            data: {
+              postId: post.id,
+              upvotes,
+              downvotes,
+              score,
+              commentCount,
+              engagement,
+            },
+          })
+        }
+        
+        updatedCount++
+      } catch (error) {
+        console.error(`Failed to refresh analytics for post ${post.id}:`, error)
+      }
+    }
+    
+    return NextResponse.json({
+      message: 'Analytics refreshed successfully',
+      updatedCount,
+    })
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    )
+  }
+}
