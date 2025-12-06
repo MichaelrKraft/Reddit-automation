@@ -11,7 +11,7 @@ export interface ContentGenerationOptions {
 }
 
 export async function generatePostContent(options: ContentGenerationOptions) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
   const prompt = `
 Generate a Reddit post for r/${options.subreddit}.
@@ -103,7 +103,7 @@ function parseNonJsonResponse(text: string) {
 }
 
 export async function analyzeSubreddit(subredditName: string) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
   const prompt = `
 Analyze the subreddit r/${subredditName} and provide insights for creating content.
@@ -143,7 +143,7 @@ Return as JSON with keys: postTypes, tone, dos, donts, bestPractices, styleGuide
 }
 
 export async function improveContent(originalContent: string, feedback: string) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
   const prompt = `
 Improve this Reddit post based on feedback:
@@ -176,7 +176,7 @@ export interface ReplyGenerationOptions {
 }
 
 export async function generateReply(options: ReplyGenerationOptions) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
   const prompt = `
 Generate a thoughtful, authentic reply to this Reddit comment.

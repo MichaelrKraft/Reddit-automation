@@ -154,14 +154,14 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-2xl font-bold text-white">
           Comments {postId ? '(Current Post)' : '(All Posts)'}
         </h2>
         {postId && (
           <button
             onClick={refreshComments}
             disabled={loading}
-            className="bg-reddit-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            className="glass-button text-gray-300 px-4 py-2 rounded-lg transition disabled:opacity-50"
           >
             {loading ? 'Refreshing...' : 'Refresh Comments'}
           </button>
@@ -171,12 +171,12 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
       {loading && comments.length === 0 ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-reddit-orange"></div>
-          <p className="text-gray-500 mt-2">Loading comments...</p>
+          <p className="text-gray-400 mt-2">Loading comments...</p>
         </div>
       ) : comments.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
+        <div className="text-center py-12 bg-[#12121a] rounded-lg border border-gray-700">
           <span className="text-4xl mb-3 block">💬</span>
-          <p className="text-gray-500 mb-2">No comments yet</p>
+          <p className="text-gray-400 mb-2">No comments yet</p>
           {postId && (
             <button
               onClick={refreshComments}
@@ -191,46 +191,46 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className={`bg-white rounded-lg border p-4 ${
-                comment.replied ? 'border-green-200 bg-green-50' : 'border-gray-200'
+              className={`bg-[#12121a] rounded-lg border p-4 ${
+                comment.replied ? 'border-green-700 bg-green-900/20' : 'border-gray-700'
               }`}
               style={{ marginLeft: `${comment.depth * 20}px` }}
             >
               <div className="flex justify-between items-start mb-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-gray-900">u/{comment.author}</span>
+                    <span className="font-medium text-white">u/{comment.author}</span>
                     <span className="text-sm text-gray-500">•</span>
                     <span className="text-sm text-gray-500">{formatDate(comment.createdAt)}</span>
                     <span className="text-sm text-gray-500">•</span>
                     <span className="text-sm font-medium text-reddit-orange">↑ {comment.score}</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className="text-sm text-gray-400 mb-2">
                     on {comment.post.subreddit.displayName} - "{comment.post.title}"
                   </p>
                 </div>
                 {comment.replied ? (
-                  <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                  <span className="text-xs px-2 py-1 rounded-full bg-green-900/50 text-green-400">
                     ✓ Replied
                   </span>
                 ) : (
-                  <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">
+                  <span className="text-xs px-2 py-1 rounded-full bg-yellow-900/50 text-yellow-400">
                     Pending
                   </span>
                 )}
               </div>
 
-              <p className="text-gray-800 mb-3 whitespace-pre-wrap">{comment.content}</p>
+              <p className="text-gray-300 mb-3 whitespace-pre-wrap">{comment.content}</p>
 
               {comment.replied && comment.replyText && (
-                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium text-blue-700">Your Reply:</span>
+                    <span className="text-xs font-medium text-blue-400">Your Reply:</span>
                     <span className="text-xs text-gray-500">
                       {comment.repliedAt && formatDate(comment.repliedAt)}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700">{comment.replyText}</p>
+                  <p className="text-sm text-gray-300">{comment.replyText}</p>
                 </div>
               )}
 
@@ -250,7 +250,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                       setSelectedComment(comment)
                       setCustomReply('')
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm"
+                    className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition text-sm"
                   >
                     Write Reply
                   </button>
@@ -258,13 +258,13 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
               )}
 
               {selectedComment?.id === comment.id && !comment.replied && (
-                <div className="mt-3 p-3 bg-gray-50 border border-gray-300 rounded-lg">
+                <div className="mt-3 p-3 bg-[#1a1a24] border border-gray-600 rounded-lg">
                   <textarea
                     value={customReply}
                     onChange={(e) => setCustomReply(e.target.value)}
                     placeholder="Write your reply..."
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent mb-2"
+                    className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent mb-2 text-white placeholder-gray-500"
                   />
                   <div className="flex gap-2">
                     <button
@@ -276,7 +276,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                     </button>
                     <button
                       onClick={() => setSelectedComment(null)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm"
+                      className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition text-sm"
                     >
                       Cancel
                     </button>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import DashboardNav from '@/components/DashboardNav'
 
 interface HeatmapCell {
   dayOfWeek: number
@@ -92,23 +93,34 @@ export default function TimingDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
+      {/* Dot Grid Background */}
+      <div className="dot-grid-background">
+        <div className="dot-grid-container">
+          <div className="dot-grid"></div>
+          <div className="dot-grid-overlay"></div>
+        </div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <DashboardNav />
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">⏰ Optimal Posting Times</h1>
+            <p className="text-gray-400 mt-1">Analyze subreddit activity patterns and find the best times to post (Mountain Time)</p>
+          </div>
           <Link
             href="/dashboard"
-            className="text-reddit-orange hover:underline mb-4 inline-block"
+            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
           >
-            ← Back to Dashboard
+            ← Back
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">⏰ Optimal Posting Times</h1>
-          <p className="text-gray-600 mt-1">Analyze subreddit activity patterns and find the best times to post (Mountain Time)</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="feature-card rounded-lg p-6 mb-8">
           <div className="flex gap-4 items-end">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Subreddit Name
               </label>
               <input
@@ -116,7 +128,7 @@ export default function TimingDashboard() {
                 placeholder="e.g., technology"
                 value={subredditName}
                 onChange={(e) => setSubredditName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
               />
             </div>
             <button
@@ -130,7 +142,7 @@ export default function TimingDashboard() {
               <button
                 onClick={fetchHeatmap}
                 disabled={loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-medium"
+                className="glass-button text-gray-300 px-6 py-2 rounded-lg transition disabled:opacity-50 font-medium"
               >
                 {loading ? '↻ Refreshing...' : '↻ Refresh'}
               </button>
@@ -138,36 +150,36 @@ export default function TimingDashboard() {
           </div>
 
           {error && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-700">⚠️ {error}</p>
+            <div className="mt-4 bg-red-900/50 border border-red-700 rounded-lg p-3">
+              <p className="text-sm text-red-300">⚠️ {error}</p>
             </div>
           )}
         </div>
 
         {loading ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="feature-card rounded-lg p-12 text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-            <p className="text-gray-600 mt-4">Loading heatmap data...</p>
+            <p className="text-gray-400 mt-4">Loading heatmap data...</p>
           </div>
         ) : !analyzed ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="feature-card rounded-lg p-12 text-center">
             <div className="text-6xl mb-4">📊</div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No Data Yet</h2>
-            <p className="text-gray-600">Enter a subreddit name and click "Analyze" to generate timing insights</p>
+            <h2 className="text-2xl font-semibold text-white mb-2">No Data Yet</h2>
+            <p className="text-gray-400">Enter a subreddit name and click "Analyze" to generate timing insights</p>
           </div>
         ) : heatmapData.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div className="feature-card rounded-lg p-12 text-center">
             <div className="text-6xl mb-4">🤷</div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No Activity Data</h2>
-            <p className="text-gray-600">Unable to find enough activity data for r/{subredditName}</p>
+            <h2 className="text-2xl font-semibold text-white mb-2">No Activity Data</h2>
+            <p className="text-gray-400">Unable to find enough activity data for r/{subredditName}</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="feature-card rounded-lg p-6">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold text-white mb-2">
                 Activity Heatmap for r/{subredditName} (Mountain Time)
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-400">
                 Brighter colors indicate higher engagement rates. All times shown in Mountain Time (MT). Click on any cell for details.
               </p>
             </div>
@@ -177,7 +189,7 @@ export default function TimingDashboard() {
                 <div className="flex">
                   <div className="w-12"></div>
                   {dayNames.map((day, idx) => (
-                    <div key={idx} className="flex-1 text-center font-semibold text-gray-700 text-sm py-2">
+                    <div key={idx} className="flex-1 text-center font-semibold text-gray-300 text-sm py-2">
                       {day}
                     </div>
                   ))}
@@ -185,7 +197,7 @@ export default function TimingDashboard() {
 
                 {hours.map((hour) => (
                   <div key={hour} className="flex">
-                    <div className="w-12 flex items-center justify-end pr-2 text-xs text-gray-600">
+                    <div className="w-12 flex items-center justify-end pr-2 text-xs text-gray-400">
                       {hour.toString().padStart(2, '0')}:00
                     </div>
                     {dayNames.map((_, dayIdx) => {
@@ -209,7 +221,7 @@ export default function TimingDashboard() {
                               </span>
                             </div>
                           ) : (
-                            <div className="bg-gray-100 rounded h-8"></div>
+                            <div className="bg-gray-700 rounded h-8"></div>
                           )}
                         </div>
                       )
@@ -221,15 +233,15 @@ export default function TimingDashboard() {
 
             <div className="mt-6 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">Engagement Level:</span>
+                <span className="text-sm text-gray-400">Engagement Level:</span>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-red-500 rounded"></div>
-                  <span className="text-xs text-gray-600">Low</span>
+                  <span className="text-xs text-gray-400">Low</span>
                   <div className="w-8 h-8 bg-orange-500 rounded"></div>
                   <div className="w-8 h-8 bg-yellow-500 rounded"></div>
                   <div className="w-8 h-8 bg-green-500 rounded"></div>
                   <div className="w-8 h-8 bg-green-600 rounded"></div>
-                  <span className="text-xs text-gray-600">High</span>
+                  <span className="text-xs text-gray-400">High</span>
                 </div>
               </div>
 

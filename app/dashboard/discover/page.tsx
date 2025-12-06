@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import DashboardNav from '@/components/DashboardNav'
 
 interface Subreddit {
   id?: string
@@ -104,29 +105,38 @@ export default function DiscoverSubreddits() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
+      {/* Dot Grid Background */}
+      <div className="dot-grid-background">
+        <div className="dot-grid-container">
+          <div className="dot-grid"></div>
+          <div className="dot-grid-overlay"></div>
+        </div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <DashboardNav />
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Discover Subreddits</h1>
-            <p className="text-gray-600 mt-1">Find relevant communities for your content</p>
+            <h1 className="text-3xl font-bold text-white">Discover Subreddits</h1>
+            <p className="text-gray-400 mt-1">Find relevant communities for your content</p>
           </div>
           <Link
             href="/dashboard"
-            className="text-gray-600 hover:text-gray-900"
+            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
           >
-            ← Back to Dashboard
+            ← Back
           </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="feature-card rounded-lg p-6 mb-6">
           <form onSubmit={handleSearch} className="flex gap-3">
             <input
               type="text"
               placeholder="Search for subreddits (e.g., technology, gaming, startups)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent"
+              className="flex-1 px-4 py-3 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
             />
             <button
               type="submit"
@@ -138,15 +148,15 @@ export default function DiscoverSubreddits() {
           </form>
         </div>
 
-        <div className="bg-white rounded-lg shadow">
-          <div className="border-b border-gray-200">
+        <div className="feature-card rounded-lg">
+          <div className="border-b border-gray-700">
             <nav className="flex -mb-px">
               <button
                 onClick={() => setActiveTab('search')}
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
                   activeTab === 'search'
                     ? 'border-reddit-orange text-reddit-orange'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
                 }`}
               >
                 Search Results ({searchResults.length})
@@ -156,7 +166,7 @@ export default function DiscoverSubreddits() {
                 className={`px-6 py-4 text-sm font-medium border-b-2 ${
                   activeTab === 'saved'
                     ? 'border-reddit-orange text-reddit-orange'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
                 }`}
               >
                 Saved Subreddits ({savedSubreddits.length})
@@ -170,7 +180,7 @@ export default function DiscoverSubreddits() {
                 {searchResults.length === 0 ? (
                   <div className="text-center py-12">
                     <span className="text-4xl mb-3 block">🔍</span>
-                    <p className="text-gray-500">
+                    <p className="text-gray-400">
                       {searchQuery ? 'No results found' : 'Search for subreddits to get started'}
                     </p>
                   </div>
@@ -179,14 +189,14 @@ export default function DiscoverSubreddits() {
                     {searchResults.map((subreddit) => (
                       <div
                         key={subreddit.name}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                        className="border border-gray-700 bg-[#12121a] rounded-lg p-4 hover:border-[#00D9FF] transition"
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-reddit-blue text-lg">
+                            <h3 className="font-semibold text-[#00D9FF] text-lg">
                               {subreddit.displayName}
                             </h3>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-gray-400 mt-1">
                               {formatNumber(subreddit.subscribers)} members
                             </p>
                             {subreddit.description && (
@@ -203,7 +213,7 @@ export default function DiscoverSubreddits() {
                             }
                             className={`ml-4 px-4 py-2 rounded-lg text-sm font-medium transition ${
                               subreddit.saved
-                                ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                ? 'bg-green-900/50 text-green-400 hover:bg-green-900'
                                 : 'bg-reddit-orange text-white hover:bg-orange-600'
                             }`}
                           >
@@ -222,7 +232,7 @@ export default function DiscoverSubreddits() {
                 {savedSubreddits.length === 0 ? (
                   <div className="text-center py-12">
                     <span className="text-4xl mb-3 block">📋</span>
-                    <p className="text-gray-500 mb-4">No saved subreddits yet</p>
+                    <p className="text-gray-400 mb-4">No saved subreddits yet</p>
                     <button
                       onClick={() => setActiveTab('search')}
                       className="text-reddit-orange hover:underline"
@@ -235,20 +245,20 @@ export default function DiscoverSubreddits() {
                     {savedSubreddits.map((subreddit) => (
                       <div
                         key={subreddit.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                        className="border border-gray-700 bg-[#12121a] rounded-lg p-4 hover:border-[#00D9FF] transition"
                       >
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex-1">
-                            <h3 className="font-semibold text-reddit-blue">
+                            <h3 className="font-semibold text-[#00D9FF]">
                               {subreddit.displayName}
                             </h3>
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-400">
                               {formatNumber(subreddit.subscribers)} members
                             </p>
                           </div>
                           <button
                             onClick={() => removeSubreddit(subreddit.id!)}
-                            className="text-red-600 hover:text-red-700 text-sm"
+                            className="text-red-400 hover:text-red-300 text-sm"
                           >
                             Remove
                           </button>

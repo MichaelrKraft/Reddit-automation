@@ -18,7 +18,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  redditAccounts RedditAccount[]
+  redditAccounts       RedditAccount[]
+  monitoredSubreddits  MonitoredSubreddit[]
+  draftPosts           DraftPost[]
+  brandKeywords        BrandKeyword[]
+  spyAccounts          SpyAccount[]
 }
 
 // Reddit Account
@@ -159,4 +163,201 @@ model OptimalTimeRecommendation {
 
   @@unique([subredditName, rank])
   @@index([subredditName])
+}
+
+// ============================================
+// SPEED ALERTS & VIRAL HEADLINE OPTIMIZER
+// ============================================
+
+// Monitored Subreddit (for Speed Alerts)
+model MonitoredSubreddit {
+  id            String   @id @default(cuid())
+  subreddit     String
+  isActive      Boolean  @default(true)
+  lastPostId    String?  // Track last seen post to detect new ones
+  lastChecked   DateTime @default(now())
+  checkInterval Int      @default(15) // seconds
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  alerts AlertHistory[]
+
+  @@unique([userId, subreddit])
+  @@index([isActive])
+}
+
+// Alert History (for Speed Alerts & Brand Mentions)
+model AlertHistory {
+  id             String   @id @default(cuid())
+  postId         String   // Reddit post/comment ID
+  postTitle      String
+  postUrl        String
+  postAuthor     String?
+  subreddit      String
+  commentOptions String   @db.Text // JSON array of 3 AI-generated comments
+  wasActedOn     Boolean  @default(false)
+  responseTime   Int?     // Milliseconds from alert to action
+  alertType      String   @default("new_post") // "new_post" | "brand_mention"
+  brandKeyword   String?  // Which keyword triggered (if brand_mention)
+  contextSnippet String?  @db.Text // Text snippet showing mention context
+  mentionType    String?  // "post" | "comment"
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  monitoredSubredditId String
+  monitoredSubreddit   MonitoredSubreddit @relation(fields: [monitoredSubredditId], references: [id], onDelete: Cascade)
+
+  @@index([subreddit])
+  @@index([createdAt])
+  @@index([alertType])
+  @@index([brandKeyword])
+}
+
+// Brand Keyword (for Sentiment Shield / Brand Mentions)
+model BrandKeyword {
+  id            String   @id @default(cuid())
+  keyword       String
+  isActive      Boolean  @default(true)
+  lastMentionId String?  // Track last seen mention to avoid duplicates
+  alertCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, keyword])
+  @@index([isActive])
+}
+
+// Viral Pattern (for Viral Headline Optimizer)
+model ViralPattern {
+  id              String   @id @default(cuid())
+  subreddit       String   @unique
+  avgTitleLength  Float
+  firstPersonRate Float    // % using I/my/me
+  questionRate    Float    // % using questions
+  avgScore        Int
+  contentType     String   // text, image, video
+  topWords        String   @db.Text // JSON array
+  formula         String   @db.Text // Viral formula description
+  exampleTitle    String?  // Example viral title
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([subreddit])
+}
+
+// Draft Post (for Viral Headline Optimizer)
+model DraftPost {
+  id             String   @id @default(cuid())
+  title          String
+  content        String?  @db.Text
+  subreddit      String
+  postType       String   // text, image, video
+  viralScore     Int      // 0-100
+  scoreBreakdown String   @db.Text // JSON object with score components
+  suggestions    String   @db.Text // JSON array of improvement suggestions
+  improvedTitles String   @db.Text // JSON array of AI-generated alternatives
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([viralScore])
+  @@index([subreddit])
+}
+
+// ============================================
+// SPY MODE - COMPETITOR INTELLIGENCE
+// ============================================
+
+// Tracked Competitor Account
+model SpyAccount {
+  id            String    @id @default(cuid())
+  username      String
+  displayName   String?
+  avatarUrl     String?
+  totalKarma    Int       @default(0)
+  accountAge    DateTime?
+  isActive      Boolean   @default(true)
+  lastPostId    String?
+  lastChecked   DateTime  @default(now())
+  notes         String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  posts    SpyPost[]
+  alerts   SpyAlert[]
+  insights SpyInsight[]
+
+  @@unique([userId, username])
+  @@index([userId, isActive])
+}
+
+// Competitor's Reddit Posts
+model SpyPost {
+  id           String   @id @default(cuid())
+  redditId     String
+  title        String
+  content      String?  @db.Text
+  url          String
+  subreddit    String
+  postType     String   // text, link, image, video
+  score        Int      @default(0)
+  upvoteRatio  Float    @default(0)
+  commentCount Int      @default(0)
+  awards       Int      @default(0)
+  postedAt     DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accountId String
+  account   SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, redditId])
+  @@index([accountId, postedAt])
+  @@index([subreddit])
+  @@index([score])
+}
+
+// Real-time Competitor Activity Alerts
+model SpyAlert {
+  id          String   @id @default(cuid())
+  alertType   String   // new_post, viral_post, new_subreddit
+  title       String
+  description String   @db.Text
+  postUrl     String?
+  subreddit   String?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  accountId String
+  account   SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, isRead])
+}
+
+// AI-Generated Competitor Insights
+model SpyInsight {
+  id          String   @id @default(cuid())
+  insightType String   // pattern, timing, subreddit, recommendation
+  title       String
+  description String   @db.Text
+  actionItems String   @db.Text // JSON array
+  confidence  Float    @default(0.8)
+  createdAt   DateTime @default(now())
+
+  accountId String
+  account   SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
 }

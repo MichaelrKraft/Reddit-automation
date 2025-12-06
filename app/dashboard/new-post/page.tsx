@@ -146,14 +146,30 @@ export default function NewPost() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Create New Post</h1>
-          <p className="text-gray-600 mt-1">Schedule a post to Reddit</p>
+    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
+      {/* Dot Grid Background */}
+      <div className="dot-grid-background">
+        <div className="dot-grid-container">
+          <div className="dot-grid"></div>
+          <div className="dot-grid-overlay"></div>
+        </div>
+      </div>
+
+      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Create New Post</h1>
+            <p className="text-gray-400 mt-1">Schedule a post to Reddit</p>
+          </div>
+          <Link
+            href="/dashboard"
+            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+          >
+            ← Back
+          </Link>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="feature-card rounded-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <AIContentGenerator
               subreddit={formData.subredditName}
@@ -162,12 +178,12 @@ export default function NewPost() {
               }}
             />
 
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Post Details</h3>
+            <div className="border-t border-gray-700 pt-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Post Details</h3>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Subreddit
               </label>
               <input
@@ -176,7 +192,7 @@ export default function NewPost() {
                 placeholder="e.g., technology"
                 value={formData.subredditName}
                 onChange={(e) => setFormData({ ...formData, subredditName: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Enter subreddit name without "r/"
@@ -204,11 +220,11 @@ export default function NewPost() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Post Type
               </label>
               <div className="flex gap-4">
-                <label className="flex items-center">
+                <label className="flex items-center text-gray-300">
                   <input
                     type="radio"
                     value="text"
@@ -218,7 +234,7 @@ export default function NewPost() {
                   />
                   Text Post
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center text-gray-300">
                   <input
                     type="radio"
                     value="link"
@@ -232,7 +248,7 @@ export default function NewPost() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Title
               </label>
               <input
@@ -241,12 +257,12 @@ export default function NewPost() {
                 placeholder="Enter post title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 {formData.postType === 'text' ? 'Content' : 'URL'}
               </label>
               <textarea
@@ -255,16 +271,16 @@ export default function NewPost() {
                 placeholder={formData.postType === 'text' ? 'Enter post content' : 'https://example.com'}
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Scheduling
               </label>
               <div className="space-y-3">
-                <label className="flex items-center">
+                <label className="flex items-center text-gray-300">
                   <input
                     type="radio"
                     checked={formData.scheduleNow}
@@ -273,7 +289,7 @@ export default function NewPost() {
                   />
                   Post immediately
                 </label>
-                <label className="flex items-center">
+                <label className="flex items-center text-gray-300">
                   <input
                     type="radio"
                     checked={!formData.scheduleNow}
@@ -287,23 +303,23 @@ export default function NewPost() {
               {!formData.scheduleNow && (
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Date</label>
+                    <label className="block text-xs text-gray-400 mb-1">Date</label>
                     <input
                       type="date"
                       required
                       value={formData.scheduledDate}
                       onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Time</label>
+                    <label className="block text-xs text-gray-400 mb-1">Time</label>
                     <input
                       type="time"
                       required
                       value={formData.scheduledTime}
                       onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
                     />
                   </div>
                 </div>
@@ -328,7 +344,7 @@ export default function NewPost() {
               </button>
               <Link
                 href="/dashboard"
-                className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-center"
+                className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition text-center"
               >
                 Cancel
               </Link>
