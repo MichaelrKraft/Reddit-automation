@@ -10,7 +10,7 @@ let _replyQueue: Queue | null = null
 let _postQueueEvents: QueueEvents | null = null
 let _replyQueueEvents: QueueEvents | null = null
 
-function getConnection(): IORedis {
+export function getConnection(): IORedis {
   if (!_connection) {
     _connection = new IORedis(process.env.REDIS_URL!, {
       maxRetriesPerRequest: null,

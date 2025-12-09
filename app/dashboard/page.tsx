@@ -3,6 +3,17 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import FounderBanner from '@/components/FounderBanner'
+
+interface UserStats {
+  isLoggedIn: boolean
+  tier?: string
+  signupNumber?: number
+  hasLifetimeDeal?: boolean
+  founderSpotsRemaining: number
+  isFounder?: boolean
+  canPurchaseLifetime?: boolean
+}
 
 interface Post {
   id: string
@@ -27,10 +38,22 @@ export default function Dashboard() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<string>('all')
+  const [userStats, setUserStats] = useState<UserStats | null>(null)
 
   useEffect(() => {
     fetchPosts()
+    fetchUserStats()
   }, [filter])
+
+  async function fetchUserStats() {
+    try {
+      const response = await fetch('/api/user/stats')
+      const data = await response.json()
+      setUserStats(data)
+    } catch (error) {
+      console.error('Failed to fetch user stats:', error)
+    }
+  }
 
   async function fetchPosts() {
     try {
@@ -56,6 +79,16 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
+      {/* Founder Banner - shows for founders who haven't purchased lifetime deal */}
+      {userStats?.canPurchaseLifetime && (
+        <FounderBanner
+          signupNumber={userStats.signupNumber || 0}
+          founderSpotsRemaining={userStats.founderSpotsRemaining}
+          hasLifetimeDeal={userStats.hasLifetimeDeal || false}
+          canPurchaseLifetime={userStats.canPurchaseLifetime}
+        />
+      )}
+
       {/* Dot Grid Background */}
       <div className="dot-grid-background">
         <div className="dot-grid-container">
@@ -92,49 +125,49 @@ export default function Dashboard() {
             </Link>
             <Link
               href="/dashboard/speed-alerts"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
             >
               Speed Alerts
             </Link>
             <Link
               href="/dashboard/viral"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
             >
               Viral Optimizer
             </Link>
             <Link
               href="/dashboard/timing"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
             >
               Optimal Times
             </Link>
             <Link
               href="/dashboard/analytics"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
             >
               Analytics
             </Link>
             <Link
               href="/dashboard/comments"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
             >
               Comments
             </Link>
             <Link
-              href="/dashboard/discover"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
-            >
-              Discover
-            </Link>
-            <Link
               href="/dashboard/calendar"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
             >
               Calendar
             </Link>
             <Link
+              href="/warmup"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+            >
+              Warmup
+            </Link>
+            <Link
               href="/dashboard/new-post"
-              className="bg-reddit-orange text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
             >
               + New Post
             </Link>

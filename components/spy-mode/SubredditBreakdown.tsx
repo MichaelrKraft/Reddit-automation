@@ -85,8 +85,8 @@ export default function SubredditBreakdown({ data }: SubredditBreakdownProps) {
                 borderRadius: '8px',
                 color: '#fff',
               }}
-              formatter={(value: number, name: string, props: { payload: typeof chartData[0] }) => [
-                `${value} posts (${props.payload.percentage}%)`,
+              formatter={(value: number, name: string, props: { payload?: { percentage?: number } }) => [
+                `${value} posts (${props.payload?.percentage ?? 0}%)`,
                 name,
               ]}
             />

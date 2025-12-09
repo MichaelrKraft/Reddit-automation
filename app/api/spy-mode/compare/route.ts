@@ -102,16 +102,23 @@ export async function GET(request: NextRequest) {
       const row: Record<string, string | number> = { metric: metric.label }
 
       comparison.forEach((c, idx) => {
-        const value = c.analytics[metric.key as keyof typeof c.analytics]
-        row[`account_${idx}`] = typeof value === 'number'
-          ? metric.key === 'successRate' ? `${value}%` : value
-          : value
+        const analytics = c.analytics as unknown as Record<string, unknown>
+        const value = analytics[metric.key]
+        if (typeof value === 'number') {
+          row[`account_${idx}`] = metric.key === 'successRate' ? `${value}%` : value
+        } else if (typeof value === 'string') {
+          row[`account_${idx}`] = value
+        } else {
+          row[`account_${idx}`] = String(value ?? '')
+        }
       })
 
       // Calculate diff if 2 accounts
       if (comparison.length === 2) {
-        const val1 = comparison[0].analytics[metric.key as keyof typeof comparison[0].analytics]
-        const val2 = comparison[1].analytics[metric.key as keyof typeof comparison[1].analytics]
+        const analytics0 = comparison[0].analytics as unknown as Record<string, unknown>
+        const analytics1 = comparison[1].analytics as unknown as Record<string, unknown>
+        const val1 = analytics0[metric.key]
+        const val2 = analytics1[metric.key]
 
         if (typeof val1 === 'number' && typeof val2 === 'number' && val2 !== 0) {
           const diff = Math.round(((val1 - val2) / val2) * 100)
