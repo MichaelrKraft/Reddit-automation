@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -36,7 +36,24 @@ interface TableRow {
   diff?: string
 }
 
+// Wrapper component to handle Suspense boundary for useSearchParams
 export default function ComparePage() {
+  return (
+    <Suspense fallback={<ComparePageLoading />}>
+      <ComparePageContent />
+    </Suspense>
+  )
+}
+
+function ComparePageLoading() {
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00D9FF]"></div>
+    </div>
+  )
+}
+
+function ComparePageContent() {
   const searchParams = useSearchParams()
   const ids = searchParams.get('ids')?.split(',') || []
 
