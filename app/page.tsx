@@ -162,13 +162,35 @@ export default function Home() {
 
           <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-tight font-[family-name:var(--font-montserrat)]">
             <span className="block">
-              Make <span className="text-red-500">Reddit</span> Your
+              <TextType
+                text="Make "
+                typingSpeed={70}
+                initialDelay={0}
+                showCursor={false}
+                loop={false}
+              />
+              <span className="text-red-500">
+                <TextType
+                  text="Reddit"
+                  typingSpeed={70}
+                  initialDelay={350}
+                  showCursor={false}
+                  loop={false}
+                />
+              </span>
+              <TextType
+                text=" Your"
+                typingSpeed={70}
+                initialDelay={770}
+                showCursor={false}
+                loop={false}
+              />
             </span>
             <span className="block">
               <TextType
                 text="#1 Customer Source"
                 typingSpeed={70}
-                initialDelay={1200}
+                initialDelay={1100}
                 showCursor={false}
                 loop={false}
               />
@@ -181,7 +203,7 @@ export default function Home() {
               <TextType
                 text="Without Getting Banned"
                 typingSpeed={70}
-                initialDelay={2600}
+                initialDelay={2400}
                 showCursor={true}
                 cursorCharacter="|"
                 cursorClassName="text-purple-600"
