@@ -12,7 +12,7 @@ let _replyQueueEvents: QueueEvents | null = null
 
 export function getConnection(): IORedis {
   if (!_connection) {
-    const redisUrl = process.env.REDIS_URL!
+    const redisUrl = process.env.REDIS_URL || ''
     _connection = new IORedis(redisUrl, {
       maxRetriesPerRequest: null,
       // Enable TLS for rediss:// URLs (Upstash)
