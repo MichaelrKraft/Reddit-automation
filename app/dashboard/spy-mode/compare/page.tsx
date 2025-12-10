@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import RadarComparison from '@/components/spy-mode/RadarComparison'
 
 interface ComparisonAccount {
@@ -136,18 +135,6 @@ function ComparePageContent() {
         </div>
       </div>
 
-      {/* Logo */}
-      <div className="absolute top-6 z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full">
-        <Link href="/">
-          <Image
-            src="/logo.png"
-            alt="Redoit Logo"
-            width={199}
-            height={79}
-            className="object-contain cursor-pointer"
-          />
-        </Link>
-      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}

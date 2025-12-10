@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import PerformanceChart from '@/components/spy-mode/PerformanceChart'
 import PostingHeatmap from '@/components/spy-mode/PostingHeatmap'
 import SubredditBreakdown from '@/components/spy-mode/SubredditBreakdown'
@@ -147,18 +146,6 @@ export default function SpyAccountPage() {
         </div>
       </div>
 
-      {/* Logo */}
-      <div className="absolute top-6 z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full">
-        <Link href="/">
-          <Image
-            src="/logo.png"
-            alt="Redoit Logo"
-            width={199}
-            height={79}
-            className="object-contain cursor-pointer"
-          />
-        </Link>
-      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
@@ -192,16 +179,16 @@ export default function SpyAccountPage() {
           <div className="flex gap-3">
             <Link
               href={`/dashboard/spy-mode/compare?ids=${id}`}
-              className="glass-button text-gray-300 px-4 py-2 rounded-lg transition"
+              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
             >
-              📊 Compare
+              Compare
             </Link>
             <button
               onClick={generateInsights}
               disabled={isGeneratingInsights}
-              className="bg-gradient-to-r from-[#00D9FF] to-cyan-500 text-black font-semibold px-4 py-2 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition disabled:opacity-50"
             >
-              {isGeneratingInsights ? 'Analyzing...' : '🧠 AI Insights'}
+              {isGeneratingInsights ? 'Analyzing...' : 'AI Insights'}
             </button>
           </div>
         </div>

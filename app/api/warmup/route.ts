@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { getWarmupOrchestrator } from '@/lib/warmup-orchestrator'
 import { calculatePhase } from '@/lib/warmup-worker'
 import { getOrCreateUser } from '@/lib/auth'
+import { fetchUserProfile } from '@/lib/spy-mode/tracker'
 
 // GET - List all warmup accounts with detailed status
 export async function GET(request: NextRequest) {
@@ -28,8 +29,23 @@ export async function GET(request: NextRequest) {
       ],
     })
 
-    // Calculate enriched data for each account
-    const enrichedAccounts = accounts.map((account) => {
+    // Fetch real karma from Reddit for each account and update DB
+    const enrichedAccounts = await Promise.all(accounts.map(async (account) => {
+      // Fetch real karma from Reddit
+      let currentKarma = account.karma
+      try {
+        const profile = await fetchUserProfile(account.username)
+        if (profile && profile.totalKarma !== account.karma) {
+          currentKarma = profile.totalKarma
+          // Update karma in database
+          await prisma.redditAccount.update({
+            where: { id: account.id },
+            data: { karma: currentKarma },
+          })
+        }
+      } catch (err) {
+        console.error(`Failed to fetch karma for ${account.username}:`, err)
+      }
       // Calculate days in warmup
       const daysInWarmup = account.warmupStartedAt
         ? Math.floor(
@@ -57,7 +73,7 @@ export async function GET(request: NextRequest) {
       return {
         id: account.id,
         username: account.username,
-        karma: account.karma,
+        karma: currentKarma,
         status: account.warmupStatus,
         isActive: account.connected,
         daysInWarmup,
@@ -71,7 +87,7 @@ export async function GET(request: NextRequest) {
           0
         ) || 0,
       }
-    })
+    }));
 
     return NextResponse.json({
       accounts: enrichedAccounts,

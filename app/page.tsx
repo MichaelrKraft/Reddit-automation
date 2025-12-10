@@ -3,6 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import FounderBanner from '@/components/FounderBanner';
+import TextType from '@/components/TextType';
+import GradientText from '@/components/GradientText';
+import ShinyText from '@/components/ShinyText';
+import dynamic from 'next/dynamic';
+
+const Antigravity = dynamic(() => import('@/components/Antigravity'), { ssr: false });
 
 interface UserStats {
   isLoggedIn: boolean
@@ -154,16 +160,38 @@ export default function Home() {
             <span className="text-sm font-medium text-slate-700">AI-Powered Reddit Marketing</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-tight">
-            Make Money with Reddit
-            <br />
-            <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Using Simple AI
+          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-tight font-[family-name:var(--font-montserrat)]">
+            <span className="block">
+              Make <span className="text-red-500">Reddit</span> Your
             </span>
+            <span className="block">
+              <TextType
+                text="#1 Customer Source"
+                typingSpeed={70}
+                initialDelay={1200}
+                showCursor={false}
+                loop={false}
+              />
+            </span>
+            <GradientText
+              colors={['#1e40af', '#7c3aed', '#db2777', '#1e40af']}
+              animationSpeed={6}
+              className="block"
+            >
+              <TextType
+                text="Without Getting Banned"
+                typingSpeed={70}
+                initialDelay={2600}
+                showCursor={true}
+                cursorCharacter="|"
+                cursorClassName="text-purple-600"
+                loop={false}
+              />
+            </GradientText>
           </h1>
 
-          <p className="text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Turn Reddit into your <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent font-semibold">#1 Customer source</span> with authentic account building, automated posting, and intelligent engagement.
+          <p className="text-xl md:text-2xl text-red-500 mb-10 max-w-3xl mx-auto leading-relaxed">
+            Build authentic credibility, automate your marketing, and drive real customers—without spam filters or bans
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -204,7 +232,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Powerful Dashboard
+              <ShinyText speed={3}>
+                Powerful Dashboard
+              </ShinyText>
             </h2>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto">
               Manage all your Reddit marketing from one beautiful interface
@@ -766,6 +796,79 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="py-20 px-6 bg-slate-50">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-slate-600">
+              Everything you need to know about ReddRide
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {[
+              {
+                question: "How long does Reddit account warmup take?",
+                answer: "Our intelligent warmup system typically takes 2-4 weeks to build authentic karma and credibility. The exact timeline depends on your target karma goals and the subreddits you want to engage with. We gradually increase activity to establish trust and avoid spam detection."
+              },
+              {
+                question: "Will my account get banned during warmup?",
+                answer: "Our warmup process is designed to mimic natural Reddit behavior, significantly reducing ban risk. We use intelligent timing, varied engagement patterns, and authentic interactions. While no system can guarantee 100% safety, our users have an extremely high success rate."
+              },
+              {
+                question: "How does multi-subreddit posting work?",
+                answer: "Write your content once, and ReddRide intelligently distributes it across multiple relevant subreddits. We optimize posting times for each community, adapt formatting to match subreddit rules, and space out posts to avoid spam detection."
+              },
+              {
+                question: "Is the auto-reply feature compliant with Reddit rules?",
+                answer: "Yes! Our AI generates helpful, contextually relevant responses that add genuine value to conversations. We focus on being helpful rather than promotional, which aligns with Reddit's community guidelines and builds authentic engagement."
+              },
+              {
+                question: "Can I use my existing Reddit account?",
+                answer: "Absolutely! You can connect existing accounts or create new ones. For established accounts, we recommend starting with our warmup phase to ensure the account is in good standing before automated posting."
+              },
+              {
+                question: "How much karma do I need before promoting my business?",
+                answer: "This varies by subreddit, but generally 500-1000 karma is a good baseline. Some communities require more. Our AI analyzes each subreddit's requirements and only posts when your account meets the necessary thresholds."
+              },
+              {
+                question: "What if my account gets shadowbanned?",
+                answer: "Our system continuously monitors account health and will alert you immediately if any issues are detected. We also provide guidance on recovery steps and can help you pivot to backup accounts if needed."
+              },
+              {
+                question: "Can I customize the AI-generated content?",
+                answer: "Yes! You have full control over tone, messaging, and content style. You can provide templates, set guidelines, review posts before they go live, or let the AI handle everything autonomously based on your preferences."
+              }
+            ].map((faq, index) => (
+              <details
+                key={index}
+                className="group bg-white rounded-xl border border-slate-200 overflow-hidden"
+              >
+                <summary className="flex items-center justify-between p-5 cursor-pointer hover:bg-slate-50 transition-colors">
+                  <span className="font-semibold text-slate-900 text-left pr-4">{faq.question}</span>
+                  <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-slate-100 group-open:bg-slate-900 transition-colors">
+                    <svg
+                      className="w-4 h-4 text-slate-600 group-open:text-white group-open:rotate-180 transition-transform duration-300"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </summary>
+                <div className="px-5 pb-5 text-slate-600 leading-relaxed">
+                  {faq.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
@@ -788,7 +891,7 @@ export default function Home() {
       <footer className="py-12 px-6 bg-slate-900 text-white relative">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/reddride-logo-dark.png" alt="ReddRide" className="h-12" />
+            <img src="/reddride-logo-dark.png" alt="ReddRide" className="h-24" />
           </div>
           <p className="text-slate-400 mb-6">
             AI-Powered Reddit Marketing Automation

@@ -168,8 +168,9 @@ export default function SpeedAlertsPage() {
       console.log('Heartbeat:', JSON.parse(event.data))
     })
 
-    eventSource.addEventListener('error', () => {
-      console.error('SSE connection error')
+    eventSource.addEventListener('error', (event: Event) => {
+      // Connection was closed or failed - this is normal when stopping monitoring
+      // or when there's a network issue
       setIsMonitoring(false)
     })
 
