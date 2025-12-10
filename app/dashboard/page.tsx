@@ -100,12 +100,10 @@ export default function Dashboard() {
       {/* Logo in upper left */}
       <div className="absolute top-6 z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full">
         <Link href="/">
-          <Image
-            src="/logo.png"
-            alt="Redoit Logo"
-            width={199}
-            height={79}
-            className="object-contain cursor-pointer"
+          <img
+            src="/reddride-logo-dark.png"
+            alt="ReddRide - The Reddit AI Automation Platform"
+            className="h-[101px] object-contain cursor-pointer"
           />
         </Link>
       </div>

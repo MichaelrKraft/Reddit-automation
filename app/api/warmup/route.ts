@@ -2,16 +2,24 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getWarmupOrchestrator } from '@/lib/warmup-orchestrator'
 import { calculatePhase } from '@/lib/warmup-worker'
+import { getOrCreateUser } from '@/lib/auth'
 
 // GET - List all warmup accounts with detailed status
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await getOrCreateUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Please sign in to view warmup accounts' },
+        { status: 401 }
+      )
+    }
 
     // Get all warmup accounts for user
     const accounts = await prisma.redditAccount.findMany({
       where: {
-        userId,
+        userId: user.id,
         isWarmupAccount: true,
       },
       orderBy: [
@@ -91,7 +99,15 @@ export async function GET(request: NextRequest) {
 // POST - Start warmup for an existing Reddit account
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await getOrCreateUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Please sign in to start warmup' },
+        { status: 401 }
+      )
+    }
+
     const { accountId } = await request.json()
 
     if (!accountId) {
@@ -103,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     // Verify account exists and belongs to user
     const account = await prisma.redditAccount.findFirst({
-      where: { id: accountId, userId },
+      where: { id: accountId, userId: user.id },
     })
 
     if (!account) {
@@ -147,7 +163,15 @@ export async function POST(request: NextRequest) {
 // PATCH - Update warmup status (pause, resume, stop)
 export async function PATCH(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await getOrCreateUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Please sign in to update warmup' },
+        { status: 401 }
+      )
+    }
+
     const { accountId, action } = await request.json()
 
     if (!accountId || !action) {
@@ -159,7 +183,7 @@ export async function PATCH(request: NextRequest) {
 
     // Verify account exists and belongs to user
     const account = await prisma.redditAccount.findFirst({
-      where: { id: accountId, userId },
+      where: { id: accountId, userId: user.id },
     })
 
     if (!account) {

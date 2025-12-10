@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import WarmupOnboarding from './WarmupOnboarding'
+import WarmupJourneyStepper from './WarmupJourneyStepper'
 
 interface WarmupAccount {
   id: string
@@ -48,6 +50,11 @@ export default function WarmupDashboard() {
   const [loading, setLoading] = useState(true)
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(true)
+  const [showAddAccount, setShowAddAccount] = useState(false)
+  const [newUsername, setNewUsername] = useState('')
+  const [addingAccount, setAddingAccount] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -104,6 +111,71 @@ export default function WarmupDashboard() {
     }
   }
 
+  function handleStartWarmup() {
+    // Hide onboarding and show the add account form
+    setShowOnboarding(false)
+    setShowAddAccount(true)
+  }
+
+  async function handleAddAccount() {
+    if (!newUsername.trim()) {
+      setAddError('Please enter your Reddit username')
+      return
+    }
+
+    setAddingAccount(true)
+    setAddError(null)
+
+    try {
+      const response = await fetch('/api/warmup/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: newUsername.trim() }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add account')
+      }
+
+      // Success - refresh data and reset form
+      setNewUsername('')
+      setShowAddAccount(false)
+      await fetchData()
+
+      // Now start the warmup for this account
+      if (data.account?.id) {
+        await handleStartAccountWarmup(data.account.id)
+      }
+    } catch (error: any) {
+      setAddError(error.message)
+    } finally {
+      setAddingAccount(false)
+    }
+  }
+
+  async function handleStartAccountWarmup(accountId: string) {
+    try {
+      const response = await fetch('/api/warmup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert(data.message || 'Warmup started!')
+        await fetchData()
+      } else {
+        alert(`Error: ${data.error}`)
+      }
+    } catch (error) {
+      alert('Failed to start warmup')
+    }
+  }
+
   function getStatusColor(status: string): string {
     switch (status) {
       case 'COMPLETED': return 'text-green-400'
@@ -140,6 +212,11 @@ export default function WarmupDashboard() {
     }
   }
 
+  // Show onboarding if no accounts and user hasn't dismissed it
+  if (accounts.length === 0 && !loading && showOnboarding) {
+    return <WarmupOnboarding onStartWarmup={handleStartWarmup} />
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -152,7 +229,7 @@ export default function WarmupDashboard() {
           disabled={loading}
           className="glass-button text-gray-300 px-4 py-2 rounded-lg transition disabled:opacity-50"
         >
-          {loading ? 'Refreshing...' : '🔄 Refresh'}
+          {loading ? 'Refreshing...' : 'Refresh'}
         </button>
       </div>
 
@@ -235,9 +312,75 @@ export default function WarmupDashboard() {
         </div>
       </div>
 
+      {/* Add Account Form */}
+      {showAddAccount && (
+        <div className="feature-card rounded-lg p-6 mb-6 border-2 border-[#00D9FF]/50">
+          <h3 className="text-lg font-semibold text-white mb-4">Add Your Reddit Account</h3>
+          <p className="text-gray-400 text-sm mb-4">
+            Enter your Reddit username to start the 30-day warmup process. Our AI will automatically build trust and karma for your account.
+          </p>
+
+          <div className="flex gap-4 items-end">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Reddit Username
+              </label>
+              <div className="flex items-center">
+                <span className="text-gray-400 mr-2">u/</span>
+                <input
+                  type="text"
+                  placeholder="your_username"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddAccount()}
+                  className="flex-1 px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
+                  disabled={addingAccount}
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleAddAccount}
+              disabled={addingAccount || !newUsername.trim()}
+              className="px-6 py-2 bg-gradient-to-r from-[#00D9FF] to-cyan-600 text-black font-semibold rounded-lg hover:from-cyan-400 hover:to-cyan-500 transition disabled:opacity-50"
+            >
+              {addingAccount ? (
+                <span className="flex items-center gap-2">
+                  <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-black"></span>
+                  Adding...
+                </span>
+              ) : (
+                'Add & Start Warmup'
+              )}
+            </button>
+            <button
+              onClick={() => setShowAddAccount(false)}
+              className="px-4 py-2 text-gray-400 hover:text-white transition"
+            >
+              Cancel
+            </button>
+          </div>
+
+          {addError && (
+            <div className="mt-4 bg-red-900/50 border border-red-700 rounded-lg p-3">
+              <p className="text-sm text-red-300">⚠️ {addError}</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Accounts List */}
       <div className="feature-card rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Warmup Accounts</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-white">Warmup Accounts</h3>
+          {!showAddAccount && (
+            <button
+              onClick={() => setShowAddAccount(true)}
+              className="px-4 py-2 bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 rounded-lg hover:bg-[#00D9FF]/30 transition text-sm font-medium"
+            >
+              + Add Account
+            </button>
+          )}
+        </div>
 
         {loading && accounts.length === 0 ? (
           <div className="text-center py-12">
@@ -245,11 +388,29 @@ export default function WarmupDashboard() {
             <p className="text-gray-400 mt-2">Loading accounts...</p>
           </div>
         ) : accounts.length === 0 ? (
-          <p className="text-gray-400 text-center py-8">No warmup accounts yet. Add Reddit accounts to get started!</p>
+          <div className="text-center py-8">
+            <p className="text-gray-400 mb-4">No warmup accounts yet.</p>
+            {!showAddAccount && (
+              <button
+                onClick={() => setShowAddAccount(true)}
+                className="px-6 py-3 bg-gradient-to-r from-[#00D9FF] to-cyan-600 text-black font-semibold rounded-lg hover:from-cyan-400 hover:to-cyan-500 transition"
+              >
+                Add Your First Reddit Account
+              </button>
+            )}
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {accounts.map((account) => (
               <div key={account.id} className="p-4 bg-[#1a1a24] rounded-lg border border-gray-700 hover:border-[#00D9FF] transition">
+                {/* Journey Stepper */}
+                <WarmupJourneyStepper
+                  status={account.status}
+                  daysInWarmup={account.daysInWarmup}
+                  karma={account.karma}
+                  isCompleted={account.status === 'COMPLETED'}
+                />
+
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="text-xl font-bold text-[#00D9FF]">u/{account.username}</div>

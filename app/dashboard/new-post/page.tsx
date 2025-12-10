@@ -155,19 +155,88 @@ export default function NewPost() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Logo */}
+        <div className="mb-6">
+          <Link href="/">
+            <img
+              src="/reddride-logo-dark.png"
+              alt="ReddRide - The Reddit AI Automation Platform"
+              className="h-[101px] object-contain cursor-pointer"
+            />
+          </Link>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          <Link
+            href="/dashboard"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Dashboard
+          </Link>
+          <Link
+            href="/dashboard/spy-mode"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Spy Mode
+          </Link>
+          <Link
+            href="/dashboard/speed-alerts"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Speed Alerts
+          </Link>
+          <Link
+            href="/dashboard/viral"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Viral Optimizer
+          </Link>
+          <Link
+            href="/dashboard/timing"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Optimal Times
+          </Link>
+          <Link
+            href="/dashboard/analytics"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Analytics
+          </Link>
+          <Link
+            href="/dashboard/comments"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Comments
+          </Link>
+          <Link
+            href="/dashboard/calendar"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Calendar
+          </Link>
+          <Link
+            href="/warmup"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+          >
+            Warmup
+          </Link>
+          <Link
+            href="/dashboard/new-post"
+            className="bg-[#00D9FF]/30 text-[#00D9FF] border border-[#00D9FF] px-6 py-2 rounded-lg font-semibold"
+          >
+            + New Post
+          </Link>
+        </div>
+
+        {/* Page Header */}
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-8">
             <h1 className="text-3xl font-bold text-white">Create New Post</h1>
             <p className="text-gray-400 mt-1">Schedule a post to Reddit</p>
           </div>
-          <Link
-            href="/dashboard"
-            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
-          >
-            ← Back
-          </Link>
-        </div>
 
         <div className="feature-card rounded-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -350,6 +419,7 @@ export default function NewPost() {
               </Link>
             </div>
           </form>
+        </div>
         </div>
       </div>
     </div>

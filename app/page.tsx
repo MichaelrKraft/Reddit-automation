@@ -35,63 +35,54 @@ export default function Home() {
 
   const features = [
     {
-      icon: '📅',
       title: 'Post Scheduling',
       description: 'Schedule posts to multiple subreddits at optimal times for maximum engagement',
       href: '/dashboard/new-post',
       color: 'from-blue-500/10 to-cyan-500/10 border-blue-500/20 hover:border-blue-500/40'
     },
     {
-      icon: '🤖',
       title: 'AI Content Generation',
       description: 'Create engaging, subreddit-specific content powered by Gemini AI',
       href: '/dashboard/viral',
       color: 'from-purple-500/10 to-pink-500/10 border-purple-500/20 hover:border-purple-500/40'
     },
     {
-      icon: '🔍',
       title: 'Subreddit Discovery',
       description: 'Find relevant communities automatically based on your niche and target audience',
       href: '/dashboard/discover',
       color: 'from-green-500/10 to-emerald-500/10 border-green-500/20 hover:border-green-500/40'
     },
     {
-      icon: '💬',
       title: 'Auto-Replies',
       description: 'Engage with comments automatically using AI-powered contextual responses',
       href: '/dashboard/comments',
       color: 'from-orange-500/10 to-red-500/10 border-orange-500/20 hover:border-orange-500/40'
     },
     {
-      icon: '📊',
       title: 'Analytics Dashboard',
       description: 'Track performance metrics and engagement across all your Reddit campaigns',
       href: '/dashboard/analytics',
       color: 'from-indigo-500/10 to-blue-500/10 border-indigo-500/20 hover:border-indigo-500/40'
     },
     {
-      icon: '⏰',
       title: 'Optimal Timing',
       description: 'Post at the best times for engagement based on subreddit activity patterns',
       href: '/dashboard/timing',
       color: 'from-yellow-500/10 to-orange-500/10 border-yellow-500/20 hover:border-yellow-500/40'
     },
     {
-      icon: '🕵️',
       title: 'Spy Mode',
       description: 'Monitor competitor Reddit activity in real-time and steal their winning strategies',
       href: '/dashboard/spy-mode',
       color: 'from-cyan-500/10 to-teal-500/10 border-cyan-500/20 hover:border-cyan-500/40'
     },
     {
-      icon: '🚀',
       title: 'Viral Optimizer',
       description: 'AI analyzes viral patterns to optimize your content for maximum reach and engagement',
       href: '/dashboard/viral',
       color: 'from-pink-500/10 to-rose-500/10 border-pink-500/20 hover:border-pink-500/40'
     },
     {
-      icon: '⚡',
       title: 'Speed Alerts',
       description: 'Get instant notifications when posts gain traction so you can engage at the right moment',
       href: '/dashboard/alerts',
@@ -129,17 +120,24 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="fixed top-8 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">🤖</span>
-            <span className="text-xl font-bold text-slate-900">RedRide</span>
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between h-[72px]">
+          <div className="flex items-center overflow-visible">
+            <img src="/reddride-logo.png" alt="ReddRide - The Reddit AI Automation Platform" className="h-[101px] -my-2" />
           </div>
-          <Link
-            href="/signup"
-            className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg hover:shadow-slate-900/20"
-          >
-            Get Started →
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/sign-in"
+              className="px-6 py-2.5 text-slate-700 font-medium hover:text-slate-900 transition-all"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/signup"
+              className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+            >
+              Get Started →
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -165,7 +163,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/signup"
-              className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5"
+              className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
             >
               Join Alpha Free
             </Link>
@@ -303,9 +301,6 @@ export default function Home() {
                   opacity: isVisible ? 1 : 0
                 }}
               >
-                <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                  {feature.icon}
-                </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3">
                   {feature.title}
                 </h3>
@@ -358,23 +353,12 @@ export default function Home() {
             </div>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 blur-3xl"></div>
-              <div className="relative bg-slate-900 rounded-xl shadow-2xl p-6 border border-slate-700">
-                <div className="text-cyan-400 text-2xl font-bold mb-4">SPY MODE</div>
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-slate-800 rounded-lg p-4 border border-slate-700">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-slate-700 rounded-full"></div>
-                        <div className="flex-1">
-                          <div className="h-3 bg-slate-700 rounded w-24 mb-1"></div>
-                          <div className="h-2 bg-slate-700 rounded w-16"></div>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-slate-700 rounded w-full mb-1"></div>
-                      <div className="h-2 bg-slate-700 rounded w-3/4"></div>
-                    </div>
-                  ))}
-                </div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-700">
+                <img
+                  src="/spymode-screenshot.png"
+                  alt="Spy Mode - Track competitors and steal their secrets"
+                  className="w-full h-auto"
+                />
               </div>
             </div>
           </div>
@@ -632,7 +616,7 @@ export default function Home() {
           <div className="text-center mt-12">
             <Link
               href="/signup"
-              className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:shadow-slate-900/20"
+              className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
             >
               Start Your Success Story →
             </Link>
@@ -646,13 +630,13 @@ export default function Home() {
           {/* Section Header */}
           <div className="text-center mb-12">
             <div className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
-              WHY REDRIDE
+              WHY REDDRIDE
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              RedRide vs The Competition
+              ReddRide vs The Competition
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              See how RedRide stacks up against Scaloom and why marketers choose us
+              See how ReddRide stacks up against Scaloom and why marketers choose us
             </p>
           </div>
 
@@ -662,7 +646,7 @@ export default function Home() {
             <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200">
               <div className="p-4 md:p-6 font-semibold text-slate-700">Feature</div>
               <div className="p-4 md:p-6 font-bold text-slate-900 bg-gradient-to-r from-blue-50 to-purple-50 text-center">
-                🤖 RedRide
+                ReddRide
               </div>
               <div className="p-4 md:p-6 font-semibold text-slate-500 text-center">Scaloom</div>
             </div>
@@ -708,9 +692,9 @@ export default function Home() {
           <div className="text-center mt-10">
             <Link
               href="/signup"
-              className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5"
+              className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
             >
-              Start Free with RedRide →
+              Start Free with ReddRide →
             </Link>
           </div>
         </div>
@@ -731,45 +715,45 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Step 1 */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 1
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Install the Extension</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Create Your Account</h3>
               <p className="text-slate-600">
-                Add ReddRide to your browser in one click
+                Sign up free in 30 seconds with just your email
               </p>
             </div>
 
             {/* Step 2 */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 2
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Connect Reddit</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Connect Your Reddit</h3>
               <p className="text-slate-600">
-                Securely link your Reddit account
+                Securely link your Reddit account with OAuth
               </p>
             </div>
 
             {/* Step 3 */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 3
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Set Your Preferences</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Choose Your Strategy</h3>
               <p className="text-slate-600">
-                Choose subreddits and engagement style
+                Pick your subreddits, set posting schedules, and customize AI settings
               </p>
             </div>
 
             {/* Step 4 */}
             <div className="text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 4
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Watch It Work</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Grow on Autopilot</h3>
               <p className="text-slate-600">
-                ReddRide handles the rest automatically
+                ReddRide posts, engages, and tracks results while you focus on your business
               </p>
             </div>
           </div>
@@ -783,11 +767,11 @@ export default function Home() {
             Ready to Grow Your Reddit Presence?
           </h2>
           <p className="text-xl text-slate-600 mb-10">
-            Join our alpha program and get lifetime free access as one of the first 10 users
+            Join our alpha program and get 1 year free access as one of the first 10 users
           </p>
           <Link
             href="/signup"
-            className="inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:shadow-slate-900/20 hover:-translate-y-0.5"
+            className="inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
           >
             Get Started →
           </Link>
@@ -795,11 +779,10 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-6 bg-slate-900 text-white">
+      <footer className="py-12 px-6 bg-slate-900 text-white relative">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="text-3xl">🤖</span>
-            <span className="text-xl font-bold">RedRide</span>
+            <img src="/reddride-logo-dark.png" alt="ReddRide" className="h-12" />
           </div>
           <p className="text-slate-400 mb-6">
             AI-Powered Reddit Marketing Automation
@@ -808,6 +791,12 @@ export default function Home() {
             Powered by Next.js, Gemini AI, and PostgreSQL
           </p>
         </div>
+        {/* Elephant icon in lower left */}
+        <img
+          src="/red-elephant-icon.png"
+          alt=""
+          className="absolute bottom-16 left-6 h-32 w-32 object-contain"
+        />
       </footer>
 
       <style jsx>{`

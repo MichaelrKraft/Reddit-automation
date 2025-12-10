@@ -156,7 +156,13 @@ export default function TimingDashboard() {
           )}
         </div>
 
-        {loading ? (
+        {analyzing ? (
+          <div className="feature-card rounded-lg p-12 text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            <p className="text-gray-400 mt-4">Analyzing r/{subredditName}...</p>
+            <p className="text-gray-500 text-sm mt-2">This may take 15-30 seconds while we fetch recent posts</p>
+          </div>
+        ) : loading ? (
           <div className="feature-card rounded-lg p-12 text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
             <p className="text-gray-400 mt-4">Loading heatmap data...</p>

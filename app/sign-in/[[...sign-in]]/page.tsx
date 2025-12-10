@@ -6,7 +6,7 @@ export default function SignInPage() {
       <div className="dot-grid-background"><div className="dot-grid"></div></div>
       <div className="relative z-10">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold shimmer-text mb-2">Red Rider</h1>
+          <img src="/reddride-logo-dark.png" alt="ReddRide" className="h-20 mx-auto mb-4" />
           <p className="text-text-secondary">Sign in to your account</p>
         </div>
         <SignIn appearance={{
