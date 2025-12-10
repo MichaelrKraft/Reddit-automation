@@ -12,8 +12,11 @@ let _replyQueueEvents: QueueEvents | null = null
 
 export function getConnection(): IORedis {
   if (!_connection) {
-    _connection = new IORedis(process.env.REDIS_URL!, {
+    const redisUrl = process.env.REDIS_URL!
+    _connection = new IORedis(redisUrl, {
       maxRetriesPerRequest: null,
+      // Enable TLS for rediss:// URLs (Upstash)
+      tls: redisUrl.startsWith('rediss://') ? {} : undefined,
     })
   }
   return _connection
@@ -207,4 +210,88 @@ export function getReplyQueueEvents(): QueueEvents {
     _replyQueueEvents = new QueueEvents('reddit-replies', { connection: getConnection() })
   }
   return _replyQueueEvents
+}
+
+// ============================================
+// OPPORTUNITY MINER QUEUE
+// ============================================
+
+let _opportunityQueue: Queue | null = null
+let _opportunityQueueEvents: QueueEvents | null = null
+
+export function getOpportunityQueue(): Queue {
+  if (!_opportunityQueue) {
+    _opportunityQueue = new Queue('opportunity-scanner', {
+      connection: getConnection(),
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+        removeOnComplete: 100,
+        removeOnFail: 50,
+      },
+    })
+  }
+  return _opportunityQueue
+}
+
+export interface OpportunityScanData {
+  userId: string
+  subreddit: string
+  monitoredSubredditId: string
+  limit?: number
+}
+
+export interface OpportunityAnalyzeData {
+  userId: string
+  postId: string
+  postTitle: string
+  postContent: string
+  subreddit: string
+  author: string
+  score: number
+  numComments: number
+  createdUtc: number
+  url: string
+}
+
+/**
+ * Schedule a subreddit scan for opportunities
+ */
+export async function scheduleOpportunityScan(
+  data: OpportunityScanData,
+  delay: number = 0
+) {
+  return await getOpportunityQueue().add(
+    'scan-subreddit',
+    data,
+    {
+      delay,
+      jobId: `scan-${data.monitoredSubredditId}-${Date.now()}`,
+    }
+  )
+}
+
+/**
+ * Schedule analysis of a single post
+ */
+export async function schedulePostAnalysis(data: OpportunityAnalyzeData) {
+  return await getOpportunityQueue().add(
+    'analyze-post',
+    data,
+    {
+      jobId: `analyze-${data.postId}`,
+    }
+  )
+}
+
+export function getOpportunityQueueEvents(): QueueEvents {
+  if (!_opportunityQueueEvents) {
+    _opportunityQueueEvents = new QueueEvents('opportunity-scanner', {
+      connection: getConnection(),
+    })
+  }
+  return _opportunityQueueEvents
 }
