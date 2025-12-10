@@ -169,7 +169,6 @@ export default function TimingDashboard() {
           </div>
         ) : !analyzed ? (
           <div className="feature-card rounded-lg p-12 text-center">
-            <div className="text-6xl mb-4">📊</div>
             <h2 className="text-2xl font-semibold text-white mb-2">No Data Yet</h2>
             <p className="text-gray-400">Enter a subreddit name and click "Analyze" to generate timing insights</p>
           </div>
