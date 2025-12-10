@@ -16,11 +16,7 @@ services:
         fromDatabase:
           name: reddit-automation-db
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          name: reddit-automation-redis
-          type: redis
-          property: connectionString
+      # REDIS_URL is set manually in dashboard (using Upstash)
       # These must be added manually in Render dashboard:
       # - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
       # - CLERK_SECRET_KEY
