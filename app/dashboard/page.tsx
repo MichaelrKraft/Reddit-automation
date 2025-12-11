@@ -77,6 +77,10 @@ export default function Dashboard() {
     failed: 'bg-red-100 text-red-800',
   }
 
+  // Debug log
+  console.log('Dashboard userStats:', userStats)
+  console.log('canPurchaseLifetime:', userStats?.canPurchaseLifetime)
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
       {/* Founder Banner - shows for founders who haven't purchased lifetime deal */}
@@ -115,6 +119,12 @@ export default function Dashboard() {
             <p className="text-gray-400 mt-1">Manage your Reddit posts</p>
           </div>
           <div className="flex flex-wrap gap-3">
+            <Link
+              href="/dashboard/opportunity-miner"
+              className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/50 px-6 py-2 rounded-lg hover:bg-purple-500/30 transition font-semibold"
+            >
+              Opportunity Miner
+            </Link>
             <Link
               href="/dashboard/spy-mode"
               className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
