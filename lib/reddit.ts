@@ -55,13 +55,26 @@ export async function getSubredditInfo(subredditName: string): Promise<any> {
 }
 
 export async function searchSubreddits(query: string, limit: number = 10): Promise<any[]> {
-  const reddit = getRedditClient()
-  const results = await reddit.searchSubreddits({ query, limit })
+  // Use Reddit's public JSON API for more reliable subreddit search
+  // This doesn't require authentication and has better reliability than snoowrap
+  const url = `https://www.reddit.com/subreddits/search.json?q=${encodeURIComponent(query)}&limit=${limit}`
 
-  return results.map((sub: any) => ({
-    name: sub.display_name,
-    displayName: sub.display_name_prefixed,
-    subscribers: sub.subscribers,
-    description: sub.public_description,
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'RedRide/1.0.0'
+    }
+  })
+
+  if (!response.ok) {
+    throw new Error(`Reddit API error: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  return (data.data?.children || []).map((child: any) => ({
+    name: child.data.display_name,
+    displayName: child.data.display_name_prefixed,
+    subscribers: child.data.subscribers,
+    description: child.data.public_description,
   }))
 }

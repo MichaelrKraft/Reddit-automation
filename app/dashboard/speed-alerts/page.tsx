@@ -131,19 +131,28 @@ export default function SpeedAlertsPage() {
   }
 
   const startMonitoring = useCallback(() => {
+    console.log('[Speed Alerts UI] Starting monitoring...')
+
     if (eventSourceRef.current) {
+      console.log('[Speed Alerts UI] Closing existing connection')
       eventSourceRef.current.close()
     }
 
+    console.log('[Speed Alerts UI] Creating new EventSource connection')
     const eventSource = new EventSource('/api/speed-alerts/stream')
     eventSourceRef.current = eventSource
 
+    eventSource.onopen = () => {
+      console.log('[Speed Alerts UI] EventSource connection opened')
+    }
+
     eventSource.addEventListener('connected', (event) => {
-      console.log('Speed Alerts connected:', JSON.parse(event.data))
+      console.log('[Speed Alerts UI] Connected event received:', JSON.parse(event.data))
       setIsMonitoring(true)
     })
 
     eventSource.addEventListener('new_post', (event) => {
+      console.log('[Speed Alerts UI] New post received!')
       const data = JSON.parse(event.data)
       const alert = data.alert as StreamAlert
 
@@ -165,18 +174,27 @@ export default function SpeedAlertsPage() {
     })
 
     eventSource.addEventListener('heartbeat', (event) => {
-      console.log('Heartbeat:', JSON.parse(event.data))
+      console.log('[Speed Alerts UI] Heartbeat:', JSON.parse(event.data))
+    })
+
+    eventSource.addEventListener('status', (event) => {
+      console.log('[Speed Alerts UI] Status:', JSON.parse(event.data))
     })
 
     eventSource.addEventListener('error', (event: Event) => {
-      // Connection was closed or failed - this is normal when stopping monitoring
-      // or when there's a network issue
-      setIsMonitoring(false)
+      console.log('[Speed Alerts UI] Error event received:', event)
+      // Don't immediately set monitoring to false - let the browser try to reconnect
     })
 
-    eventSource.onerror = () => {
-      setIsMonitoring(false)
-      eventSource.close()
+    eventSource.onerror = (err) => {
+      console.error('[Speed Alerts UI] Connection error:', err)
+      // Check if the connection is truly closed
+      if (eventSource.readyState === EventSource.CLOSED) {
+        console.log('[Speed Alerts UI] Connection closed, stopping monitoring')
+        setIsMonitoring(false)
+      } else {
+        console.log('[Speed Alerts UI] Connection error but may reconnect, readyState:', eventSource.readyState)
+      }
     }
   }, [])
 
@@ -512,6 +530,8 @@ function DiscoverSection() {
   const [searchResults, setSearchResults] = useState<Subreddit[]>([])
   const [savedSubreddits, setSavedSubreddits] = useState<Subreddit[]>([])
   const [loading, setLoading] = useState(false)
+  const [savingId, setSavingId] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [activeTab, setActiveTab] = useState<'search' | 'saved'>('search')
 
   useEffect(() => {
@@ -550,7 +570,13 @@ function DiscoverSection() {
     }
   }
 
+  function showToast(message: string, type: 'success' | 'error') {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
+  }
+
   async function saveSubreddit(subreddit: Subreddit) {
+    setSavingId(subreddit.name)
     try {
       const response = await fetch('/api/subreddits', {
         method: 'POST',
@@ -568,9 +594,15 @@ function DiscoverSection() {
         setSearchResults(prev =>
           prev.map(s => (s.name === subreddit.name ? { ...s, saved: true } : s))
         )
+        showToast(`${subreddit.displayName} saved!`, 'success')
+      } else {
+        showToast('Failed to save subreddit', 'error')
       }
     } catch (error) {
       console.error('Failed to save subreddit:', error)
+      showToast('Failed to save subreddit', 'error')
+    } finally {
+      setSavingId(null)
     }
   }
 
@@ -599,6 +631,26 @@ function DiscoverSection() {
 
   return (
     <>
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in ${
+          toast.type === 'success'
+            ? 'bg-green-900/90 border border-green-700 text-green-200'
+            : 'bg-red-900/90 border border-red-700 text-red-200'
+        }`}>
+          {toast.type === 'success' ? (
+            <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          )}
+          {toast.message}
+        </div>
+      )}
+
       <div className="feature-card rounded-lg p-6 mb-6">
         <form onSubmit={handleSearch} className="flex gap-3">
           <input
@@ -607,15 +659,38 @@ function DiscoverSection() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-1 px-4 py-3 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
+            disabled={loading}
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-reddit-orange text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition disabled:opacity-50 font-medium"
+            className="bg-reddit-orange text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition disabled:opacity-50 font-medium min-w-[120px]"
           >
-            {loading ? 'Searching...' : 'Search'}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Searching
+              </span>
+            ) : 'Search'}
           </button>
         </form>
+
+        {/* Loading indicator with message */}
+        {loading && (
+          <div className="mt-4 flex items-center justify-center gap-3 p-4 bg-blue-900/30 border border-blue-700 rounded-lg">
+            <svg className="animate-spin h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div className="text-blue-300">
+              <p className="font-medium">Searching Reddit...</p>
+              <p className="text-sm text-blue-400">This may take up to 30 seconds</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="feature-card rounded-lg">
@@ -681,13 +756,22 @@ function DiscoverSection() {
                               ? removeSubreddit(subreddit.id!)
                               : saveSubreddit(subreddit)
                           }
-                          className={`ml-4 px-4 py-2 rounded-lg text-sm font-medium transition ${
+                          disabled={savingId === subreddit.name}
+                          className={`ml-4 px-4 py-2 rounded-lg text-sm font-medium transition min-w-[80px] ${
                             subreddit.saved
                               ? 'bg-green-900/50 text-green-400 hover:bg-green-900'
-                              : 'bg-reddit-orange text-white hover:bg-orange-600'
+                              : 'bg-reddit-orange text-white hover:bg-orange-600 disabled:opacity-50'
                           }`}
                         >
-                          {subreddit.saved ? '✓ Saved' : 'Save'}
+                          {savingId === subreddit.name ? (
+                            <span className="flex items-center justify-center gap-1">
+                              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Saving
+                            </span>
+                          ) : subreddit.saved ? '✓ Saved' : 'Save'}
                         </button>
                       </div>
                     </div>

@@ -5,8 +5,11 @@ import { checkForNewPosts, generateCommentOptions, RedditPost } from '@/lib/spee
 
 // SSE endpoint for real-time speed alerts
 export async function GET(request: NextRequest) {
+  console.log('[Speed Alerts Stream] SSE connection requested')
+
   try {
     const user = await requireUser()
+    console.log(`[Speed Alerts Stream] User authenticated: ${user.id}`)
 
     // Create a readable stream for SSE
     const stream = new ReadableStream({
@@ -19,6 +22,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Send initial connection confirmation
+        console.log('[Speed Alerts Stream] Sending connected event')
         sendEvent('connected', { message: 'Speed Alerts stream connected', userId: user.id })
 
         let isActive = true
@@ -37,16 +41,20 @@ export async function GET(request: NextRequest) {
             })
 
             if (monitored.length === 0) {
+              console.log('[Speed Alerts Stream] No subreddits being monitored')
               sendEvent('status', { message: 'No subreddits being monitored' })
               return
             }
+
+            console.log(`[Speed Alerts Stream] Checking ${monitored.length} subreddits: ${monitored.map(m => m.subreddit).join(', ')}`)
 
             // Check each subreddit for new posts
             for (const sub of monitored) {
               try {
                 const { newPosts, latestPostId } = await checkForNewPosts(
                   sub.subreddit,
-                  sub.lastPostId
+                  sub.lastPostId,
+                  sub.lastChecked
                 )
 
                 // Update last post ID if we found posts

@@ -121,7 +121,8 @@ Return ONLY valid JSON in this exact format:
  */
 export async function checkForNewPosts(
   subreddit: string,
-  lastPostId: string | null
+  lastPostId: string | null,
+  lastCheckedTime?: Date | null
 ): Promise<{ newPosts: RedditPost[]; latestPostId: string | null }> {
   const posts = await fetchNewPosts(subreddit, 25)
 
@@ -133,15 +134,37 @@ export async function checkForNewPosts(
 
   if (!lastPostId) {
     // First check - return only the most recent post
+    console.log(`[Speed Alerts] r/${subreddit}: First check, returning 1 post`)
     return { newPosts: [posts[0]], latestPostId }
+  }
+
+  // If latest post is same as last seen, no new posts
+  if (latestPostId === lastPostId) {
+    console.log(`[Speed Alerts] r/${subreddit}: No new posts (latest=${latestPostId})`)
+    return { newPosts: [], latestPostId }
   }
 
   // Find posts newer than our last seen
   const newPosts: RedditPost[] = []
+  let foundLastPost = false
+
   for (const post of posts) {
-    if (post.id === lastPostId) break
+    if (post.id === lastPostId) {
+      foundLastPost = true
+      break
+    }
     newPosts.push(post)
   }
 
+  // If we didn't find the last post in the results, it may have scrolled off
+  // In this case, use timestamp-based filtering if available, or limit to recent posts
+  if (!foundLastPost && lastCheckedTime) {
+    const lastCheckedTimestamp = lastCheckedTime.getTime() / 1000
+    const filteredPosts = posts.filter(post => post.created_utc > lastCheckedTimestamp)
+    console.log(`[Speed Alerts] r/${subreddit}: Last post scrolled off, found ${filteredPosts.length} posts since last check`)
+    return { newPosts: filteredPosts.slice(0, 5), latestPostId } // Limit to 5 to avoid spam
+  }
+
+  console.log(`[Speed Alerts] r/${subreddit}: Found ${newPosts.length} new posts`)
   return { newPosts, latestPostId }
 }
