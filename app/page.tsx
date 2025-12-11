@@ -125,7 +125,7 @@ export default function Home() {
       )}
 
       {/* Navigation */}
-      <nav className="fixed top-10 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
+      <nav className="fixed top-11 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between h-[72px]">
           <div className="flex items-center overflow-visible">
             <img src="/reddride-logo.png" alt="ReddRide - The Reddit AI Automation Platform" className="h-[101px] -my-2" />

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface FounderBannerProps {
   signupNumber: number
@@ -17,8 +17,19 @@ export default function FounderBanner({
 }: FounderBannerProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
 
-  // Don't show banner if dismissed, already has lifetime deal, or can't purchase
+  // Show banner after 5 second delay
+  useEffect(() => {
+    if (!isDismissed && !hasLifetimeDeal && canPurchaseLifetime) {
+      const timer = setTimeout(() => {
+        setIsVisible(true)
+      }, 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [isDismissed, hasLifetimeDeal, canPurchaseLifetime])
+
+  // Don't render if dismissed, already has lifetime deal, or can't purchase
   if (isDismissed || hasLifetimeDeal || !canPurchaseLifetime) {
     return null
   }
@@ -50,8 +61,8 @@ export default function FounderBanner({
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-3 px-4 relative z-50">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+    <div className={`fixed top-0 left-0 right-0 w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-2 px-4 z-[60] transition-transform duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
           <span className="text-2xl">🎉</span>
           <div>
@@ -71,7 +82,7 @@ export default function FounderBanner({
           <button
             onClick={handleGetLifetimeDeal}
             disabled={isLoading}
-            className="bg-white text-emerald-700 px-5 py-2 rounded-lg font-bold hover:bg-emerald-50 transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            className="bg-white text-emerald-700 px-5 py-2 rounded-lg font-bold hover:bg-emerald-50 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap animate-pulse hover:animate-none hover:scale-105 hover:shadow-xl"
           >
             {isLoading ? 'Loading...' : 'Get Lifetime Deal →'}
           </button>
