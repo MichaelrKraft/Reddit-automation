@@ -50,7 +50,7 @@ export default function FounderBanner({
   }
 
   return (
-    <div className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-3 px-4 relative">
+    <div className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-3 px-4 relative z-50">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
           <span className="text-2xl">🎉</span>
