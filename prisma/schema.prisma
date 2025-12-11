@@ -39,6 +39,10 @@ model User {
   draftPosts           DraftPost[]
   brandKeywords        BrandKeyword[]
   spyAccounts          SpyAccount[]
+
+  // Opportunity Miner relations
+  opportunities        Opportunity[]
+  opportunityActions   OpportunityAction[]
 }
 
 // Reddit Account
@@ -77,6 +81,39 @@ enum WarmupStatus {
   COMPLETED           // 30+ days, 100+ karma
   PAUSED
   FAILED              // Shadowbanned/detected
+}
+
+// ============================================
+// OPPORTUNITY MINER ENUMS
+// ============================================
+
+enum OpportunityCategory {
+  PAIN_POINT
+  FEATURE_REQUEST
+  CONTENT_OPPORTUNITY
+  COMPETITOR_GAP
+  TRENDING_TOPIC
+}
+
+enum OpportunityStatus {
+  NEW
+  TRACKING
+  ACTED_ON
+  ARCHIVED
+}
+
+enum TrendDirection {
+  GROWING
+  STABLE
+  DECLINING
+}
+
+enum OpportunityActionType {
+  VIEWED
+  CONTENT_CREATED
+  TRACKED
+  EXPORTED
+  ARCHIVED
 }
 
 // Marketing Campaign
@@ -205,7 +242,7 @@ model OptimalTimeRecommendation {
 // SPEED ALERTS & VIRAL HEADLINE OPTIMIZER
 // ============================================
 
-// Monitored Subreddit (for Speed Alerts)
+// Monitored Subreddit (for Speed Alerts & Opportunity Miner)
 model MonitoredSubreddit {
   id            String   @id @default(cuid())
   subreddit     String
@@ -216,6 +253,11 @@ model MonitoredSubreddit {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // Opportunity Miner fields
+  opportunityMiningEnabled Boolean  @default(false)
+  opportunityFrequency     String   @default("daily") // realtime, hourly, daily, weekly
+  lastOpportunityScan      DateTime?
+
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -223,6 +265,7 @@ model MonitoredSubreddit {
 
   @@unique([userId, subreddit])
   @@index([isActive])
+  @@index([opportunityMiningEnabled])
 }
 
 // Alert History (for Speed Alerts & Brand Mentions)
@@ -396,4 +439,92 @@ model SpyInsight {
   account   SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@index([accountId])
+}
+
+// ============================================
+// OPPORTUNITY MINER - MARKET INTELLIGENCE
+// ============================================
+
+// Main Opportunity Model
+model Opportunity {
+  id               String              @id @default(cuid())
+  title            String
+  category         OpportunityCategory
+  score            Int                 // 0-100 calculated score
+  problemStatement String              @db.Text
+  evidenceCount    Int                 @default(0)
+  firstSeenAt      DateTime            @default(now())
+  lastUpdatedAt    DateTime            @default(now())
+  trendDirection   TrendDirection      @default(STABLE)
+  status           OpportunityStatus   @default(NEW)
+  metadata         Json?               // Score breakdown, themes, confidence, etc.
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  evidence   OpportunityEvidence[]
+  subreddits OpportunitySubreddit[]
+  actions    OpportunityAction[]
+
+  @@index([userId, score])
+  @@index([userId, status])
+  @@index([category])
+  @@index([createdAt])
+}
+
+// Evidence from Reddit Posts/Comments
+model OpportunityEvidence {
+  id             String   @id @default(cuid())
+  redditPostId   String
+  redditPostUrl  String
+  quoteText      String   @db.Text
+  author         String?
+  subreddit      String
+  upvotes        Int      @default(0)
+  commentCount   Int      @default(0)
+  sentimentScore Float?   // -1 to 1
+  postedAt       DateTime
+  createdAt      DateTime @default(now())
+
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([redditPostId, opportunityId])
+  @@index([opportunityId])
+  @@index([subreddit])
+  @@index([postedAt])
+}
+
+// Subreddits Where Opportunity Was Mentioned
+model OpportunitySubreddit {
+  id               String   @id @default(cuid())
+  subreddit        String
+  mentionCount     Int      @default(1)
+  firstMentionedAt DateTime @default(now())
+  lastMentionedAt  DateTime @default(now())
+
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, subreddit])
+  @@index([opportunityId])
+}
+
+// User Actions on Opportunities
+model OpportunityAction {
+  id         String                @id @default(cuid())
+  actionType OpportunityActionType
+  metadata   Json?                 // Additional action details
+  createdAt  DateTime              @default(now())
+
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId])
+  @@index([userId, createdAt])
 }

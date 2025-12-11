@@ -295,3 +295,67 @@ export function getOpportunityQueueEvents(): QueueEvents {
   }
   return _opportunityQueueEvents
 }
+
+/**
+ * Start the Opportunity Scanner Worker
+ * Processes scan-subreddit and analyze-post jobs
+ */
+export function startOpportunityWorker() {
+  const worker = new Worker(
+    'opportunity-scanner',
+    async (job) => {
+      if (job.name === 'scan-subreddit') {
+        const data = job.data as OpportunityScanData
+        console.log(`[OpportunityWorker] Processing scan for r/${data.subreddit}`)
+
+        // Dynamically import to avoid circular dependencies
+        const { scanSubreddit } = await import('./opportunity-scanner')
+        const result = await scanSubreddit(data.userId, data.subreddit, data.limit || 50)
+
+        // Update monitored subreddit last scan timestamp
+        await prisma.monitoredSubreddit.update({
+          where: { id: data.monitoredSubredditId },
+          data: { lastOpportunityScan: new Date() },
+        })
+
+        return result
+      } else if (job.name === 'analyze-post') {
+        const data = job.data as OpportunityAnalyzeData
+        console.log(`[OpportunityWorker] Analyzing post: ${data.postId}`)
+
+        const { analyzePost } = await import('./opportunity-analyzer')
+
+        const redditPost: any = {
+          id: data.postId,
+          title: data.postTitle,
+          selftext: data.postContent,
+          subreddit: data.subreddit,
+          author: data.author,
+          score: data.score,
+          num_comments: data.numComments,
+          created_utc: data.createdUtc,
+          url: data.url,
+        }
+
+        const analysis = await analyzePost(redditPost)
+        return analysis
+      }
+
+      throw new Error(`Unknown job type: ${job.name}`)
+    },
+    {
+      connection: getConnection(),
+      concurrency: 2, // Process 2 jobs at a time
+    }
+  )
+
+  worker.on('completed', (job, result) => {
+    console.log(`[OpportunityWorker] Job ${job.id} completed:`, result)
+  })
+
+  worker.on('failed', (job, err) => {
+    console.error(`[OpportunityWorker] Job ${job?.id} failed:`, err)
+  })
+
+  return worker
+}

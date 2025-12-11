@@ -10,6 +10,7 @@ const isProtectedRoute = createRouteMatcher([
   '/api/speed-alerts(.*)',
   '/api/brand-mentions(.*)',
   '/api/spy-mode(.*)',
+  '/api/opportunities(.*)',
 ])
 
 const isPublicRoute = createRouteMatcher([

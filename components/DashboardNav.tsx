@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navItems = [
+  { href: '/dashboard/opportunity-miner', label: '💎 Opportunity Miner' },
   { href: '/dashboard/spy-mode', label: 'Spy Mode' },
   { href: '/dashboard/speed-alerts', label: 'Speed Alerts' },
   { href: '/dashboard/viral', label: 'Viral Optimizer' },
