@@ -294,8 +294,8 @@ export default function OpportunityMinerPage() {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-[#00D9FF] to-cyan-400 bg-clip-text text-transparent">
-                OPPORTUNITY MINER
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">
+                Opportunity Miner
               </h1>
               <p className="text-gray-400 mt-1 text-sm sm:text-base">
                 Discover market opportunities hidden in Reddit conversations

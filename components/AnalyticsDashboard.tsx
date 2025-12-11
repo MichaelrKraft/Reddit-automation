@@ -124,9 +124,9 @@ export default function AnalyticsDashboard() {
           </button>
           <button
             onClick={exportCSV}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
           >
-            📊 Export CSV
+            Export CSV
           </button>
         </div>
       </div>

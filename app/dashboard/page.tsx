@@ -101,8 +101,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Logo in upper left */}
-      <div className="absolute top-6 z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full">
+      {/* Logo in upper left - moves down when founder banner is showing */}
+      <div className={`absolute z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full ${userStats?.canPurchaseLifetime ? 'top-16' : 'top-6'}`}>
         <Link href="/">
           <img
             src="/reddride-logo-dark.png"
@@ -121,7 +121,7 @@ export default function Dashboard() {
           <div className="flex flex-wrap gap-3">
             <Link
               href="/dashboard/opportunity-miner"
-              className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/50 px-6 py-2 rounded-lg hover:bg-purple-500/30 transition font-semibold"
+              className="bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border border-red-500/50 px-6 py-2 rounded-lg hover:bg-red-500/30 transition font-semibold"
             >
               Opportunity Miner
             </Link>

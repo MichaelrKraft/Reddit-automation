@@ -64,8 +64,8 @@ export default function FounderBanner({
         <div className="flex items-center gap-3">
           <div className="text-sm opacity-90 hidden md:block">
             Lock in <span className="font-bold">LIFETIME</span> access for just{' '}
-            <span className="font-bold">$29</span>
-            <span className="text-xs opacity-75 ml-1">(normally $29/month)</span>
+            <span className="font-bold">$59</span>
+            <span className="text-xs opacity-75 ml-1">(normally $59/month)</span>
           </div>
 
           <button

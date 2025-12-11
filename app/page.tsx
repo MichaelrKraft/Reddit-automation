@@ -100,9 +100,9 @@ export default function Home() {
   const spotsRemaining = userStats?.founderSpotsRemaining ?? 10;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-[112px]">
       {/* Alpha Banner - Dynamic based on user status */}
-      <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-center py-2 px-4">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-center py-2 px-4">
         <span className="font-semibold">
           {userStats?.isFounder ? (
             <>🎉 You're one of our first 20 founders! Thank you for believing in us!</>
@@ -125,7 +125,7 @@ export default function Home() {
       )}
 
       {/* Navigation */}
-      <nav className="fixed top-8 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
+      <nav className="fixed top-10 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between h-[72px]">
           <div className="flex items-center overflow-visible">
             <img src="/reddride-logo.png" alt="ReddRide - The Reddit AI Automation Platform" className="h-[101px] -my-2" />
@@ -165,7 +165,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-40 pb-20 px-6">
+      <section className="pt-12 pb-20 px-6">
         <div className={`max-w-7xl mx-auto text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="inline-block mb-4 px-4 py-2 bg-slate-900/5 border border-slate-900/10 rounded-full">
             <span className="text-sm font-medium text-slate-700">AI-Powered Reddit Marketing</span>
@@ -551,6 +551,57 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Opportunity Miner Feature */}
+      <section className="py-20 px-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-orange-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-amber-200">
+                <img
+                  src="/opportunity-miner-screenshot.png"
+                  alt="Opportunity Miner - Discover market opportunities from Reddit"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+            <div>
+              <div className="inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
+                OPPORTUNITY MINER
+              </div>
+              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Stop Guessing What People Want
+              </h3>
+              <p className="text-lg text-slate-600 mb-6">
+                Our AI scans thousands of Reddit conversations to surface real market opportunities.
+                Discover pain points, feature requests, and emerging trends before your competitors do—backed by evidence, not hunches.
+              </p>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">AI analyzes posts to find pain points & feature requests</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">5-factor scoring ranks opportunities by real demand</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Evidence-based insights linked to actual Reddit posts</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Automated 24/7 scanning across multiple subreddits</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/opportunity-miner" className="text-amber-600 font-medium hover:text-amber-700">
+                Explore Opportunity Miner →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Real Use Cases */}
       <section className="py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
@@ -874,6 +925,10 @@ export default function Home() {
               {
                 question: "Can I customize the AI-generated content?",
                 answer: "Yes! You have full control over tone, messaging, and content style. You can provide templates, set guidelines, review posts before they go live, or let the AI handle everything autonomously based on your preferences."
+              },
+              {
+                question: "What is Opportunity Miner and how does it work?",
+                answer: "Opportunity Miner is our AI-powered market research tool that scans Reddit conversations to find real business opportunities. It analyzes posts for pain points, feature requests, and emerging trends, then ranks them using a 5-factor scoring system (frequency, engagement, sentiment, trend momentum, and market gap). Each opportunity is backed by actual Reddit posts as evidence, so you're making decisions based on real demand—not guesses."
               }
             ].map((faq, index) => (
               <details

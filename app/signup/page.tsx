@@ -91,8 +91,8 @@ export default function SignupPage() {
           </h1>
           <p className="text-slate-600">
             {founderSpotsRemaining !== null && founderSpotsRemaining > 0
-              ? `Only ${founderSpotsRemaining} founder spot${founderSpotsRemaining !== 1 ? 's' : ''} left for the $29 lifetime deal!`
-              : 'Be one of the first 20 users to get the $29 lifetime deal'}
+              ? `Only ${founderSpotsRemaining} founder spot${founderSpotsRemaining !== 1 ? 's' : ''} left for the $59 lifetime deal!`
+              : 'Be one of the first 20 users to get the $59 lifetime deal'}
           </p>
         </div>
 

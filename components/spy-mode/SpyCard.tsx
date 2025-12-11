@@ -135,7 +135,7 @@ export default function SpyCard({ account, onRemove }: SpyCardProps) {
       <div className="flex gap-2 pt-4 border-t border-gray-700/50">
         <Link
           href={`/dashboard/spy-mode/${account.id}`}
-          className="flex-1 text-center py-2 text-[#00D9FF] hover:bg-[#00D9FF]/10 rounded-lg transition text-sm font-medium"
+          className="flex-1 text-center py-2 text-[#00D9FF] hover:bg-[#00D9FF]/10 rounded-lg transition text-base font-bold"
         >
           View Profile
         </Link>

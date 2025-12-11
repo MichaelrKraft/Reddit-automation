@@ -91,7 +91,7 @@ export default function WaitlistPage() {
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
             You Just Missed the
             <span className="block bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-              $29 Lifetime Deal
+              $59 Lifetime Deal
             </span>
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
@@ -110,7 +110,7 @@ export default function WaitlistPage() {
             <div className="text-slate-400">On the Waitlist</div>
           </div>
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
-            <div className="text-3xl font-bold text-emerald-500 mb-2">$29/mo</div>
+            <div className="text-3xl font-bold text-emerald-500 mb-2">$59/mo</div>
             <div className="text-slate-400">Regular Price</div>
           </div>
         </div>

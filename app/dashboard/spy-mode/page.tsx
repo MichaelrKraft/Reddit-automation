@@ -189,8 +189,8 @@ export default function SpyModePage() {
         <div className="mb-8">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-[#00D9FF] to-cyan-400 bg-clip-text text-transparent">
-                SPY MODE
+              <h1 className="text-3xl font-bold text-white">
+                Spy Mode
               </h1>
               <p className="text-gray-400 mt-1">
                 Track competitors & steal their secrets
