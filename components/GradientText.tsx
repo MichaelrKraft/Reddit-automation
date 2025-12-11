@@ -36,7 +36,8 @@ export default function GradientText({
           flex-direction: row;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
+          overflow: visible;
+          padding-bottom: 0.1em;
         }
 
         .gradient-overlay {

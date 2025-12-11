@@ -167,11 +167,11 @@ export default function Home() {
       {/* Hero Section */}
       <section className="pt-12 pb-20 px-6">
         <div className={`max-w-7xl mx-auto text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="inline-block mb-4 px-4 py-2 bg-slate-900/5 border border-slate-900/10 rounded-full">
+          <div className="inline-block mt-2 mb-2 px-4 py-2 bg-slate-900/5 border border-slate-900/10 rounded-full">
             <span className="text-sm font-medium text-slate-700">AI-Powered Reddit Marketing</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-tight font-[family-name:var(--font-montserrat)]">
+          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-normal font-[family-name:var(--font-montserrat)]">
             <span className="block">
               <TextType
                 text="Make "
@@ -964,7 +964,7 @@ export default function Home() {
             Ready to Grow Your Reddit Presence?
           </h2>
           <p className="text-xl text-slate-600 mb-10">
-            Join our alpha program and get 1 year free access as one of the first 20 users
+            Join our alpha program and get free access as one of the first 20 users
           </p>
           <Link
             href="/sign-up"
