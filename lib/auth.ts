@@ -15,20 +15,35 @@ export async function getOrCreateUser() {
     const clerkUser = await currentUser()
     if (!clerkUser) return null
 
-    // Count existing users to determine signup number and tier
-    const userCount = await prisma.user.count()
-    const signupNumber = userCount + 1
-    const tier = signupNumber <= FOUNDER_LIMIT ? 'FOUNDER' : 'ALPHA'
+    const email = clerkUser.emailAddresses[0]?.emailAddress || ''
 
-    user = await prisma.user.create({
-      data: {
-        clerkId: userId,
-        email: clerkUser.emailAddresses[0]?.emailAddress || '',
-        plan: 'free',
-        tier: tier,
-        signupNumber: signupNumber,
-      }
+    // Check if user exists by email (handles Clerk dev->prod migration)
+    user = await prisma.user.findUnique({
+      where: { email }
     })
+
+    if (user) {
+      // Update existing user with new Clerk ID (prod migration)
+      user = await prisma.user.update({
+        where: { email },
+        data: { clerkId: userId }
+      })
+    } else {
+      // Count existing users to determine signup number and tier
+      const userCount = await prisma.user.count()
+      const signupNumber = userCount + 1
+      const tier = signupNumber <= FOUNDER_LIMIT ? 'FOUNDER' : 'ALPHA'
+
+      user = await prisma.user.create({
+        data: {
+          clerkId: userId,
+          email: email,
+          plan: 'free',
+          tier: tier,
+          signupNumber: signupNumber,
+        }
+      })
+    }
   }
   return user
 }
