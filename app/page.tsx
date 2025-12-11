@@ -137,18 +137,29 @@ export default function Home() {
             >
               Pricing
             </Link>
-            <Link
-              href="/sign-in"
-              className="px-6 py-2.5 text-slate-700 font-medium hover:text-slate-900 transition-all"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
-            >
-              Get Started →
-            </Link>
+            {userStats?.isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+              >
+                Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="px-6 py-2.5 text-slate-700 font-medium hover:text-slate-900 transition-all"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+                >
+                  Get Started →
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
