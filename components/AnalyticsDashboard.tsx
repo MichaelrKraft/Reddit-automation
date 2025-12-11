@@ -99,16 +99,16 @@ export default function AnalyticsDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">Analytics Dashboard</h2>
-          <p className="text-gray-400 mt-1">Track your Reddit performance</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Analytics Dashboard</h2>
+          <p className="text-gray-400 mt-1 text-sm sm:text-base">Track your Reddit performance</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 border border-gray-600 bg-[#12121a] text-white rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent"
+            className="px-3 sm:px-4 py-2 border border-gray-600 bg-[#12121a] text-white rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-sm sm:text-base"
           >
             <option value="7">Last 7 days</option>
             <option value="30">Last 30 days</option>
@@ -118,13 +118,13 @@ export default function AnalyticsDashboard() {
           <button
             onClick={refreshAnalytics}
             disabled={refreshing}
-            className="glass-button text-gray-300 px-4 py-2 rounded-lg transition disabled:opacity-50"
+            className="glass-button text-gray-300 px-3 sm:px-4 py-2 rounded-lg transition disabled:opacity-50 text-sm sm:text-base"
           >
-            {refreshing ? 'Refreshing...' : '🔄 Refresh Data'}
+            {refreshing ? 'Refreshing...' : '🔄 Refresh'}
           </button>
           <button
             onClick={exportCSV}
-            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
           >
             Export CSV
           </button>
@@ -174,19 +174,23 @@ export default function AnalyticsDashboard() {
             ) : (
               <div className="space-y-3">
                 {topSubreddits.map((sub, index) => (
-                  <div key={sub.name} className="flex items-center gap-4 p-3 bg-[#1a1a24] rounded-lg border border-gray-700">
-                    <div className="text-2xl font-bold text-gray-500 w-8">#{index + 1}</div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-[#00D9FF]">{sub.displayName}</div>
-                      <div className="text-sm text-gray-400">{sub.posts} posts</div>
+                  <div key={sub.name} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-[#1a1a24] rounded-lg border border-gray-700">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="text-xl sm:text-2xl font-bold text-gray-500 w-8">#{index + 1}</div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-[#00D9FF] text-sm sm:text-base">{sub.displayName}</div>
+                        <div className="text-xs sm:text-sm text-gray-400">{sub.posts} posts</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-400">↑ {formatNumber(sub.upvotes)}</div>
-                      <div className="text-sm text-gray-400">💬 {formatNumber(sub.comments)}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-purple-400">{formatNumber(sub.engagement)}</div>
-                      <div className="text-xs text-gray-500">engagement</div>
+                    <div className="flex items-center justify-between sm:justify-end gap-4 pl-11 sm:pl-0">
+                      <div className="text-left sm:text-right">
+                        <div className="text-xs sm:text-sm text-gray-400">↑ {formatNumber(sub.upvotes)}</div>
+                        <div className="text-xs sm:text-sm text-gray-400">💬 {formatNumber(sub.comments)}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-semibold text-purple-400 text-sm sm:text-base">{formatNumber(sub.engagement)}</div>
+                        <div className="text-xs text-gray-500">engagement</div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -202,40 +206,44 @@ export default function AnalyticsDashboard() {
             ) : (
               <div className="space-y-3">
                 {topPosts.map((post, index) => (
-                  <div key={post.id} className="flex items-center gap-4 p-4 bg-[#1a1a24] rounded-lg border border-gray-700 hover:border-[#00D9FF] transition">
-                    <div className="text-2xl font-bold text-gray-500 w-8">#{index + 1}</div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-white line-clamp-1">{post.title}</h4>
-                      <div className="flex gap-3 text-sm text-gray-400 mt-1">
-                        <span className="text-[#00D9FF]">{post.subreddit}</span>
-                        <span>•</span>
-                        <span>{post.postedAt && new Date(post.postedAt).toLocaleDateString()}</span>
+                  <div key={post.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[#1a1a24] rounded-lg border border-gray-700 hover:border-[#00D9FF] transition">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="text-xl sm:text-2xl font-bold text-gray-500 w-8">#{index + 1}</div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-white line-clamp-1 text-sm sm:text-base">{post.title}</h4>
+                        <div className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400 mt-1">
+                          <span className="text-[#00D9FF]">{post.subreddit}</span>
+                          <span>•</span>
+                          <span>{post.postedAt && new Date(post.postedAt).toLocaleDateString()}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex gap-4 text-sm">
-                      <div className="text-center">
-                        <div className="font-semibold text-green-400">↑ {formatNumber(post.upvotes)}</div>
-                        <div className="text-xs text-gray-500">upvotes</div>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
+                      <div className="flex gap-3 sm:gap-4 text-sm">
+                        <div className="text-center">
+                          <div className="font-semibold text-green-400 text-xs sm:text-sm">↑ {formatNumber(post.upvotes)}</div>
+                          <div className="text-xs text-gray-500 hidden sm:block">upvotes</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-semibold text-blue-400 text-xs sm:text-sm">💬 {formatNumber(post.comments)}</div>
+                          <div className="text-xs text-gray-500 hidden sm:block">comments</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-semibold text-purple-400 text-xs sm:text-sm">{post.score}</div>
+                          <div className="text-xs text-gray-500 hidden sm:block">score</div>
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <div className="font-semibold text-blue-400">💬 {formatNumber(post.comments)}</div>
-                        <div className="text-xs text-gray-500">comments</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-semibold text-purple-400">{post.score}</div>
-                        <div className="text-xs text-gray-500">score</div>
-                      </div>
+                      {post.url && (
+                        <a
+                          href={post.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-reddit-orange hover:underline text-xs sm:text-sm whitespace-nowrap"
+                        >
+                          View →
+                        </a>
+                      )}
                     </div>
-                    {post.url && (
-                      <a
-                        href={post.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-reddit-orange hover:underline text-sm"
-                      >
-                        View →
-                      </a>
-                    )}
                   </div>
                 ))}
               </div>

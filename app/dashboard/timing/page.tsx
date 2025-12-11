@@ -104,21 +104,21 @@ export default function TimingDashboard() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardNav />
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">⏰ Optimal Posting Times</h1>
-            <p className="text-gray-400 mt-1">Analyze subreddit activity patterns and find the best times to post (Mountain Time)</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">⏰ Optimal Posting Times</h1>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">Analyze subreddit activity patterns and find the best times to post (Mountain Time)</p>
           </div>
           <Link
             href="/dashboard"
-            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+            className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
           >
             ← Back
           </Link>
         </div>
 
-        <div className="feature-card rounded-lg p-6 mb-8">
-          <div className="flex gap-4 items-end">
+        <div className="feature-card rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Subreddit Name
@@ -128,25 +128,27 @@ export default function TimingDashboard() {
                 placeholder="e.g., technology"
                 value={subredditName}
                 onChange={(e) => setSubredditName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500"
+                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 text-sm sm:text-base"
               />
             </div>
-            <button
-              onClick={handleAnalyze}
-              disabled={analyzing || !subredditName}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 font-medium"
-            >
-              {analyzing ? '🔄 Analyzing...' : '🔍 Analyze'}
-            </button>
-            {analyzed && (
+            <div className="flex gap-2 sm:gap-3">
               <button
-                onClick={fetchHeatmap}
-                disabled={loading}
-                className="glass-button text-gray-300 px-6 py-2 rounded-lg transition disabled:opacity-50 font-medium"
+                onClick={handleAnalyze}
+                disabled={analyzing || !subredditName}
+                className="px-4 sm:px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 font-medium text-sm sm:text-base"
               >
-                {loading ? '↻ Refreshing...' : '↻ Refresh'}
+                {analyzing ? '🔄 Analyzing...' : '🔍 Analyze'}
               </button>
-            )}
+              {analyzed && (
+                <button
+                  onClick={fetchHeatmap}
+                  disabled={loading}
+                  className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition disabled:opacity-50 font-medium text-sm sm:text-base"
+                >
+                  {loading ? '↻ Refreshing...' : '↻ Refresh'}
+                </button>
+              )}
+            </div>
           </div>
 
           {error && (

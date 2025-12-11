@@ -102,12 +102,12 @@ export default function Dashboard() {
       </div>
 
       {/* Logo in upper left - moves down when founder banner is showing */}
-      <div className={`absolute z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full ${userStats?.canPurchaseLifetime ? 'top-16' : 'top-6'}`}>
+      <div className={`absolute z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full ${userStats?.canPurchaseLifetime ? 'top-16' : 'top-4 sm:top-6'}`}>
         <Link href="/">
           <img
             src="/reddride-logo-dark.png"
             alt="ReddRide - The Reddit AI Automation Platform"
-            className="h-[101px] object-contain cursor-pointer"
+            className="h-16 sm:h-[101px] object-contain cursor-pointer"
           />
         </Link>
       </div>
@@ -115,67 +115,67 @@ export default function Dashboard() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-8">
           <div className="mb-4 text-center">
-            <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-            <p className="text-gray-400 mt-1">Manage your Reddit posts</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">Manage your Reddit posts</p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <Link
               href="/dashboard/opportunity-miner"
-              className="bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border border-red-500/50 px-6 py-2 rounded-lg hover:bg-red-500/30 transition font-semibold"
+              className="bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border border-red-500/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-red-500/30 transition font-semibold text-sm sm:text-base"
             >
               Opportunity Miner
             </Link>
             <Link
               href="/dashboard/spy-mode"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Spy Mode
             </Link>
             <Link
               href="/dashboard/speed-alerts"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Speed Alerts
             </Link>
             <Link
               href="/dashboard/viral"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Viral Optimizer
             </Link>
             <Link
               href="/dashboard/timing"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Optimal Times
             </Link>
             <Link
               href="/dashboard/analytics"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Analytics
             </Link>
             <Link
               href="/dashboard/comments"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Comments
             </Link>
             <Link
               href="/dashboard/calendar"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Calendar
             </Link>
             <Link
               href="/warmup"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               Warmup
             </Link>
             <Link
               href="/dashboard/new-post"
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >
               + New Post
             </Link>
@@ -222,40 +222,40 @@ export default function Dashboard() {
                 {posts.map((post) => (
                   <div
                     key={post.id}
-                    className="border border-gray-700 bg-[#12121a] rounded-lg p-4 hover:border-[#00D9FF] transition"
+                    className="border border-gray-700 bg-[#12121a] rounded-lg p-3 sm:p-4 hover:border-[#00D9FF] transition"
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-sm font-medium text-[#00D9FF]">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="text-xs sm:text-sm font-medium text-[#00D9FF]">
                             {post.subreddit.displayName}
                           </span>
                           <span className={`text-xs px-2 py-1 rounded-full ${statusColors[post.status as keyof typeof statusColors]}`}>
                             {post.status}
                           </span>
                         </div>
-                        <h3 className="text-lg font-semibold text-white mb-1">
+                        <h3 className="text-base sm:text-lg font-semibold text-white mb-1 line-clamp-2">
                           {post.title}
                         </h3>
-                        <p className="text-gray-400 text-sm line-clamp-2 mb-2">
+                        <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 mb-2">
                           {post.content}
                         </p>
-                        <div className="flex gap-4 text-xs text-gray-500">
+                        <div className="flex flex-wrap gap-2 sm:gap-4 text-xs text-gray-500">
                           {post.scheduledAt && (
                             <span>
-                              Scheduled: {new Date(post.scheduledAt).toLocaleString()}
+                              Scheduled: {new Date(post.scheduledAt).toLocaleDateString()}
                             </span>
                           )}
                           {post.postedAt && (
                             <span>
-                              Posted: {new Date(post.postedAt).toLocaleString()}
+                              Posted: {new Date(post.postedAt).toLocaleDateString()}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className="flex flex-col items-end gap-2">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2">
                         {post.analytics && (
-                          <div className="text-right">
+                          <div className="text-left sm:text-right flex sm:block gap-3">
                             <div className="text-sm font-medium text-white">
                               ↑ {post.analytics.upvotes}
                             </div>
@@ -269,7 +269,7 @@ export default function Dashboard() {
                             href={post.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs text-reddit-orange hover:underline"
+                            className="text-xs text-reddit-orange hover:underline whitespace-nowrap"
                           >
                             View on Reddit →
                           </a>

@@ -131,16 +131,16 @@ export default function ViralPage() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardNav />
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">🎯 Viral Headline Optimizer</h1>
-            <p className="text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">🎯 Viral Headline Optimizer</h1>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">
               Analyze your headlines based on 4,944 viral Reddit posts
             </p>
           </div>
           <Link
             href="/dashboard"
-            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+            className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base text-center"
           >
             ← Back
           </Link>
@@ -167,7 +167,7 @@ export default function ViralPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">
                   Target Subreddit (optional)
@@ -177,7 +177,7 @@ export default function ViralPage() {
                   value={subreddit}
                   onChange={(e) => setSubreddit(e.target.value)}
                   placeholder="e.g., r/startups"
-                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-500"
+                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white placeholder-gray-500 text-sm sm:text-base"
                 />
               </div>
 
@@ -188,7 +188,7 @@ export default function ViralPage() {
                 <select
                   value={postType}
                   onChange={(e) => setPostType(e.target.value as any)}
-                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white"
+                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-white text-sm sm:text-base"
                 >
                   <option value="text">Text Post</option>
                   <option value="image">Image Post</option>
@@ -265,7 +265,7 @@ export default function ViralPage() {
             {/* Score Breakdown */}
             <div className="feature-card rounded-lg p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Score Breakdown</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {(Object.keys(result.breakdown) as Array<keyof ScoreBreakdown>).map((key) => {
                   const value = result.breakdown[key]
                   const info = breakdownLabels[key]
@@ -339,9 +339,9 @@ export default function ViralPage() {
             )}
 
             {/* Tips Panel */}
-            <div className="feature-card border border-[#00D9FF]/30 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-[#00D9FF] mb-3">📊 Based on Analysis of 4,944 Viral Posts</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
+            <div className="feature-card border border-[#00D9FF]/30 rounded-lg p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-semibold text-[#00D9FF] mb-3">📊 Based on Analysis of 4,944 Viral Posts</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-300">
                 <div>
                   <strong className="text-white">Virality Tiers:</strong>
                   <ul className="mt-1 space-y-1">

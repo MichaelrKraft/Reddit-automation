@@ -186,22 +186,22 @@ export default function SpyModePage() {
         <DashboardNav />
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-start mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">
                 Spy Mode
               </h1>
-              <p className="text-gray-400 mt-1">
+              <p className="text-gray-400 mt-1 text-sm sm:text-base">
                 Track competitors & steal their secrets
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {isMonitoring ? (
                 <button
                   onClick={stopMonitoring}
-                  className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                  className="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm sm:text-base"
                 >
                   <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
                   Stop Monitoring
@@ -210,7 +210,7 @@ export default function SpyModePage() {
                 <button
                   onClick={startMonitoring}
                   disabled={accounts.length === 0}
-                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:bg-gray-600 disabled:cursor-not-allowed"
+                  className="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:bg-gray-600 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   Start Monitoring
                 </button>
@@ -240,7 +240,7 @@ export default function SpyModePage() {
               </button>
               <Link
                 href="/dashboard"
-                className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+                className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
               >
                 ← Back
               </Link>
@@ -248,19 +248,19 @@ export default function SpyModePage() {
           </div>
 
           {/* Add Account Form */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <input
               type="text"
               value={newUsername}
               onChange={(e) => setNewUsername(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addAccount()}
               placeholder="Enter Reddit username (e.g., u/spez)"
-              className="flex-1 max-w-md px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
+              className="flex-1 sm:max-w-md px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500 text-sm sm:text-base"
             />
             <button
               onClick={addAccount}
               disabled={isAdding || !newUsername.trim()}
-              className="bg-[#00D9FF] text-black font-semibold px-6 py-2 rounded-lg hover:bg-cyan-400 transition disabled:bg-gray-600 disabled:cursor-not-allowed"
+              className="bg-[#00D9FF] text-black font-semibold px-4 sm:px-6 py-2 rounded-lg hover:bg-cyan-400 transition disabled:bg-gray-600 disabled:cursor-not-allowed text-sm sm:text-base"
             >
               {isAdding ? 'Adding...' : '+ Add Spy'}
             </button>

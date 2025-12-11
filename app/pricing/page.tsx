@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 
 export default function PricingPage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const tiers = [
     {
       name: 'Individual',
@@ -63,11 +66,13 @@ export default function PricingPage() {
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between h-[72px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between h-[72px]">
           <Link href="/" className="flex items-center overflow-visible">
-            <img src="/reddride-logo.png" alt="ReddRide" className="h-[101px] -my-2" />
+            <img src="/reddride-logo.png" alt="ReddRide" className="h-16 sm:h-[101px] -my-2" />
           </Link>
-          <div className="flex items-center gap-3">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-3">
             <Link
               href="/sign-in"
               className="px-6 py-2.5 text-slate-700 font-medium hover:text-slate-900 transition-all"
@@ -81,7 +86,44 @@ export default function PricingPage() {
               Get Started →
             </Link>
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? (
+              <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-slate-200 px-4 py-4 space-y-3">
+            <Link
+              href="/sign-in"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-4 py-3 text-slate-700 font-medium hover:bg-slate-50 rounded-lg transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/sign-up"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-4 py-3 bg-slate-900 text-white rounded-lg font-medium text-center hover:bg-slate-800 transition-all border-2 border-red-500/70"
+            >
+              Get Started →
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -103,9 +145,9 @@ export default function PricingPage() {
             {tiers.map((tier, index) => (
               <div
                 key={index}
-                className={`relative rounded-2xl p-8 ${
+                className={`relative rounded-2xl p-6 sm:p-8 ${
                   tier.highlighted
-                    ? 'bg-slate-900 text-white shadow-2xl scale-105 border-2 border-red-500/70'
+                    ? 'bg-slate-900 text-white shadow-2xl md:scale-105 border-2 border-red-500/70'
                     : 'bg-white border-2 border-slate-200 shadow-lg'
                 }`}
               >

@@ -17,20 +17,20 @@ export default function CommentsPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardNav />
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Comment Management</h1>
-            <p className="text-gray-400 mt-1">Monitor and respond to comments on your posts</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Comment Management</h1>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">Monitor and respond to comments on your posts</p>
           </div>
           <Link
             href="/dashboard"
-            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+            className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
           >
             ← Back
           </Link>
         </div>
 
-        <div className="feature-card rounded-lg p-6">
+        <div className="feature-card rounded-lg p-4 sm:p-6">
           <CommentsPanel />
         </div>
       </div>

@@ -23,6 +23,7 @@ interface UserStats {
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
@@ -126,11 +127,13 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="fixed top-11 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between h-[72px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between h-[72px]">
           <div className="flex items-center overflow-visible">
-            <img src="/reddride-logo.png" alt="ReddRide - The Reddit AI Automation Platform" className="h-[101px] -my-2" />
+            <img src="/reddride-logo.png" alt="ReddRide - The Reddit AI Automation Platform" className="h-16 sm:h-[101px] -my-2" />
           </div>
-          <div className="flex items-center gap-3">
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-3">
             <Link
               href="/pricing"
               className="px-6 py-2.5 text-slate-700 font-medium hover:text-slate-900 transition-all"
@@ -161,7 +164,63 @@ export default function Home() {
               </>
             )}
           </div>
+
+          {/* Mobile Hamburger Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? (
+              <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-slate-200 px-4 py-4 space-y-3">
+            <Link
+              href="/pricing"
+              className="block px-4 py-3 text-slate-700 font-medium hover:bg-slate-50 rounded-lg transition-all"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Pricing
+            </Link>
+            {userStats?.isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="block px-4 py-3 bg-slate-900 text-white rounded-lg font-medium text-center hover:bg-slate-800 transition-all border-2 border-red-500/70"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="block px-4 py-3 text-slate-700 font-medium hover:bg-slate-50 rounded-lg transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="block px-4 py-3 bg-slate-900 text-white rounded-lg font-medium text-center hover:bg-slate-800 transition-all border-2 border-red-500/70"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Get Started →
+                </Link>
+              </>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -171,7 +230,7 @@ export default function Home() {
             <span className="text-sm font-medium text-slate-700">AI-Powered Reddit Marketing</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-normal font-[family-name:var(--font-montserrat)]">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-normal font-[family-name:var(--font-montserrat)]">
             <span className="block">
               <TextType
                 text="Make "
@@ -243,28 +302,28 @@ export default function Home() {
           </div>
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+          <div className="mt-12 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
             <div>
-              <div className="text-3xl font-bold text-slate-900">10+</div>
-              <div className="text-sm text-slate-600 mt-1">Features</div>
+              <div className="text-2xl sm:text-3xl font-bold text-slate-900">10+</div>
+              <div className="text-xs sm:text-sm text-slate-600 mt-1">Features</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-slate-900">Alpha</div>
-              <div className="text-sm text-slate-600 mt-1">Launch Ready</div>
+              <div className="text-2xl sm:text-3xl font-bold text-slate-900">Alpha</div>
+              <div className="text-xs sm:text-sm text-slate-600 mt-1">Launch Ready</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-slate-900">Free</div>
-              <div className="text-sm text-slate-600 mt-1">For Early Users</div>
+              <div className="text-2xl sm:text-3xl font-bold text-slate-900">Free</div>
+              <div className="text-xs sm:text-sm text-slate-600 mt-1">For Early Users</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* App Preview Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
               <ShinyText speed={3}>
                 Powerful Dashboard
               </ShinyText>
@@ -347,10 +406,10 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-6 bg-white">
+      <section id="features" className="py-12 md:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Everything You Need
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
@@ -387,15 +446,15 @@ export default function Home() {
       </section>
 
       {/* Feature Showcase Sections */}
-      <section className="py-20 px-6 bg-slate-50">
+      <section className="py-12 md:py-20 px-6 bg-slate-50">
         <div className="max-w-7xl mx-auto">
           {/* Spy Mode Feature */}
-          <div className="grid md:grid-cols-2 gap-12 items-center mb-20">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mb-12 md:mb-20">
             <div>
               <div className="inline-block px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium mb-4">
                 SPY MODE
               </div>
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 Track Competitors & Steal Their Secrets
               </h3>
               <p className="text-lg text-slate-600 mb-6">
@@ -433,7 +492,7 @@ export default function Home() {
           </div>
 
           {/* Analytics Feature */}
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="order-2 md:order-1 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 blur-3xl"></div>
               <div className="relative bg-white rounded-xl shadow-2xl p-6 border border-slate-200">
@@ -467,7 +526,7 @@ export default function Home() {
               <div className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
                 ANALYTICS
               </div>
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 Track Performance & Optimize
               </h3>
               <p className="text-lg text-slate-600 mb-6">
@@ -497,14 +556,14 @@ export default function Home() {
       </section>
 
       {/* Account Warm-up Feature */}
-      <section className="py-20 px-6 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
+      <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div>
               <div className="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
                 🔥 ACCOUNT WARMUP
               </div>
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 Account Warm-up System
               </h3>
               <p className="text-lg text-slate-600 mb-6">
@@ -552,9 +611,9 @@ export default function Home() {
       </section>
 
       {/* Opportunity Miner Feature */}
-      <section className="py-20 px-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+      <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-orange-400/20 blur-3xl"></div>
               <div className="relative rounded-xl shadow-2xl overflow-hidden border border-amber-200">
@@ -569,7 +628,7 @@ export default function Home() {
               <div className="inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
                 OPPORTUNITY MINER
               </div>
-              <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 Stop Guessing What People Want
               </h3>
               <p className="text-lg text-slate-600 mb-6">
@@ -603,10 +662,10 @@ export default function Home() {
       </section>
 
       {/* Real Use Cases */}
-      <section className="py-20 px-6 bg-white">
+      <section className="py-12 md:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Real Use Cases
             </h2>
             <p className="text-xl text-slate-600 max-w-3xl mx-auto">
@@ -745,14 +804,14 @@ export default function Home() {
       </section>
 
       {/* Competitor Comparison */}
-      <section className="py-20 px-6 bg-gradient-to-br from-slate-50 to-white">
+      <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-slate-50 to-white">
         <div className="max-w-5xl mx-auto">
           {/* Section Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 md:mb-12">
             <div className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
               WHY REDDRIDE
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               ReddRide vs The Competition
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
@@ -821,10 +880,10 @@ export default function Home() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 px-6 bg-gradient-to-b from-white to-slate-50">
+      <section className="py-12 md:py-20 px-6 bg-gradient-to-b from-white to-slate-50">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               How it works
             </h2>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
@@ -881,10 +940,10 @@ export default function Home() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-6 bg-slate-50">
+      <section className="py-12 md:py-20 px-6 bg-slate-50">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Frequently Asked Questions
             </h2>
             <p className="text-xl text-slate-600">
@@ -958,9 +1017,9 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6">
+      <section className="py-12 md:py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-6">
             Ready to Grow Your Reddit Presence?
           </h2>
           <p className="text-xl text-slate-600 mb-10">

@@ -275,18 +275,18 @@ export default function SpeedAlertsPage() {
         <DashboardNav />
 
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">⚡ Speed Alerts</h1>
-            <p className="text-gray-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">⚡ Speed Alerts</h1>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">
               Get instant notifications when new posts appear
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {isMonitoring ? (
               <button
                 onClick={stopMonitoring}
-                className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                className="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm sm:text-base"
               >
                 <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
                 Stop Monitoring
@@ -295,7 +295,7 @@ export default function SpeedAlertsPage() {
               <button
                 onClick={startMonitoring}
                 disabled={monitored.length === 0}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:bg-gray-600 disabled:cursor-not-allowed"
+                className="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:bg-gray-600 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 Start Monitoring
               </button>
@@ -325,14 +325,14 @@ export default function SpeedAlertsPage() {
             </button>
             <Link
               href="/dashboard"
-              className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+              className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
             >
               ← Back
             </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Panel - Monitored Subreddits */}
           <div className="feature-card rounded-lg p-6">
             <h2 className="text-xl font-semibold text-white mb-4">

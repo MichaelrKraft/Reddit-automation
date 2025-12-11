@@ -116,32 +116,32 @@ export default function DiscoverSubreddits() {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <DashboardNav />
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Discover Subreddits</h1>
-            <p className="text-gray-400 mt-1">Find relevant communities for your content</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Discover Subreddits</h1>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">Find relevant communities for your content</p>
           </div>
           <Link
             href="/dashboard"
-            className="glass-button text-gray-300 px-6 py-2 rounded-lg transition"
+            className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
           >
             ← Back
           </Link>
         </div>
 
-        <div className="feature-card rounded-lg p-6 mb-6">
-          <form onSubmit={handleSearch} className="flex gap-3">
+        <div className="feature-card rounded-lg p-4 sm:p-6 mb-6">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
               placeholder="Search for subreddits (e.g., technology, gaming, startups)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 px-4 py-3 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
+              className="flex-1 px-4 py-3 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500 text-sm sm:text-base"
             />
             <button
               type="submit"
               disabled={loading}
-              className="bg-reddit-orange text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition disabled:opacity-50 font-medium"
+              className="bg-reddit-orange text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-orange-600 transition disabled:opacity-50 font-medium text-sm sm:text-base"
             >
               {loading ? 'Searching...' : 'Search'}
             </button>
@@ -174,7 +174,7 @@ export default function DiscoverSubreddits() {
             </nav>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {activeTab === 'search' && (
               <div>
                 {searchResults.length === 0 ? (
