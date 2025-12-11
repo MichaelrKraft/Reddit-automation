@@ -105,7 +105,7 @@ export default function Home() {
       <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white text-center py-2 px-4">
         <span className="font-semibold">
           {userStats?.isFounder ? (
-            <>🎉 You're one of our first 10 founders! Thank you for believing in us!</>
+            <>🎉 You're one of our first 20 founders! Thank you for believing in us!</>
           ) : spotsRemaining > 0 ? (
             <>🎉 Alpha Launch: Only {spotsRemaining} founder spot{spotsRemaining !== 1 ? 's' : ''} left for lifetime deal!</>
           ) : (
@@ -153,7 +153,7 @@ export default function Home() {
                   Sign In
                 </Link>
                 <Link
-                  href="/signup"
+                  href="/sign-up"
                   className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
                 >
                   Get Started →
@@ -229,7 +229,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
-              href="/signup"
+              href="/sign-up"
               className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
             >
               Join Alpha Free
@@ -684,7 +684,7 @@ export default function Home() {
 
           <div className="text-center mt-12">
             <Link
-              href="/signup"
+              href="/sign-up"
               className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
             >
               Start Your Success Story →
@@ -760,7 +760,7 @@ export default function Home() {
           {/* CTA */}
           <div className="text-center mt-10">
             <Link
-              href="/signup"
+              href="/sign-up"
               className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
             >
               Start Free with ReddRide →
@@ -909,10 +909,10 @@ export default function Home() {
             Ready to Grow Your Reddit Presence?
           </h2>
           <p className="text-xl text-slate-600 mb-10">
-            Join our alpha program and get 1 year free access as one of the first 10 users
+            Join our alpha program and get 1 year free access as one of the first 20 users
           </p>
           <Link
-            href="/signup"
+            href="/sign-up"
             className="inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
           >
             Get Started →

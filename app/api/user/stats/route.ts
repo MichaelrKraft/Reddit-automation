@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getOrCreateUser } from '@/lib/auth'
 
-const FOUNDER_LIMIT = 10
+const FOUNDER_LIMIT = 20
 
 export async function GET() {
   try {

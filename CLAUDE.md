@@ -67,7 +67,7 @@ Clerk middleware (`middleware.ts`) protects `/dashboard/*` and most `/api/*` rou
 The `lib/auth.ts` `getOrCreateUser()` function:
 1. Gets Clerk userId from session
 2. Creates User record in DB if not exists
-3. Assigns tier: first 10 users = FOUNDER, rest = ALPHA
+3. Assigns tier: first 20 users = FOUNDER, rest = ALPHA
 4. Returns user with tier info for feature gating
 
 ### User Tier System

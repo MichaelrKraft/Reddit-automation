@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -12,6 +12,26 @@ export default function SignupPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [founderSpotsRemaining, setFounderSpotsRemaining] = useState<number | null>(null);
+
+  // Check if founder spots are sold out and redirect to waitlist
+  useEffect(() => {
+    async function checkFounderSpots() {
+      try {
+        const response = await fetch('/api/waitlist/stats');
+        const data = await response.json();
+        setFounderSpotsRemaining(data.founderSpotsRemaining);
+
+        // If sold out, redirect to waitlist
+        if (data.isSoldOut) {
+          router.push('/waitlist');
+        }
+      } catch (error) {
+        console.error('Failed to check founder spots:', error);
+      }
+    }
+    checkFounderSpots();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,7 +90,9 @@ export default function SignupPage() {
             Join the Alpha
           </h1>
           <p className="text-slate-600">
-            Be one of the first 10 users to get the $29 lifetime deal
+            {founderSpotsRemaining !== null && founderSpotsRemaining > 0
+              ? `Only ${founderSpotsRemaining} founder spot${founderSpotsRemaining !== 1 ? 's' : ''} left for the $29 lifetime deal!`
+              : 'Be one of the first 20 users to get the $29 lifetime deal'}
           </p>
         </div>
 

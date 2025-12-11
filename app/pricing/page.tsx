@@ -75,7 +75,7 @@ export default function PricingPage() {
               Sign In
             </Link>
             <Link
-              href="/signup"
+              href="/sign-up"
               className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
             >
               Get Started →
@@ -218,7 +218,7 @@ export default function PricingPage() {
             Join thousands of marketers using ReddRide to grow their presence on Reddit.
           </p>
           <Link
-            href="/signup"
+            href="/sign-up"
             className="inline-block px-10 py-5 bg-white text-slate-900 text-lg rounded-xl font-semibold hover:bg-slate-100 transition-all hover:shadow-xl"
           >
             Start Your Free Trial →

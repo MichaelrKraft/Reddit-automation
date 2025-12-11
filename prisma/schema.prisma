@@ -11,8 +11,8 @@ datasource db {
 
 // User Tier Enum
 enum UserTier {
-  FOUNDER    // First 10 users - eligible for $29 lifetime deal
-  ALPHA      // Users 11+ during alpha - free access, no lifetime deal
+  FOUNDER    // First 20 users - eligible for $29 lifetime deal
+  ALPHA      // Users 21+ during alpha - free access, no lifetime deal
   STANDARD   // Post-launch users - $29/month
 }
 
@@ -527,4 +527,24 @@ model OpportunityAction {
 
   @@index([opportunityId])
   @@index([userId, createdAt])
+}
+
+// ============================================
+// WAITLIST - POST-FOUNDER SIGNUPS
+// ============================================
+
+// Waitlist for users who sign up after founder spots are filled
+model Waitlist {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  referralCode String?  // Track referral source
+  position     Int      // Position in waitlist (auto-assigned)
+  notified     Boolean  @default(false) // Whether they've been notified of availability
+  convertedAt  DateTime? // When they converted to a paid user
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([position])
+  @@index([createdAt])
 }

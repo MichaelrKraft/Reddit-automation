@@ -11,7 +11,7 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   title: 'RedRide - AI-Powered Reddit Marketing Automation',
-  description: 'Get upvotes, not shadowbans. AI-powered Reddit marketing that creates viral content, not just schedules it. Free for first 10 alpha users.',
+  description: 'Get upvotes, not shadowbans. AI-powered Reddit marketing that creates viral content, not just schedules it. Free for first 20 alpha users.',
   keywords: ['Reddit automation', 'Reddit marketing', 'AI content', 'viral marketing', 'social media automation'],
   authors: [{ name: 'RedRide' }],
   creator: 'RedRide',

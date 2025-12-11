@@ -1,7 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from './prisma'
 
-const FOUNDER_LIMIT = 10 // First 10 users get founder tier
+const FOUNDER_LIMIT = 20 // First 20 users get founder tier
 
 export async function getOrCreateUser() {
   const { userId } = await auth()
