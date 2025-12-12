@@ -120,12 +120,6 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
             <Link
-              href="/dashboard/opportunity-miner"
-              className="bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border border-red-500/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-red-500/30 transition font-semibold text-sm sm:text-base"
-            >
-              Opportunity Miner
-            </Link>
-            <Link
               href="/dashboard/spy-mode"
               className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base"
             >

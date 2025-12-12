@@ -1,152 +1,171 @@
-# ReddRide / RedRider - Code Review
+# Opportunity Miner Removal Plan
 
-## Review Summary
-
-**App Name**: ReddRide (also called Red Rider, "The Scaloom Clone")
-**Status**: Running at http://localhost:3001
-**Tech Stack**: Next.js 16, TypeScript, Prisma, PostgreSQL, Redis, Clerk Auth, Gemini AI
+**Session**: Opportunity Miner Removal
+**Date**: December 11, 2025
+**Goal**: Remove the Opportunity Miner feature from ReddRide to make it a standalone app
 
 ---
 
-## Architecture Overview
+## Summary
 
-### Strengths
-
-1. **Solid Tech Stack**
-   - Next.js 16 with App Router (modern patterns)
-   - TypeScript throughout
-   - Prisma ORM with comprehensive schema
-   - BullMQ for job queuing
-   - Clerk for authentication
-
-2. **Comprehensive Feature Set (5 Phases Complete)**
-   - Post Scheduling with queue management
-   - AI Content Generation (Gemini 2.0 Flash)
-   - Subreddit Discovery
-   - Auto-Replies system
-   - Analytics Dashboard
-   - Optimal Timing analysis
-   - Speed Alerts (real-time monitoring)
-   - Spy Mode (competitor intelligence)
-   - Viral Headline Optimizer
-
-3. **Well-Designed Database Schema**
-   - 15+ models covering all features
-   - Proper relationships and indexes
-   - Good separation of concerns
-   - Cascade deletes configured
-
-4. **AI Integration Quality**
-   - Viral Score algorithm based on analysis of 4,944 posts
-   - 8 weighted scoring factors
-   - Subreddit-specific configurations
-   - Fallback mechanisms for AI failures
-
-5. **UI/UX**
-   - Clean dark theme with glassmorphism
-   - Dot grid animated background
-   - Typewriter text effect on homepage
-   - Responsive design
+The Opportunity Miner feature is deeply integrated into ReddRide across:
+- Landing page marketing sections
+- Dashboard navigation and links
+- 2 dedicated pages (list + detail views)
+- 7 UI components
+- 6 API route directories
+- 3 library files for scanning/analyzing/scoring
+- Queue and worker integrations
+- Database models (Prisma)
 
 ---
 
-## Code Quality Observations
+## Removal Plan
 
-### Positives
-- Clean component structure
-- Good TypeScript typing
-- Modular lib/ organization
-- Proper error handling in API routes
-- Background job processing
+### Phase 1: Landing Page Marketing Removal
 
-### Areas for Improvement
+- [ ] **1.1** Remove Opportunity Miner feature showcase section (lines 613-662 in `app/page.tsx`)
+  - This is the amber/yellow gradient section with "Stop Guessing What People Want" heading
 
-1. **Authentication Consistency**
-   - Uses `demo-user` fallback in API routes
-   - Should integrate Clerk's `auth()` properly
-   ```typescript
-   // Current (lib/spy-mode API):
-   const userId = request.headers.get('x-user-id') || 'demo-user'
-   
-   // Recommended:
-   import { auth } from '@clerk/nextjs'
-   const { userId } = auth()
-   ```
+- [ ] **1.2** Remove Opportunity Miner FAQ entry (line 989-991 in `app/page.tsx`)
+  - Question: "What is Opportunity Miner and how does it work?"
 
-2. **Type Safety**
-   - Reddit client uses `any` type due to snoowrap issues
-   - Consider adding proper type definitions
+### Phase 2: Dashboard Navigation Removal
 
-3. **Environment Variable Validation**
-   - No runtime validation of required env vars
-   - Add startup checks
+- [ ] **2.1** Remove Opportunity Miner link from `components/DashboardNav.tsx` (line 7)
+  - `{ href: '/dashboard/opportunity-miner', label: '💎 Opportunity Miner' }`
 
-4. **Rate Limiting**
-   - Reddit API rate limits not explicitly handled
-   - Add exponential backoff
+- [ ] **2.2** Remove Opportunity Miner button from main dashboard `app/dashboard/page.tsx` (lines 122-127)
+  - The red-styled button linking to `/dashboard/opportunity-miner`
 
----
+### Phase 3: Delete Pages
 
-## Feature Status
+- [ ] **3.1** Delete `app/dashboard/opportunity-miner/page.tsx`
+- [ ] **3.2** Delete `app/dashboard/opportunity-miner/[id]/page.tsx`
+- [ ] **3.3** Remove empty `app/dashboard/opportunity-miner/` directory
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Post Scheduling | ✅ Complete | BullMQ integration |
-| AI Content | ✅ Complete | Gemini 2.0 Flash |
-| Subreddit Discovery | ✅ Complete | Search + relevance scoring |
-| Auto-Replies | ✅ Complete | AI-generated responses |
-| Analytics | ✅ Complete | Performance tracking |
-| Optimal Timing | ✅ Complete | Mountain Time support |
-| Speed Alerts | ✅ Complete | Real-time monitoring |
-| Spy Mode | ✅ Complete | Competitor tracking |
-| Viral Optimizer | ✅ Complete | 8-factor scoring |
+### Phase 4: Delete Components
 
----
+Delete entire `components/opportunity-miner/` directory containing:
+- [ ] **4.1** `ActionButtons.tsx`
+- [ ] **4.2** `CategoryBadge.tsx`
+- [ ] **4.3** `FilterBar.tsx`
+- [ ] **4.4** `OpportunityCard.tsx`
+- [ ] **4.5** `ScoreGauge.tsx`
+- [ ] **4.6** `StatsCard.tsx`
+- [ ] **4.7** `TrendIndicator.tsx`
 
-## Recommendations
+### Phase 5: Delete API Routes
 
-### Priority 1: Production Readiness
-- [ ] Replace demo-user fallback with proper Clerk auth
-- [ ] Add environment variable validation
-- [ ] Implement Reddit API rate limiting
-- [ ] Add error boundaries to React components
+Delete entire `app/api/opportunities/` directory containing:
+- [ ] **5.1** `route.ts` (main opportunities CRUD)
+- [ ] **5.2** `[id]/` directory (individual opportunity endpoints)
+- [ ] **5.3** `export/` directory (export functionality)
+- [ ] **5.4** `scan/` directory (subreddit scanning)
+- [ ] **5.5** `stats/` directory (statistics endpoint)
+- [ ] **5.6** `subreddits/` directory (subreddit configuration)
 
-### Priority 2: Enhancements
-- [ ] Add post preview before scheduling
-- [ ] Implement bulk post scheduling
-- [ ] Add email notifications for alerts
-- [ ] Create mobile-responsive dashboard
+### Phase 6: Delete Library Files
 
-### Priority 3: Polish
-- [ ] Add loading skeletons for better UX
-- [ ] Implement dark/light theme toggle
-- [ ] Add keyboard shortcuts
-- [ ] Create onboarding flow for new users
+- [ ] **6.1** Delete `lib/opportunity-scanner.ts`
+- [ ] **6.2** Delete `lib/opportunity-analyzer.ts`
+- [ ] **6.3** Delete `lib/opportunity-scorer.ts`
 
----
+### Phase 7: Clean Up Queue/Worker (Modify)
 
-## Files Reviewed
+- [ ] **7.1** Review and clean `lib/queue.ts` - remove opportunity-related queue definitions
+- [ ] **7.2** Review and clean `lib/worker.ts` - remove opportunity-related worker handlers
 
-- `app/page.tsx` - Homepage with typewriter effect
-- `app/dashboard/page.tsx` - Main dashboard
-- `components/DashboardNav.tsx` - Navigation
-- `lib/reddit.ts` - Reddit API integration
-- `lib/ai.ts` - Gemini AI integration
-- `lib/viral-score.ts` - Viral scoring algorithm
-- `lib/speed-alerts.ts` - Real-time monitoring
-- `lib/timing-analyzer.ts` - Optimal time calculation
-- `prisma/schema.prisma` - Database schema
-- `app/api/spy-mode/accounts/route.ts` - Spy mode API
+### Phase 8: Database Schema (DEFER)
+
+**NOT doing in this session** - The Prisma schema contains these models:
+- `Opportunity`
+- `OpportunityEvidence`
+- `OpportunitySubreddit`
+- `OpportunityAction`
+- `OpportunityCategory` (enum)
+- `OpportunityStatus` (enum)
+- `TrendDirection` (enum)
+- `OpportunityActionType` (enum)
+- `MonitoredSubreddit.opportunityMiningEnabled` field
+- `MonitoredSubreddit.opportunityFrequency` field
+- `MonitoredSubreddit.lastOpportunityScan` field
+- `User.opportunities` relation
+- `User.opportunityActions` relation
+
+**Reason to defer**:
+- Removing models requires a database migration
+- Existing data would need to be handled
+- These unused models won't affect app functionality
+- Can be cleaned up in a future "Phase 2" cleanup
 
 ---
 
-## Conclusion
+## Files to Modify (Summary)
 
-**ReddRide is a well-built, feature-complete Reddit marketing automation platform.** The codebase shows solid architecture decisions, comprehensive feature coverage, and good use of modern technologies. The viral scoring algorithm is particularly impressive with its research-backed approach.
+| File | Change |
+|------|--------|
+| `app/page.tsx` | Remove feature section + FAQ |
+| `app/dashboard/page.tsx` | Remove navigation link |
+| `components/DashboardNav.tsx` | Remove nav item |
+| `lib/queue.ts` | Remove opportunity queue definitions |
+| `lib/worker.ts` | Remove opportunity worker handlers |
 
-The main areas needing attention are:
-1. Replacing demo authentication with production-ready Clerk integration
-2. Adding proper rate limiting for Reddit API
-3. Some TypeScript type improvements
+## Files/Directories to Delete (Summary)
 
-Overall: **Ready for beta testing with minor auth fixes needed for production.**
+| Path | Type |
+|------|------|
+| `app/dashboard/opportunity-miner/` | Directory (2 pages) |
+| `app/api/opportunities/` | Directory (6 subdirs/files) |
+| `components/opportunity-miner/` | Directory (7 components) |
+| `lib/opportunity-scanner.ts` | File |
+| `lib/opportunity-analyzer.ts` | File |
+| `lib/opportunity-scorer.ts` | File |
+
+---
+
+## Verification Checklist
+
+After removal:
+- [ ] App builds without errors (`npm run build`)
+- [ ] No broken imports or references
+- [ ] Landing page loads correctly
+- [ ] Dashboard loads correctly
+- [ ] No "Opportunity Miner" text visible anywhere in UI
+- [ ] No 404 errors when navigating
+
+---
+
+## Review Section
+
+**Completed**: December 12, 2025
+
+### Summary of Changes
+
+All Opportunity Miner code has been successfully removed from ReddRide.
+
+### Files Modified
+- `app/page.tsx` - Removed feature showcase section and FAQ entry
+- `app/dashboard/page.tsx` - Removed Opportunity Miner navigation button
+- `components/DashboardNav.tsx` - Removed nav item
+- `lib/queue.ts` - Removed ~150 lines of opportunity queue code
+- `lib/worker.ts` - Removed opportunity worker initialization
+
+### Files/Directories Deleted
+- `app/dashboard/opportunity-miner/` (entire directory)
+- `app/api/opportunities/` (entire directory)
+- `app/api/test-scorer/` (discovered during build - was importing opportunity-scorer)
+- `components/opportunity-miner/` (7 components)
+- `lib/opportunity-scanner.ts`
+- `lib/opportunity-analyzer.ts`
+- `lib/opportunity-scorer.ts`
+
+### Verification
+- [x] Build succeeded (`npm run build`)
+- [x] No broken imports
+- [x] TypeScript compilation passed
+
+### Deferred Items
+- Database schema (Prisma models) - kept in place to avoid migration complexity
+- Can be cleaned up in future "Phase 2" if desired
+

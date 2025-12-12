@@ -610,56 +610,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Opportunity Miner Feature */}
-      <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-orange-400/20 blur-3xl"></div>
-              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-amber-200">
-                <img
-                  src="/opportunity-miner-screenshot.png"
-                  alt="Opportunity Miner - Discover market opportunities from Reddit"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-            <div>
-              <div className="inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
-                OPPORTUNITY MINER
-              </div>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Stop Guessing What People Want
-              </h3>
-              <p className="text-lg text-slate-600 mb-6">
-                Our AI scans thousands of Reddit conversations to surface real market opportunities.
-                Discover pain points, feature requests, and emerging trends before your competitors do—backed by evidence, not hunches.
-              </p>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">AI analyzes posts to find pain points & feature requests</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">5-factor scoring ranks opportunities by real demand</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Evidence-based insights linked to actual Reddit posts</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Automated 24/7 scanning across multiple subreddits</span>
-                </li>
-              </ul>
-              <Link href="/dashboard/opportunity-miner" className="text-amber-600 font-medium hover:text-amber-700">
-                Explore Opportunity Miner →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Real Use Cases */}
       <section className="py-12 md:py-20 px-6 bg-white">
@@ -985,10 +935,6 @@ export default function Home() {
                 question: "Can I customize the AI-generated content?",
                 answer: "Yes! You have full control over tone, messaging, and content style. You can provide templates, set guidelines, review posts before they go live, or let the AI handle everything autonomously based on your preferences."
               },
-              {
-                question: "What is Opportunity Miner and how does it work?",
-                answer: "Opportunity Miner is our AI-powered market research tool that scans Reddit conversations to find real business opportunities. It analyzes posts for pain points, feature requests, and emerging trends, then ranks them using a 5-factor scoring system (frequency, engagement, sentiment, trend momentum, and market gap). Each opportunity is backed by actual Reddit posts as evidence, so you're making decisions based on real demand—not guesses."
-              }
             ].map((faq, index) => (
               <details
                 key={index}
