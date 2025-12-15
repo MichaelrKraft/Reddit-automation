@@ -110,7 +110,7 @@ export default function WaitlistPage() {
             <div className="text-slate-400">On the Waitlist</div>
           </div>
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
-            <div className="text-3xl font-bold text-emerald-500 mb-2">$59/mo</div>
+            <div className="text-3xl font-bold text-emerald-500 mb-2">$39/mo</div>
             <div className="text-slate-400">Regular Price</div>
           </div>
         </div>

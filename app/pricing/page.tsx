@@ -9,7 +9,7 @@ export default function PricingPage() {
   const tiers = [
     {
       name: 'Individual',
-      price: '$59',
+      price: '$39',
       period: '/month',
       description: 'Perfect for solo marketers and indie makers',
       features: [

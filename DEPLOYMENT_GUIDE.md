@@ -91,25 +91,27 @@ Add these environment variables in Render (Settings → Environment):
 
 ```env
 # Reddit API Credentials
-REDDIT_CLIENT_ID=oX6w7Ly6XSa1aXnpjf1ppA
-REDDIT_CLIENT_SECRET=U-MYBGqdgX6aLuJi2h8zCa2O50YAuw
-REDDIT_USERNAME=bigswingin-mike
-REDDIT_PASSWORD=Mickey7k$
+REDDIT_CLIENT_ID=your_reddit_client_id
+REDDIT_CLIENT_SECRET=your_reddit_client_secret
+REDDIT_USERNAME=your_reddit_username
+REDDIT_PASSWORD=your_reddit_password
 
 # Database (use INTERNAL URL from your existing Render PostgreSQL)
-DATABASE_URL=postgresql://reddit_automation_db_user:dgaSVuSd7FaceQXShERGW9ZV9PbYxzVh@dpg-d418m418ocjs73cj0uv0-a/reddit_automation_db
+DATABASE_URL=postgresql://user:password@host:5432/database
 
 # Redis (use INTERNAL URL from your existing Render Redis)
-REDIS_URL=redis://red-d418oemuk2gs738ukivg:6379
+REDIS_URL=redis://your-redis-host:6379
 
 # Gemini AI
-GEMINI_API_KEY=AIzaSyCsbChkI9Le9Rf-GjZN1GD-h6wywuXPoKk
+GEMINI_API_KEY=your_gemini_api_key
 
 # App Configuration
 NODE_ENV=production
 PORT=3000
 NEXT_PUBLIC_APP_URL=https://reddit-automation.onrender.com
 ```
+
+> **Your actual credentials are saved locally in `CREDENTIALS.md`** (git-ignored, never pushed to GitHub).
 
 **Important Notes**:
 - Use **INTERNAL URLs** for PostgreSQL and Redis (without `.render.com` suffix)

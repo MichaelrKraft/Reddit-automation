@@ -265,11 +265,7 @@ export default function Home() {
                 loop={false}
               />
             </span>
-            <GradientText
-              colors={['#1e40af', '#7c3aed', '#db2777', '#1e40af']}
-              animationSpeed={6}
-              className="block"
-            >
+            <span className="block">
               <TextType
                 text="Without Getting Banned"
                 typingSpeed={70}
@@ -279,7 +275,7 @@ export default function Home() {
                 cursorClassName="text-purple-600"
                 loop={false}
               />
-            </GradientText>
+            </span>
           </h1>
 
           <p className="text-xl md:text-2xl text-red-500 mb-10 max-w-3xl mx-auto leading-relaxed">
