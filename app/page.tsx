@@ -6,6 +6,7 @@ import FounderBanner from '@/components/FounderBanner';
 import TextType from '@/components/TextType';
 import GradientText from '@/components/GradientText';
 import ShinyText from '@/components/ShinyText';
+import ScrollReveal from '@/components/ScrollReveal';
 import dynamic from 'next/dynamic';
 
 const Antigravity = dynamic(() => import('@/components/Antigravity'), { ssr: false });
@@ -101,6 +102,7 @@ export default function Home() {
   const spotsRemaining = userStats?.founderSpotsRemaining ?? 10;
 
   return (
+    <ScrollReveal>
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-[112px]">
       {/* Alpha Banner - Dynamic based on user status */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-center py-2 px-4">
@@ -324,18 +326,18 @@ export default function Home() {
       <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
               <ShinyText speed={3}>
                 Powerful Dashboard
               </ShinyText>
             </h2>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+            <p className="reveal-up text-xl text-slate-300 max-w-2xl mx-auto">
               Manage all your Reddit marketing from one beautiful interface
             </p>
           </div>
 
           {/* Dashboard Mockup */}
-          <div className="relative">
+          <div className="reveal-up relative">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-3xl"></div>
             <div className="relative bg-slate-950 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
               {/* Browser Chrome */}
@@ -410,10 +412,10 @@ export default function Home() {
       <section id="features" className="py-12 md:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Everything You Need
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="reveal-up text-xl text-slate-600 max-w-2xl mx-auto">
               Powerful features to help you dominate Reddit marketing and grow your brand
             </p>
           </div>
@@ -423,7 +425,7 @@ export default function Home() {
               <Link
                 key={index}
                 href={feature.href}
-                className={`group p-8 rounded-2xl border-2 bg-gradient-to-br ${feature.color} transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
+                className={`reveal-up group p-8 rounded-2xl border-2 bg-gradient-to-br ${feature.color} transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
                 style={{
                   animationDelay: `${index * 100}ms`,
                   animation: isVisible ? 'fadeInUp 0.6s ease-out forwards' : 'none',
@@ -452,17 +454,17 @@ export default function Home() {
           {/* Spy Mode Feature */}
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mb-12 md:mb-20">
             <div>
-              <div className="inline-block px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium mb-4">
+              <div className="reveal-up inline-block px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium mb-4">
                 SPY MODE
               </div>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 Track Competitors & Steal Their Secrets
               </h3>
-              <p className="text-lg text-slate-600 mb-6">
+              <p className="reveal-up text-lg text-slate-600 mb-6">
                 Monitor your competitors' Reddit activity in real-time. Get instant alerts when they post,
                 analyze their strategies, and stay one step ahead in your niche.
               </p>
-              <ul className="space-y-3 mb-6">
+              <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
                   <span className="text-slate-700">Real-time competitor monitoring</span>
@@ -476,11 +478,11 @@ export default function Home() {
                   <span className="text-slate-700">Performance analytics and insights</span>
                 </li>
               </ul>
-              <Link href="/dashboard/spy-mode" className="text-blue-600 font-medium hover:text-blue-700">
+              <Link href="/dashboard/spy-mode" className="reveal-up text-blue-600 font-medium hover:text-blue-700">
                 Explore Spy Mode →
               </Link>
             </div>
-            <div className="relative">
+            <div className="reveal-up relative">
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 blur-3xl"></div>
               <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-700">
                 <img
@@ -494,7 +496,7 @@ export default function Home() {
 
           {/* Analytics Feature */}
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div className="order-2 md:order-1 relative">
+            <div className="reveal-up order-2 md:order-1 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 blur-3xl"></div>
               <div className="relative bg-white rounded-xl shadow-2xl p-6 border border-slate-200">
                 <div className="text-slate-900 text-xl font-bold mb-4">Analytics Dashboard</div>
@@ -524,17 +526,17 @@ export default function Home() {
               </div>
             </div>
             <div className="order-1 md:order-2">
-              <div className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
+              <div className="reveal-up inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
                 ANALYTICS
               </div>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 Track Performance & Optimize
               </h3>
-              <p className="text-lg text-slate-600 mb-6">
+              <p className="reveal-up text-lg text-slate-600 mb-6">
                 Get detailed insights into your Reddit performance. Track upvotes, comments, engagement rates,
                 and identify your top-performing content across all subreddits.
               </p>
-              <ul className="space-y-3 mb-6">
+              <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
                   <span className="text-slate-700">Real-time performance metrics</span>
@@ -548,7 +550,7 @@ export default function Home() {
                   <span className="text-slate-700">Export data to CSV</span>
                 </li>
               </ul>
-              <Link href="/dashboard/analytics" className="text-purple-600 font-medium hover:text-purple-700">
+              <Link href="/dashboard/analytics" className="reveal-up text-purple-600 font-medium hover:text-purple-700">
                 View Analytics →
               </Link>
             </div>
@@ -561,16 +563,16 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div>
-              <div className="inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
+              <div className="reveal-up inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
                 🔥 ACCOUNT WARMUP
               </div>
-              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
                 Account Warm-up System
               </h3>
-              <p className="text-lg text-slate-600 mb-6">
+              <p className="reveal-up text-lg text-slate-600 mb-6">
                 Build authentic credibility before you start marketing. Our intelligent warm-up system gradually increases your Reddit account's activity to establish trust and avoid spam filters, ensuring your marketing efforts won't be blocked.
               </p>
-              <ul className="space-y-3 mb-6">
+              <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
                   <span className="text-slate-700">Gradual karma building through authentic engagement</span>
@@ -588,11 +590,11 @@ export default function Home() {
                   <span className="text-slate-700">Establish trust before marketing campaigns</span>
                 </li>
               </ul>
-              <Link href="/dashboard" className="text-orange-600 font-medium hover:text-orange-700">
+              <Link href="/dashboard" className="reveal-up text-orange-600 font-medium hover:text-orange-700">
                 Start Warming Up →
               </Link>
             </div>
-            <div className="relative">
+            <div className="reveal-up relative">
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-pink-400/20 blur-3xl"></div>
               <div className="relative rounded-xl shadow-2xl overflow-hidden border border-orange-200">
                 <video
@@ -616,17 +618,17 @@ export default function Home() {
       <section className="py-12 md:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Real Use Cases
             </h2>
-            <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+            <p className="reveal-up text-xl text-slate-600 max-w-3xl mx-auto">
               See how entrepreneurs and businesses are using our platform to drive authentic growth on Reddit
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Use Case 1: Indie Developer */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 hover:shadow-xl transition-shadow">
+            <div className="reveal-up bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 hover:shadow-xl transition-shadow">
               <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center text-3xl mb-4">
                 💻
               </div>
@@ -665,7 +667,7 @@ export default function Home() {
             </div>
 
             {/* Use Case 2: E-commerce Brand */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100 hover:shadow-xl transition-shadow">
+            <div className="reveal-up bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100 hover:shadow-xl transition-shadow">
               <div className="w-16 h-16 bg-purple-500 rounded-xl flex items-center justify-center text-3xl mb-4">
                 🛒
               </div>
@@ -704,7 +706,7 @@ export default function Home() {
             </div>
 
             {/* Use Case 3: Content Creator */}
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-100 hover:shadow-xl transition-shadow">
+            <div className="reveal-up bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-100 hover:shadow-xl transition-shadow">
               <div className="w-16 h-16 bg-green-500 rounded-xl flex items-center justify-center text-3xl mb-4">
                 🎥
               </div>
@@ -759,19 +761,19 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-8 md:mb-12">
-            <div className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
+            <div className="reveal-up inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
               WHY REDDRIDE
             </div>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               ReddRide vs The Competition
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="reveal-up text-xl text-slate-600 max-w-2xl mx-auto">
               See how ReddRide stacks up against Scaloom and why marketers choose us
             </p>
           </div>
 
           {/* Comparison Table */}
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl transition-shadow">
+          <div className="reveal-up bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl transition-shadow">
             {/* Table Header */}
             <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200">
               <div className="p-4 md:p-6 font-semibold text-slate-700">Feature</div>
@@ -834,17 +836,17 @@ export default function Home() {
       <section className="py-12 md:py-20 px-6 bg-gradient-to-b from-white to-slate-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               How it works
             </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <p className="reveal-up text-xl text-slate-600 max-w-2xl mx-auto">
               Get started in minutes with our simple four-step process
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Step 1 */}
-            <div className="text-center">
+            <div className="reveal-up text-center">
               <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 1
               </div>
@@ -855,7 +857,7 @@ export default function Home() {
             </div>
 
             {/* Step 2 */}
-            <div className="text-center">
+            <div className="reveal-up text-center">
               <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 2
               </div>
@@ -866,7 +868,7 @@ export default function Home() {
             </div>
 
             {/* Step 3 */}
-            <div className="text-center">
+            <div className="reveal-up text-center">
               <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 3
               </div>
@@ -877,7 +879,7 @@ export default function Home() {
             </div>
 
             {/* Step 4 */}
-            <div className="text-center">
+            <div className="reveal-up text-center">
               <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 4
               </div>
@@ -894,15 +896,15 @@ export default function Home() {
       <section className="py-12 md:py-20 px-6 bg-slate-50">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
               Frequently Asked Questions
             </h2>
-            <p className="text-xl text-slate-600">
+            <p className="reveal-up text-xl text-slate-600">
               Everything you need to know about ReddRide
             </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="reveal-up space-y-4">
             {[
               {
                 question: "How long does Reddit account warmup take?",
@@ -966,15 +968,15 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-12 md:py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-6">
+          <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-6">
             Ready to Grow Your Reddit Presence?
           </h2>
-          <p className="text-xl text-slate-600 mb-10">
+          <p className="reveal-up text-xl text-slate-600 mb-10">
             Join our alpha program and get free access as one of the first 20 users
           </p>
           <Link
             href="/sign-up"
-            className="inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+            className="reveal-up inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
           >
             Get Started →
           </Link>
@@ -1015,5 +1017,6 @@ export default function Home() {
         }
       `}</style>
     </main>
+    </ScrollReveal>
   );
 }
