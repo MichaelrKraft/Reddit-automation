@@ -248,15 +248,14 @@ export default function Home() {
                 showCursor={false}
                 loop={false}
               />
-              <span className="text-red-500">
-                <TextType
-                  text="WIN"
-                  typingSpeed={100}
-                  initialDelay={1600}
-                  showCursor={false}
-                  loop={false}
-                />
-              </span>
+              <TextType
+                text="WIN"
+                typingSpeed={100}
+                initialDelay={1600}
+                showCursor={false}
+                loop={false}
+                className="text-red-500"
+              />
               <TextType
                 text=" on "
                 typingSpeed={50}
@@ -264,15 +263,14 @@ export default function Home() {
                 showCursor={false}
                 loop={false}
               />
-              <span className="text-red-500">
-                <TextType
-                  text="Reddit"
-                  typingSpeed={50}
-                  initialDelay={2050}
-                  showCursor={false}
-                  loop={false}
-                />
-              </span>
+              <TextType
+                text="Reddit"
+                typingSpeed={50}
+                initialDelay={2050}
+                showCursor={false}
+                loop={false}
+                className="text-red-500"
+              />
               <TextType
                 text="."
                 typingSpeed={50}
