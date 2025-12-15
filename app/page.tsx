@@ -233,43 +233,34 @@ export default function Home() {
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-normal font-[family-name:var(--font-montserrat)]">
             <span className="block">
               <TextType
-                text="Make "
-                typingSpeed={70}
+                text="The only tool you'll ever need"
+                typingSpeed={50}
                 initialDelay={0}
+                showCursor={false}
+                loop={false}
+              />
+            </span>
+            <span className="block">
+              <TextType
+                text="to "
+                typingSpeed={50}
+                initialDelay={1500}
                 showCursor={false}
                 loop={false}
               />
               <span className="text-red-500">
                 <TextType
-                  text="Reddit"
-                  typingSpeed={70}
-                  initialDelay={350}
+                  text="WIN"
+                  typingSpeed={100}
+                  initialDelay={1600}
                   showCursor={false}
                   loop={false}
                 />
               </span>
               <TextType
-                text=" Your"
-                typingSpeed={70}
-                initialDelay={770}
-                showCursor={false}
-                loop={false}
-              />
-            </span>
-            <span className="block">
-              <TextType
-                text="#1 Customer Source"
-                typingSpeed={70}
-                initialDelay={1100}
-                showCursor={false}
-                loop={false}
-              />
-            </span>
-            <span className="block">
-              <TextType
-                text="Without Getting Banned"
-                typingSpeed={70}
-                initialDelay={2400}
+                text=" on Reddit."
+                typingSpeed={50}
+                initialDelay={1900}
                 showCursor={true}
                 cursorCharacter="|"
                 cursorClassName="text-purple-600"
