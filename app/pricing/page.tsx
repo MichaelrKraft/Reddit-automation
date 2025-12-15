@@ -28,7 +28,7 @@ export default function PricingPage() {
     },
     {
       name: 'Premier',
-      price: '$67',
+      price: '$79',
       period: '/month',
       description: 'For growing teams and agencies',
       features: [
