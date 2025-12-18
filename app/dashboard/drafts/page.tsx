@@ -22,6 +22,7 @@ export default function DraftsPage() {
   const [drafts, setDrafts] = useState<Draft[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
 
   useEffect(() => {
     fetchDrafts()
@@ -69,6 +70,18 @@ export default function DraftsPage() {
       hour: '2-digit',
       minute: '2-digit',
     })
+  }
+
+  async function handleCopy(draft: Draft) {
+    const textToCopy = `${draft.title}\n\n${draft.content}`
+    try {
+      await navigator.clipboard.writeText(textToCopy)
+      setCopied(draft.id)
+      setTimeout(() => setCopied(null), 2000)
+    } catch (error) {
+      console.error('Failed to copy:', error)
+      alert('Failed to copy to clipboard')
+    }
   }
 
   return (
@@ -177,6 +190,12 @@ export default function DraftsPage() {
                       >
                         Edit
                       </Link>
+                      <button
+                        onClick={() => handleCopy(draft)}
+                        className="flex-1 sm:flex-none bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm"
+                      >
+                        {copied === draft.id ? 'Copied!' : 'Copy'}
+                      </button>
                       <button
                         onClick={() => handleDelete(draft.id)}
                         disabled={deleting === draft.id}
