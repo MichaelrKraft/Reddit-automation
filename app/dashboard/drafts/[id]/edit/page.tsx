@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
+import ImageUpload from '@/components/ImageUpload'
 
 export default function EditDraft() {
   const router = useRouter()
@@ -19,6 +20,7 @@ export default function EditDraft() {
     postType: 'text',
     scheduledDate: '',
     scheduledTime: '',
+    firstComment: '',
   })
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export default function EditDraft() {
           postType: data.post.postType || 'text',
           scheduledDate: '',
           scheduledTime: '',
+          firstComment: data.post.firstComment || '',
         })
       }
     } catch (error) {
@@ -60,6 +63,7 @@ export default function EditDraft() {
           title: formData.title,
           content: formData.content,
           postType: formData.postType,
+          firstComment: formData.firstComment || null,
         }),
       })
 
@@ -91,6 +95,7 @@ export default function EditDraft() {
           title: formData.title,
           content: formData.content,
           postType: formData.postType,
+          firstComment: formData.firstComment || null,
         }),
       })
 
@@ -129,6 +134,7 @@ export default function EditDraft() {
           title: formData.title,
           content: formData.content,
           postType: formData.postType,
+          firstComment: formData.firstComment || null,
         }),
       })
 
@@ -252,6 +258,16 @@ export default function EditDraft() {
                   />
                   Link Post
                 </label>
+                <label className="flex items-center text-gray-300">
+                  <input
+                    type="radio"
+                    value="image"
+                    checked={formData.postType === 'image'}
+                    onChange={(e) => setFormData({ ...formData, postType: e.target.value })}
+                    className="mr-2"
+                  />
+                  Image Post
+                </label>
               </div>
             </div>
 
@@ -269,19 +285,54 @@ export default function EditDraft() {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                {formData.postType === 'text' ? 'Content' : 'URL'}
-              </label>
-              <textarea
-                required
-                rows={6}
-                placeholder={formData.postType === 'text' ? 'Enter post content' : 'https://example.com'}
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
-              />
-            </div>
+            {/* Image Upload - only for image posts */}
+            {formData.postType === 'image' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Upload Image
+                </label>
+                <ImageUpload
+                  currentUrl={formData.content}
+                  onUpload={(url) => setFormData({ ...formData, content: url })}
+                />
+              </div>
+            )}
+
+            {/* Content/URL field - hide for image posts */}
+            {formData.postType !== 'image' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  {formData.postType === 'text' ? 'Content' : 'URL'}
+                </label>
+                <textarea
+                  required
+                  rows={6}
+                  placeholder={formData.postType === 'text' ? 'Enter post content' : 'https://example.com'}
+                  value={formData.content}
+                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
+                />
+              </div>
+            )}
+
+            {/* First Comment - shows for image and link posts */}
+            {(formData.postType === 'image' || formData.postType === 'link') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  First Comment (optional)
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Add context, details, or your pitch here. This will be automatically posted as the first comment on your post."
+                  value={formData.firstComment}
+                  onChange={(e) => setFormData({ ...formData, firstComment: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Pro tip: Many Redditors put their detailed explanation in the first comment rather than the title
+                </p>
+              </div>
+            )}
 
             {/* Scheduling */}
             <div className="border-t border-gray-700 pt-6">
