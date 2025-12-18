@@ -257,7 +257,7 @@ export default function NewPost() {
             <AIContentGenerator
               subreddit={formData.subredditName}
               onSelectContent={(title, content) => {
-                setFormData({ ...formData, title, content })
+                setFormData(prev => ({ ...prev, title, content }))
               }}
             />
 
@@ -274,7 +274,7 @@ export default function NewPost() {
                 required
                 placeholder="e.g., technology"
                 value={formData.subredditName}
-                onChange={(e) => setFormData({ ...formData, subredditName: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, subredditName: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -292,12 +292,12 @@ export default function NewPost() {
                 onSelectTime={(time) => {
                   const date = time.toISOString().split('T')[0]
                   const timeStr = time.toTimeString().slice(0, 5)
-                  setFormData({
-                    ...formData,
+                  setFormData(prev => ({
+                    ...prev,
                     scheduleNow: false,
                     scheduledDate: date,
                     scheduledTime: timeStr,
-                  })
+                  }))
                 }}
               />
             )}
@@ -306,13 +306,13 @@ export default function NewPost() {
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Post Type
               </label>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 <label className="flex items-center text-gray-300">
                   <input
                     type="radio"
                     value="text"
                     checked={formData.postType === 'text'}
-                    onChange={(e) => setFormData({ ...formData, postType: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
                     className="mr-2"
                   />
                   Text Post
@@ -322,12 +322,30 @@ export default function NewPost() {
                     type="radio"
                     value="link"
                     checked={formData.postType === 'link'}
-                    onChange={(e) => setFormData({ ...formData, postType: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
                     className="mr-2"
                   />
                   Link Post
                 </label>
+                <label className="flex items-center text-gray-300">
+                  <input
+                    type="radio"
+                    value="image"
+                    checked={formData.postType === 'image'}
+                    onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
+                    className="mr-2"
+                  />
+                  📷 Image Post
+                </label>
               </div>
+              {formData.postType === 'image' && (
+                <div className="mt-3 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg text-sm">
+                  <p className="text-blue-300 font-medium mb-1">💡 Image Post Tip:</p>
+                  <p className="text-blue-200/80">
+                    Upload your screenshot to <a href="https://imgur.com" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">imgur.com</a> (free, no account needed), then paste the image URL in the content field below.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -339,23 +357,40 @@ export default function NewPost() {
                 required
                 placeholder="Enter post title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                {formData.postType === 'text' ? 'Content' : 'URL'}
+                {formData.postType === 'text' ? 'Content' : formData.postType === 'image' ? 'Image URL' : 'URL'}
               </label>
               <textarea
                 required
-                rows={6}
-                placeholder={formData.postType === 'text' ? 'Enter post content' : 'https://example.com'}
+                rows={formData.postType === 'text' ? 6 : 2}
+                placeholder={
+                  formData.postType === 'text'
+                    ? 'Enter post content'
+                    : formData.postType === 'image'
+                    ? 'https://i.imgur.com/your-image.png'
+                    : 'https://example.com'
+                }
                 value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
+              {formData.postType === 'image' && formData.content && formData.content.match(/\.(jpg|jpeg|png|gif|webp)/i) && (
+                <div className="mt-3">
+                  <p className="text-xs text-gray-400 mb-2">Preview:</p>
+                  <img
+                    src={formData.content}
+                    alt="Preview"
+                    className="max-w-full max-h-48 rounded-lg border border-gray-600"
+                    onError={(e) => (e.target as HTMLImageElement).style.display = 'none'}
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -367,7 +402,7 @@ export default function NewPost() {
                   <input
                     type="radio"
                     checked={formData.scheduleNow}
-                    onChange={() => setFormData({ ...formData, scheduleNow: true })}
+                    onChange={() => setFormData(prev => ({ ...prev, scheduleNow: true }))}
                     className="mr-2"
                   />
                   Post immediately
@@ -376,7 +411,7 @@ export default function NewPost() {
                   <input
                     type="radio"
                     checked={!formData.scheduleNow}
-                    onChange={() => setFormData({ ...formData, scheduleNow: false })}
+                    onChange={() => setFormData(prev => ({ ...prev, scheduleNow: false }))}
                     className="mr-2"
                   />
                   Schedule for later
@@ -391,7 +426,7 @@ export default function NewPost() {
                       type="date"
                       required
                       value={formData.scheduledDate}
-                      onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
+                      onChange={(e) => setFormData(prev => ({ ...prev, scheduledDate: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
                     />
                   </div>
@@ -401,7 +436,7 @@ export default function NewPost() {
                       type="time"
                       required
                       value={formData.scheduledTime}
-                      onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
+                      onChange={(e) => setFormData(prev => ({ ...prev, scheduledTime: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
                     />
                   </div>
