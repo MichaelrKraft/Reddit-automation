@@ -47,6 +47,7 @@ export default function PostDetailPage() {
   const [newTime, setNewTime] = useState('')
   const [postingNow, setPostingNow] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
 
   useEffect(() => {
     fetchPost()
@@ -292,15 +293,51 @@ export default function PostDetailPage() {
         <div className="feature-card rounded-lg p-6 space-y-6">
           {/* Timing Info */}
           <div className="p-4 bg-[#0a0a0f] rounded-lg relative">
-            {/* Save Draft button in upper right for scheduled posts */}
+            {/* Save Draft button with dropdown in upper right for scheduled posts */}
             {post.status === 'scheduled' && (
-              <button
-                onClick={handleCancelScheduled}
-                disabled={cancelling}
-                className="absolute top-3 right-3 bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 py-1.5 rounded-lg hover:bg-[#00D9FF]/30 transition font-medium text-xs disabled:opacity-50"
-              >
-                {cancelling ? 'Saving...' : 'Save Draft'}
-              </button>
+              <div className="absolute top-3 right-3 flex">
+                <button
+                  onClick={handleCancelScheduled}
+                  disabled={cancelling}
+                  className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 border-r-0 px-3 py-1.5 rounded-l-lg hover:bg-[#00D9FF]/30 transition font-medium text-xs disabled:opacity-50"
+                >
+                  {cancelling ? 'Saving...' : 'Save Draft'}
+                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowDropdown(!showDropdown)}
+                    className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-2 py-1.5 rounded-r-lg hover:bg-[#00D9FF]/30 transition font-medium text-xs"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {showDropdown && (
+                    <div className="absolute right-0 mt-1 w-36 bg-[#1a1a24] border border-gray-700 rounded-lg shadow-lg z-10">
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false)
+                          handleCancelScheduled()
+                        }}
+                        disabled={cancelling}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 rounded-t-lg transition"
+                      >
+                        Cancel Post
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false)
+                          handleDelete()
+                        }}
+                        disabled={deleting}
+                        className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded-b-lg transition"
+                      >
+                        Delete Post
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -335,40 +372,28 @@ export default function PostDetailPage() {
             {(post.status === 'scheduled' || post.status === 'draft') && (
               <div className="mt-4 pt-4 border-t border-gray-700">
                 {!showReschedule ? (
-                  <div className="flex justify-between items-start">
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={handlePostNow}
-                        disabled={postingNow}
-                        className="bg-green-500/20 text-green-400 border border-green-500/50 px-4 py-2 rounded-lg hover:bg-green-500/30 transition font-medium text-sm disabled:opacity-50"
-                      >
-                        {postingNow ? 'Posting...' : '🚀 Post Now'}
-                      </button>
-                      {post.status === 'scheduled' && (
-                        <button
-                          onClick={() => {
-                            setShowReschedule(true)
-                            // Pre-fill with current scheduled time
-                            if (post.scheduledAt) {
-                              const d = new Date(post.scheduledAt)
-                              setNewDate(d.toISOString().split('T')[0])
-                              setNewTime(d.toTimeString().slice(0, 5))
-                            }
-                          }}
-                          className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-medium text-sm"
-                        >
-                          🕐 Change Scheduled Time
-                        </button>
-                      )}
-                    </div>
-                    {/* Cancel button - same size as Save Draft, aligned right below it */}
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={handlePostNow}
+                      disabled={postingNow}
+                      className="bg-green-500/20 text-green-400 border border-green-500/50 px-4 py-2 rounded-lg hover:bg-green-500/30 transition font-medium text-sm disabled:opacity-50"
+                    >
+                      {postingNow ? 'Posting...' : '🚀 Post Now'}
+                    </button>
                     {post.status === 'scheduled' && (
                       <button
-                        onClick={handleCancelScheduled}
-                        disabled={cancelling}
-                        className="bg-red-600/20 text-red-400 border border-red-600/50 px-3 py-1.5 rounded-lg hover:bg-red-600/30 transition font-medium text-xs disabled:opacity-50"
+                        onClick={() => {
+                          setShowReschedule(true)
+                          // Pre-fill with current scheduled time
+                          if (post.scheduledAt) {
+                            const d = new Date(post.scheduledAt)
+                            setNewDate(d.toISOString().split('T')[0])
+                            setNewTime(d.toTimeString().slice(0, 5))
+                          }
+                        }}
+                        className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-medium text-sm"
                       >
-                        {cancelling ? 'Cancelling...' : 'Cancel'}
+                        🕐 Change Scheduled Time
                       </button>
                     )}
                   </div>
