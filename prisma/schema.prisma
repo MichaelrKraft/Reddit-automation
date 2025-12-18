@@ -1,5 +1,3 @@
-// Prisma Schema for Reddit Automation Platform
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,83 +7,434 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User Tier Enum
-enum UserTier {
-  FOUNDER    // First 20 users - eligible for $29 lifetime deal
-  ALPHA      // Users 21+ during alpha - free access, no lifetime deal
-  STANDARD   // Post-launch users - $29/month
-}
-
-// User (linked to Clerk)
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  plan      String   @default("free")
-
-  // Tier system for alpha/founder access
-  tier              UserTier  @default(ALPHA)
-  signupNumber      Int?      // Track signup order (1-10 = founder)
-  hasLifetimeDeal   Boolean   @default(false)
+  id                  String               @id @default(cuid())
+  clerkId             String               @unique
+  email               String               @unique
+  plan                String               @default("free")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  hasLifetimeDeal     Boolean              @default(false)
   lifetimePurchasedAt DateTime?
-  stripeCustomerId  String?
-  stripePaymentId   String?   // Payment intent ID for lifetime deal
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  redditAccounts       RedditAccount[]
-  monitoredSubreddits  MonitoredSubreddit[]
-  draftPosts           DraftPost[]
-  brandKeywords        BrandKeyword[]
-  spyAccounts          SpyAccount[]
-
-  // Opportunity Miner relations
-  opportunities        Opportunity[]
-  opportunityActions   OpportunityAction[]
+  signupNumber        Int?
+  stripeCustomerId    String?
+  stripePaymentId     String?
+  tier                UserTier             @default(ALPHA)
+  brandKeywords       BrandKeyword[]
+  draftPosts          DraftPost[]
+  monitoredSubreddits MonitoredSubreddit[]
+  opportunities       Opportunity[]
+  opportunityActions  OpportunityAction[]
+  redditAccounts      RedditAccount[]
+  spyAccounts         SpyAccount[]
 }
 
-// Reddit Account
 model RedditAccount {
-  id        String   @id @default(cuid())
-  username  String
-  connected Boolean  @default(true)
-  karma     Int      @default(0)
-
-  // Warm-up fields for account credibility building
-  isWarmupAccount   Boolean        @default(false)
-  warmupStatus      WarmupStatus   @default(NOT_STARTED)
-  warmupStartedAt   DateTime?
+  id                String       @id @default(cuid())
+  username          String
+  connected         Boolean      @default(true)
+  karma             Int          @default(0)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  isWarmupAccount   Boolean      @default(false)
+  userId            String
   warmupCompletedAt DateTime?
-  warmupProgress    Json?          // Track daily actions {daily: [{date, actions: []}]}
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  posts     Post[]
-  campaigns Campaign[]
+  warmupProgress    Json?
+  warmupStartedAt   DateTime?
+  warmupStatus      WarmupStatus @default(NOT_STARTED)
+  campaigns         Campaign[]
+  posts             Post[]
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, username])
 }
 
-// Warm-up Status Enum
-enum WarmupStatus {
-  NOT_STARTED
-  PHASE_1_UPVOTES     // Days 1-3
-  PHASE_2_COMMENTS    // Days 4-7
-  PHASE_3_POSTS       // Days 8-14
-  PHASE_4_MIXED       // Days 15-30
-  COMPLETED           // 30+ days, 100+ karma
-  PAUSED
-  FAILED              // Shadowbanned/detected
+model Campaign {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      String        @default("active")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  accountId   String
+  account     RedditAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  posts       Post[]
 }
 
-// ============================================
-// OPPORTUNITY MINER ENUMS
-// ============================================
+model Subreddit {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  subscribers Int      @default(0)
+  relevance   Float    @default(0)
+  lastChecked DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  posts       Post[]
+}
+
+model Post {
+  id          String         @id @default(cuid())
+  title       String
+  content     String
+  postType    String         @default("text")
+  status      String         @default("scheduled")
+  scheduledAt DateTime?
+  postedAt    DateTime?
+  redditId    String?        @unique
+  url         String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  accountId   String
+  campaignId  String?
+  subredditId String
+  comments    Comment[]
+  account     RedditAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  campaign    Campaign?      @relation(fields: [campaignId], references: [id])
+  subreddit   Subreddit      @relation(fields: [subredditId], references: [id], onDelete: Cascade)
+  analytics   PostAnalytics?
+}
+
+model PostAnalytics {
+  id           String   @id @default(cuid())
+  upvotes      Int      @default(0)
+  downvotes    Int      @default(0)
+  score        Int      @default(0)
+  commentCount Int      @default(0)
+  engagement   Float    @default(0)
+  lastUpdated  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  postId       String   @unique
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  redditId  String   @unique
+  content   String
+  author    String
+  replied   Boolean  @default(false)
+  replyText String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model SubredditActivity {
+  id             String   @id @default(cuid())
+  subredditName  String
+  dayOfWeek      Int
+  hourOfDay      Int
+  avgScore       Float    @default(0)
+  avgComments    Float    @default(0)
+  postCount      Int      @default(0)
+  engagementRate Float    @default(0)
+  sampleSize     Int      @default(0)
+  lastAnalyzed   DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([subredditName, dayOfWeek, hourOfDay])
+  @@index([subredditName])
+}
+
+model OptimalTimeRecommendation {
+  id              String   @id @default(cuid())
+  subredditName   String
+  dayOfWeek       Int
+  hourOfDay       Int
+  confidenceScore Float    @default(0)
+  avgEngagement   Float    @default(0)
+  rank            Int      @default(0)
+  calculatedAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([subredditName, rank])
+  @@index([subredditName])
+}
+
+model MonitoredSubreddit {
+  id                       String         @id @default(cuid())
+  subreddit                String
+  isActive                 Boolean        @default(true)
+  lastPostId               String?
+  lastChecked              DateTime       @default(now())
+  checkInterval            Int            @default(15)
+  createdAt                DateTime       @default(now())
+  updatedAt                DateTime       @updatedAt
+  userId                   String
+  lastOpportunityScan      DateTime?
+  opportunityFrequency     String         @default("daily")
+  opportunityMiningEnabled Boolean        @default(false)
+  alerts                   AlertHistory[]
+  user                     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subreddit])
+  @@index([isActive])
+  @@index([opportunityMiningEnabled])
+}
+
+model AlertHistory {
+  id                   String             @id @default(cuid())
+  postId               String
+  postTitle            String
+  postUrl              String
+  postAuthor           String?
+  subreddit            String
+  commentOptions       String
+  wasActedOn           Boolean            @default(false)
+  responseTime         Int?
+  alertType            String             @default("new_post")
+  brandKeyword         String?
+  contextSnippet       String?
+  mentionType          String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  monitoredSubredditId String
+  monitoredSubreddit   MonitoredSubreddit @relation(fields: [monitoredSubredditId], references: [id], onDelete: Cascade)
+
+  @@index([subreddit])
+  @@index([createdAt])
+  @@index([alertType])
+  @@index([brandKeyword])
+}
+
+model BrandKeyword {
+  id            String   @id @default(cuid())
+  keyword       String
+  isActive      Boolean  @default(true)
+  lastMentionId String?
+  alertCount    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, keyword])
+  @@index([isActive])
+}
+
+model ViralPattern {
+  id              String   @id @default(cuid())
+  subreddit       String   @unique
+  avgTitleLength  Float
+  firstPersonRate Float
+  questionRate    Float
+  avgScore        Int
+  contentType     String
+  topWords        String
+  formula         String
+  exampleTitle    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([subreddit])
+}
+
+model DraftPost {
+  id             String   @id @default(cuid())
+  title          String
+  content        String?
+  subreddit      String
+  postType       String
+  viralScore     Int
+  scoreBreakdown String
+  suggestions    String
+  improvedTitles String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([viralScore])
+  @@index([subreddit])
+}
+
+model SpyAccount {
+  id          String       @id @default(cuid())
+  username    String
+  displayName String?
+  avatarUrl   String?
+  totalKarma  Int          @default(0)
+  accountAge  DateTime?
+  isActive    Boolean      @default(true)
+  lastPostId  String?
+  lastChecked DateTime     @default(now())
+  notes       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alerts      SpyAlert[]
+  insights    SpyInsight[]
+  posts       SpyPost[]
+
+  @@unique([userId, username])
+  @@index([userId, isActive])
+}
+
+model SpyPost {
+  id           String     @id @default(cuid())
+  redditId     String
+  title        String
+  content      String?
+  url          String
+  subreddit    String
+  postType     String
+  score        Int        @default(0)
+  upvoteRatio  Float      @default(0)
+  commentCount Int        @default(0)
+  awards       Int        @default(0)
+  postedAt     DateTime
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  accountId    String
+  account      SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, redditId])
+  @@index([accountId, postedAt])
+  @@index([subreddit])
+  @@index([score])
+}
+
+model SpyAlert {
+  id          String     @id @default(cuid())
+  alertType   String
+  title       String
+  description String
+  postUrl     String?
+  subreddit   String?
+  isRead      Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  accountId   String
+  account     SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, isRead])
+}
+
+model SpyInsight {
+  id          String     @id @default(cuid())
+  insightType String
+  title       String
+  description String
+  actionItems String
+  confidence  Float      @default(0.8)
+  createdAt   DateTime   @default(now())
+  accountId   String
+  account     SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+}
+
+model Opportunity {
+  id               String                 @id @default(cuid())
+  title            String
+  category         OpportunityCategory
+  score            Int
+  problemStatement String
+  evidenceCount    Int                    @default(0)
+  firstSeenAt      DateTime               @default(now())
+  lastUpdatedAt    DateTime               @default(now())
+  trendDirection   TrendDirection         @default(STABLE)
+  status           OpportunityStatus      @default(NEW)
+  metadata         Json?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  userId           String
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actions          OpportunityAction[]
+  evidence         OpportunityEvidence[]
+  subreddits       OpportunitySubreddit[]
+
+  @@index([userId, score])
+  @@index([userId, status])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model OpportunityEvidence {
+  id             String      @id @default(cuid())
+  redditPostId   String
+  redditPostUrl  String
+  quoteText      String
+  author         String?
+  subreddit      String
+  upvotes        Int         @default(0)
+  commentCount   Int         @default(0)
+  sentimentScore Float?
+  postedAt       DateTime
+  createdAt      DateTime    @default(now())
+  opportunityId  String
+  opportunity    Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([redditPostId, opportunityId])
+  @@index([opportunityId])
+  @@index([subreddit])
+  @@index([postedAt])
+}
+
+model OpportunitySubreddit {
+  id               String      @id @default(cuid())
+  subreddit        String
+  mentionCount     Int         @default(1)
+  firstMentionedAt DateTime    @default(now())
+  lastMentionedAt  DateTime    @default(now())
+  opportunityId    String
+  opportunity      Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, subreddit])
+  @@index([opportunityId])
+}
+
+model OpportunityAction {
+  id            String                @id @default(cuid())
+  actionType    OpportunityActionType
+  metadata      Json?
+  createdAt     DateTime              @default(now())
+  opportunityId String
+  userId        String
+  opportunity   Opportunity           @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([opportunityId])
+  @@index([userId, createdAt])
+}
+
+model Waitlist {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  referralCode String?
+  position     Int
+  notified     Boolean   @default(false)
+  convertedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([position])
+  @@index([createdAt])
+}
+
+enum UserTier {
+  FOUNDER
+  ALPHA
+  STANDARD
+}
+
+enum WarmupStatus {
+  NOT_STARTED
+  PHASE_1_UPVOTES
+  PHASE_2_COMMENTS
+  PHASE_3_POSTS
+  PHASE_4_MIXED
+  COMPLETED
+  PAUSED
+  FAILED
+}
 
 enum OpportunityCategory {
   PAIN_POINT
@@ -116,435 +465,21 @@ enum OpportunityActionType {
   ARCHIVED
 }
 
-// Marketing Campaign
-model Campaign {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  status      String   @default("active") // active, paused, completed
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model AlphaFeedback {
+  id        String   @id @default(cuid())
+  clerkId   String?
+  type      String   @default("general")
+  message   String
+  name      String?
+  email     String?
+  page      String?
+  userAgent String?
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  accountId String
-  account   RedditAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  posts     Post[]
-}
-
-// Subreddit
-model Subreddit {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  displayName   String
-  subscribers   Int      @default(0)
-  relevance     Float    @default(0) // 0-1 relevance score
-  lastChecked   DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  posts Post[]
-}
-
-// Post (Scheduled or Completed)
-model Post {
-  id          String   @id @default(cuid())
-  title       String
-  content     String   @db.Text
-  postType    String   @default("text") // text, link, image
-  status      String   @default("scheduled") // scheduled, posted, failed
-  scheduledAt DateTime?
-  postedAt    DateTime?
-  redditId    String?  @unique // Reddit post ID after posting
-  url         String?  // URL to the Reddit post
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  accountId   String
-  account     RedditAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  
-  campaignId  String?
-  campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  
-  subredditId String
-  subreddit   Subreddit @relation(fields: [subredditId], references: [id], onDelete: Cascade)
-
-  analytics   PostAnalytics?
-  comments    Comment[]
-}
-
-// Post Analytics
-model PostAnalytics {
-  id           String   @id @default(cuid())
-  upvotes      Int      @default(0)
-  downvotes    Int      @default(0)
-  score        Int      @default(0)
-  commentCount Int      @default(0)
-  engagement   Float    @default(0) // Calculated engagement rate
-  lastUpdated  DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  postId String @unique
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-}
-
-// Comment (for auto-replies)
-model Comment {
-  id          String   @id @default(cuid())
-  redditId    String   @unique // Reddit comment ID
-  content     String   @db.Text
-  author      String
-  replied     Boolean  @default(false)
-  replyText   String?  @db.Text
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  postId String
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-}
-
-// Subreddit Activity Pattern (for optimal posting time analysis)
-model SubredditActivity {
-  id              String   @id @default(cuid())
-  subredditName   String
-  dayOfWeek       Int      // 0-6 (Sunday-Saturday)
-  hourOfDay       Int      // 0-23
-  avgScore        Float    @default(0)
-  avgComments     Float    @default(0)
-  postCount       Int      @default(0)
-  engagementRate  Float    @default(0)
-  sampleSize      Int      @default(0)
-  lastAnalyzed    DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([subredditName, dayOfWeek, hourOfDay])
-  @@index([subredditName])
-}
-
-// Optimal Time Recommendation
-model OptimalTimeRecommendation {
-  id              String   @id @default(cuid())
-  subredditName   String
-  dayOfWeek       Int      // 0-6
-  hourOfDay       Int      // 0-23
-  confidenceScore Float    @default(0) // 0-1 confidence
-  avgEngagement   Float    @default(0)
-  rank            Int      @default(0) // 1 = best time, 2 = second best, etc.
-  calculatedAt    DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@unique([subredditName, rank])
-  @@index([subredditName])
-}
-
-// ============================================
-// SPEED ALERTS & VIRAL HEADLINE OPTIMIZER
-// ============================================
-
-// Monitored Subreddit (for Speed Alerts & Opportunity Miner)
-model MonitoredSubreddit {
-  id            String   @id @default(cuid())
-  subreddit     String
-  isActive      Boolean  @default(true)
-  lastPostId    String?  // Track last seen post to detect new ones
-  lastChecked   DateTime @default(now())
-  checkInterval Int      @default(15) // seconds
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Opportunity Miner fields
-  opportunityMiningEnabled Boolean  @default(false)
-  opportunityFrequency     String   @default("daily") // realtime, hourly, daily, weekly
-  lastOpportunityScan      DateTime?
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  alerts AlertHistory[]
-
-  @@unique([userId, subreddit])
-  @@index([isActive])
-  @@index([opportunityMiningEnabled])
-}
-
-// Alert History (for Speed Alerts & Brand Mentions)
-model AlertHistory {
-  id             String   @id @default(cuid())
-  postId         String   // Reddit post/comment ID
-  postTitle      String
-  postUrl        String
-  postAuthor     String?
-  subreddit      String
-  commentOptions String   @db.Text // JSON array of 3 AI-generated comments
-  wasActedOn     Boolean  @default(false)
-  responseTime   Int?     // Milliseconds from alert to action
-  alertType      String   @default("new_post") // "new_post" | "brand_mention"
-  brandKeyword   String?  // Which keyword triggered (if brand_mention)
-  contextSnippet String?  @db.Text // Text snippet showing mention context
-  mentionType    String?  // "post" | "comment"
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  monitoredSubredditId String
-  monitoredSubreddit   MonitoredSubreddit @relation(fields: [monitoredSubredditId], references: [id], onDelete: Cascade)
-
-  @@index([subreddit])
-  @@index([createdAt])
-  @@index([alertType])
-  @@index([brandKeyword])
-}
-
-// Brand Keyword (for Sentiment Shield / Brand Mentions)
-model BrandKeyword {
-  id            String   @id @default(cuid())
-  keyword       String
-  isActive      Boolean  @default(true)
-  lastMentionId String?  // Track last seen mention to avoid duplicates
-  alertCount    Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, keyword])
-  @@index([isActive])
-}
-
-// Viral Pattern (for Viral Headline Optimizer)
-model ViralPattern {
-  id              String   @id @default(cuid())
-  subreddit       String   @unique
-  avgTitleLength  Float
-  firstPersonRate Float    // % using I/my/me
-  questionRate    Float    // % using questions
-  avgScore        Int
-  contentType     String   // text, image, video
-  topWords        String   @db.Text // JSON array
-  formula         String   @db.Text // Viral formula description
-  exampleTitle    String?  // Example viral title
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([subreddit])
-}
-
-// Draft Post (for Viral Headline Optimizer)
-model DraftPost {
-  id             String   @id @default(cuid())
-  title          String
-  content        String?  @db.Text
-  subreddit      String
-  postType       String   // text, image, video
-  viralScore     Int      // 0-100
-  scoreBreakdown String   @db.Text // JSON object with score components
-  suggestions    String   @db.Text // JSON array of improvement suggestions
-  improvedTitles String   @db.Text // JSON array of AI-generated alternatives
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@index([viralScore])
-  @@index([subreddit])
-}
-
-// ============================================
-// SPY MODE - COMPETITOR INTELLIGENCE
-// ============================================
-
-// Tracked Competitor Account
-model SpyAccount {
-  id            String    @id @default(cuid())
-  username      String
-  displayName   String?
-  avatarUrl     String?
-  totalKarma    Int       @default(0)
-  accountAge    DateTime?
-  isActive      Boolean   @default(true)
-  lastPostId    String?
-  lastChecked   DateTime  @default(now())
-  notes         String?   @db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  posts    SpyPost[]
-  alerts   SpyAlert[]
-  insights SpyInsight[]
-
-  @@unique([userId, username])
-  @@index([userId, isActive])
-}
-
-// Competitor's Reddit Posts
-model SpyPost {
-  id           String   @id @default(cuid())
-  redditId     String
-  title        String
-  content      String?  @db.Text
-  url          String
-  subreddit    String
-  postType     String   // text, link, image, video
-  score        Int      @default(0)
-  upvoteRatio  Float    @default(0)
-  commentCount Int      @default(0)
-  awards       Int      @default(0)
-  postedAt     DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  accountId String
-  account   SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  @@unique([accountId, redditId])
-  @@index([accountId, postedAt])
-  @@index([subreddit])
-  @@index([score])
-}
-
-// Real-time Competitor Activity Alerts
-model SpyAlert {
-  id          String   @id @default(cuid())
-  alertType   String   // new_post, viral_post, new_subreddit
-  title       String
-  description String   @db.Text
-  postUrl     String?
-  subreddit   String?
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  accountId String
-  account   SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  @@index([accountId, isRead])
-}
-
-// AI-Generated Competitor Insights
-model SpyInsight {
-  id          String   @id @default(cuid())
-  insightType String   // pattern, timing, subreddit, recommendation
-  title       String
-  description String   @db.Text
-  actionItems String   @db.Text // JSON array
-  confidence  Float    @default(0.8)
-  createdAt   DateTime @default(now())
-
-  accountId String
-  account   SpyAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
-
-  @@index([accountId])
-}
-
-// ============================================
-// OPPORTUNITY MINER - MARKET INTELLIGENCE
-// ============================================
-
-// Main Opportunity Model
-model Opportunity {
-  id               String              @id @default(cuid())
-  title            String
-  category         OpportunityCategory
-  score            Int                 // 0-100 calculated score
-  problemStatement String              @db.Text
-  evidenceCount    Int                 @default(0)
-  firstSeenAt      DateTime            @default(now())
-  lastUpdatedAt    DateTime            @default(now())
-  trendDirection   TrendDirection      @default(STABLE)
-  status           OpportunityStatus   @default(NEW)
-  metadata         Json?               // Score breakdown, themes, confidence, etc.
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  evidence   OpportunityEvidence[]
-  subreddits OpportunitySubreddit[]
-  actions    OpportunityAction[]
-
-  @@index([userId, score])
-  @@index([userId, status])
-  @@index([category])
-  @@index([createdAt])
-}
-
-// Evidence from Reddit Posts/Comments
-model OpportunityEvidence {
-  id             String   @id @default(cuid())
-  redditPostId   String
-  redditPostUrl  String
-  quoteText      String   @db.Text
-  author         String?
-  subreddit      String
-  upvotes        Int      @default(0)
-  commentCount   Int      @default(0)
-  sentimentScore Float?   // -1 to 1
-  postedAt       DateTime
-  createdAt      DateTime @default(now())
-
-  opportunityId String
-  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-
-  @@unique([redditPostId, opportunityId])
-  @@index([opportunityId])
-  @@index([subreddit])
-  @@index([postedAt])
-}
-
-// Subreddits Where Opportunity Was Mentioned
-model OpportunitySubreddit {
-  id               String   @id @default(cuid())
-  subreddit        String
-  mentionCount     Int      @default(1)
-  firstMentionedAt DateTime @default(now())
-  lastMentionedAt  DateTime @default(now())
-
-  opportunityId String
-  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-
-  @@unique([opportunityId, subreddit])
-  @@index([opportunityId])
-}
-
-// User Actions on Opportunities
-model OpportunityAction {
-  id         String                @id @default(cuid())
-  actionType OpportunityActionType
-  metadata   Json?                 // Additional action details
-  createdAt  DateTime              @default(now())
-
-  opportunityId String
-  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
-
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([opportunityId])
-  @@index([userId, createdAt])
-}
-
-// ============================================
-// WAITLIST - POST-FOUNDER SIGNUPS
-// ============================================
-
-// Waitlist for users who sign up after founder spots are filled
-model Waitlist {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String?
-  referralCode String?  // Track referral source
-  position     Int      // Position in waitlist (auto-assigned)
-  notified     Boolean  @default(false) // Whether they've been notified of availability
-  convertedAt  DateTime? // When they converted to a paid user
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([position])
+  @@index([clerkId])
+  @@index([type])
+  @@index([status])
   @@index([createdAt])
 }

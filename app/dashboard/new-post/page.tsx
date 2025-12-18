@@ -20,6 +20,8 @@ export default function NewPost() {
     scheduledDate: '',
     scheduledTime: '',
   })
+  const [savingDraft, setSavingDraft] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     fetchAccount()
@@ -44,12 +46,20 @@ export default function NewPost() {
   }
 
   async function handleSaveDraft() {
+    console.log('Save draft clicked, accountId:', accountId)
+    setMessage(null)
+
     if (!accountId) {
-      alert('No Reddit account found. Please check your .env.local configuration.')
+      setMessage({ type: 'error', text: 'No Reddit account found. Please check your .env.local configuration.' })
       return
     }
 
-    setLoading(true)
+    if (!formData.title || !formData.content || !formData.subredditName) {
+      setMessage({ type: 'error', text: 'Please fill in all required fields (title, content, and subreddit).' })
+      return
+    }
+
+    setSavingDraft(true)
 
     try {
       const postResponse = await fetch('/api/posts', {
@@ -61,19 +71,23 @@ export default function NewPost() {
           subredditName: formData.subredditName,
           accountId,
           postType: formData.postType,
+          isDraft: true,
         }),
       })
 
+      const data = await postResponse.json()
+
       if (!postResponse.ok) {
-        throw new Error('Failed to save draft')
+        throw new Error(data.error || 'Failed to save draft')
       }
 
-      alert('Draft saved successfully! You can schedule it later from the dashboard.')
-      router.push('/dashboard')
+      setMessage({ type: 'success', text: 'Draft saved successfully! Redirecting to dashboard...' })
+      setTimeout(() => router.push('/dashboard'), 1500)
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
+      console.error('Save draft error:', error)
+      setMessage({ type: 'error', text: `Error: ${error.message}` })
     } finally {
-      setLoading(false)
+      setSavingDraft(false)
     }
   }
 
@@ -395,22 +409,46 @@ export default function NewPost() {
               )}
             </div>
 
+            {/* Inline Message Display */}
+            {message && (
+              <div className={`p-4 rounded-lg ${
+                message.type === 'success'
+                  ? 'bg-green-900/50 text-green-300 border border-green-700'
+                  : 'bg-red-900/50 text-red-300 border border-red-700'
+              }`}>
+                {message.text}
+              </div>
+            )}
+
             <div className="flex gap-4 pt-4">
               <button
                 type="submit"
-                disabled={loading}
-                className="flex-1 bg-reddit-orange text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition disabled:opacity-50"
+                disabled={loading || savingDraft}
+                className="flex-1 bg-[#00D9FF] text-black px-6 py-3 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:opacity-50 font-semibold"
               >
                 {loading ? 'Creating...' : 'Create Post'}
               </button>
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                disabled={loading || !formData.title || !formData.content || !formData.subredditName}
-                className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                disabled={savingDraft || loading || !formData.title || !formData.content || !formData.subredditName}
+                className="flex-1 bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition disabled:opacity-50 font-semibold"
               >
-                💾 Save Draft
+                {savingDraft ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-[#00D9FF] border-t-transparent rounded-full animate-spin"></span>
+                    Saving...
+                  </span>
+                ) : (
+                  '💾 Save Draft'
+                )}
               </button>
+              <Link
+                href="/dashboard/drafts"
+                className="flex-1 bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition text-center font-semibold"
+              >
+                📝 Drafts
+              </Link>
               <Link
                 href="/dashboard"
                 className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition text-center"

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireUser()
     const body = await request.json()
-    const { title, content, subredditName, accountId, campaignId, postType = 'text' } = body
+    const { title, content, subredditName, accountId, campaignId, postType = 'text', isDraft = false } = body
 
     if (!title || !subredditName || !accountId) {
       return NextResponse.json(
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         title,
         content: content || '',
         postType,
-        status: 'scheduled',
+        status: isDraft ? 'draft' : 'scheduled',
         accountId,
         subredditId: subreddit.id,
         campaignId: campaignId || null,

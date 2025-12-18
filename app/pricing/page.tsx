@@ -1,10 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+interface PricingInfo {
+  currentTier: {
+    tier: number
+    maxCount: number
+    price: number
+    label: string
+    discount: string
+    spotsRemaining: number
+    currentCount: number
+    isSoldOut: boolean
+  }
+  allTiers: Array<{
+    tier: number
+    maxCount: number
+    price: number
+    label: string
+    discount: string
+  }>
+  fullPrice: number
+  totalSold: number
+}
 
 export default function PricingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [pricingInfo, setPricingInfo] = useState<PricingInfo | null>(null);
+
+  useEffect(() => {
+    async function fetchPricingInfo() {
+      try {
+        const response = await fetch('/api/pricing/current');
+        const data = await response.json();
+        setPricingInfo(data);
+      } catch (error) {
+        console.error('Failed to fetch pricing info:', error);
+      }
+    }
+    fetchPricingInfo();
+  }, []);
+
+  const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
 
   const tiers = [
     {
@@ -127,7 +165,7 @@ export default function PricingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-32 pb-8 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
             Simple, Transparent Pricing
@@ -137,6 +175,98 @@ export default function PricingPage() {
           </p>
         </div>
       </section>
+
+      {/* Lifetime Deal Banner */}
+      <section className="pb-12 px-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl p-6 shadow-lg text-white relative overflow-hidden border border-slate-700">
+            {/* Red Elephant Logo - positioned on right */}
+            <img
+              src="/red-elephant-flying.png"
+              alt=""
+              className="absolute right-24 bottom-20 h-32 w-auto opacity-80 hidden md:block"
+            />
+
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-sm font-medium">
+                  Limited Time
+                </span>
+                <span className="bg-slate-700 text-slate-300 px-3 py-1 rounded-full text-sm font-medium">
+                  {pricingInfo?.currentTier?.label || 'Founding Alpha'}
+                </span>
+              </div>
+
+              <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                Lifetime Access Deal
+              </h2>
+
+              <p className="text-slate-300 text-base mb-5 max-w-xl">
+                Get lifetime access to ReddRide for a one-time payment. Price increases as spots fill up.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-5 mb-5">
+                <div>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold text-white">
+                      {formatPrice(pricingInfo?.currentTier?.price || 2900)}
+                    </span>
+                    <span className="text-xl text-slate-500 line-through">
+                      {formatPrice(pricingInfo?.fullPrice || 29900)}
+                    </span>
+                  </div>
+                  <p className="text-slate-400 text-sm mt-1">
+                    One-time • {pricingInfo?.currentTier?.discount || '90% off'}
+                  </p>
+                </div>
+
+                <div className="bg-slate-700/50 rounded-lg px-4 py-3">
+                  <div className="text-2xl font-bold text-red-400">
+                    {pricingInfo?.currentTier?.spotsRemaining ?? 10}
+                  </div>
+                  <div className="text-xs text-slate-400">spots left</div>
+                </div>
+              </div>
+
+              {/* Tier Progress */}
+              <div className="mb-5">
+                <div className="text-xs text-slate-500 mb-2">Pricing tiers:</div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(pricingInfo?.allTiers || []).map((tier) => (
+                    <span
+                      key={tier.tier}
+                      className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        tier.tier === pricingInfo?.currentTier?.tier
+                          ? 'bg-red-500 text-white'
+                          : tier.tier < (pricingInfo?.currentTier?.tier || 1)
+                          ? 'bg-slate-700 text-slate-500 line-through'
+                          : 'bg-slate-700/50 text-slate-500'
+                      }`}
+                    >
+                      {formatPrice(tier.price)}
+                    </span>
+                  ))}
+                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-slate-700/50 text-slate-500">
+                    {formatPrice(pricingInfo?.fullPrice || 29900)}
+                  </span>
+                </div>
+              </div>
+
+              <Link
+                href="/sign-up"
+                className="group relative inline-block px-6 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-all overflow-hidden"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                <span className="relative">Get Lifetime Access →</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="text-center mb-8">
+        <p className="text-slate-500">Or choose a monthly subscription:</p>
+      </div>
 
       {/* Pricing Cards */}
       <section className="pb-20 px-6">
@@ -189,13 +319,14 @@ export default function PricingPage() {
 
                 <Link
                   href={tier.href}
-                  className={`block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all ${
+                  className={`group relative block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all overflow-hidden ${
                     tier.highlighted
                       ? 'bg-white text-slate-900 hover:bg-slate-100'
                       : 'bg-slate-900 text-white hover:bg-slate-800 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]'
                   }`}
                 >
-                  {tier.cta}
+                  <span className={`absolute inset-0 bg-gradient-to-r from-transparent ${tier.highlighted ? 'via-slate-200/50' : 'via-white/30'} to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out`}></span>
+                  <span className="relative">{tier.cta}</span>
                 </Link>
               </div>
             ))}

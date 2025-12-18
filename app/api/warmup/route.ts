@@ -112,6 +112,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// FIX #5: Rate limiting - prevent multiple start warmup requests within 5 minutes
+const WARMUP_START_COOLDOWN_MS = 5 * 60 * 1000 // 5 minutes
+
 // POST - Start warmup for an existing Reddit account
 export async function POST(request: NextRequest) {
   try {
@@ -151,6 +154,18 @@ export async function POST(request: NextRequest) {
         { error: 'Account is already in warmup mode' },
         { status: 400 }
       )
+    }
+
+    // FIX #5: Rate limiting - check if warmup was recently started
+    if (account.warmupStartedAt) {
+      const timeSinceStart = Date.now() - account.warmupStartedAt.getTime()
+      if (timeSinceStart < WARMUP_START_COOLDOWN_MS) {
+        const remainingSeconds = Math.ceil((WARMUP_START_COOLDOWN_MS - timeSinceStart) / 1000)
+        return NextResponse.json(
+          { error: `Please wait ${remainingSeconds} seconds before starting warmup again` },
+          { status: 429 }
+        )
+      }
     }
 
     // Start warmup via orchestrator

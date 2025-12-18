@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import DashboardNav from '@/components/DashboardNav'
+import ViralBodyOptimizer from '@/components/ViralBodyOptimizer'
 
 interface ScoreBreakdown {
   titleLength: number
@@ -364,6 +365,12 @@ export default function ViralPage() {
             </div>
           </div>
         )}
+
+        {/* Divider */}
+        <div className="border-t border-gray-700 my-8"></div>
+
+        {/* Body Copy Optimizer Section */}
+        <ViralBodyOptimizer />
       </div>
     </div>
   )

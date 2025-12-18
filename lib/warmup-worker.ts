@@ -4,6 +4,82 @@ import { getRedditClient } from '@/lib/reddit'
 import { generateReply, generatePostContent } from '@/lib/ai'
 import { getConnection } from '@/lib/queue'
 
+// FIX #3: Constants for progressive error handling
+const MAX_CONSECUTIVE_ERRORS = 3 // Mark as FAILED after 3 consecutive 403 errors
+const COOLDOWN_HOURS = 1 // Pause for 1 hour after a 403 error
+
+// Helper to track and check consecutive errors
+async function recordError(accountId: string, errorType: string): Promise<number> {
+  const account = await prisma.redditAccount.findUnique({
+    where: { id: accountId },
+  })
+
+  if (!account) return 0
+
+  const progress = (account.warmupProgress as any) || { daily: [] }
+
+  // Initialize error tracking if not present
+  if (!progress.errorTracking) {
+    progress.errorTracking = { consecutiveErrors: 0, lastErrorAt: null, errorType: null }
+  }
+
+  // Increment consecutive errors
+  progress.errorTracking.consecutiveErrors += 1
+  progress.errorTracking.lastErrorAt = new Date().toISOString()
+  progress.errorTracking.errorType = errorType
+
+  await prisma.redditAccount.update({
+    where: { id: accountId },
+    data: { warmupProgress: progress },
+  })
+
+  return progress.errorTracking.consecutiveErrors
+}
+
+// Helper to clear error tracking on success
+async function clearErrorTracking(accountId: string): Promise<void> {
+  const account = await prisma.redditAccount.findUnique({
+    where: { id: accountId },
+  })
+
+  if (!account) return
+
+  const progress = (account.warmupProgress as any) || { daily: [] }
+
+  if (progress.errorTracking) {
+    progress.errorTracking.consecutiveErrors = 0
+    progress.errorTracking.lastErrorAt = null
+    progress.errorTracking.errorType = null
+
+    await prisma.redditAccount.update({
+      where: { id: accountId },
+      data: { warmupProgress: progress },
+    })
+  }
+}
+
+// Helper to check if account is in cooldown period
+async function isInCooldown(accountId: string): Promise<boolean> {
+  const account = await prisma.redditAccount.findUnique({
+    where: { id: accountId },
+  })
+
+  if (!account) return false
+
+  const progress = (account.warmupProgress as any) || {}
+
+  if (progress.errorTracking?.lastErrorAt) {
+    const lastError = new Date(progress.errorTracking.lastErrorAt)
+    const cooldownEnd = new Date(lastError.getTime() + COOLDOWN_HOURS * 60 * 60 * 1000)
+
+    if (new Date() < cooldownEnd) {
+      return true
+    }
+  }
+
+  return false
+}
+
 // Warm-up job data interface
 interface WarmupJobData {
   accountId: string
@@ -264,6 +340,12 @@ async function processWarmupJob(job: Job<WarmupJobData>): Promise<void> {
       return
     }
 
+    // FIX #3: Check if account is in cooldown period after a previous error
+    if (await isInCooldown(accountId)) {
+      console.log(`⏳ Account ${accountId} is in cooldown period, skipping job`)
+      return
+    }
+
     // Get Reddit client
     const redditClient = await getRedditClient()
 
@@ -280,6 +362,9 @@ async function processWarmupJob(job: Job<WarmupJobData>): Promise<void> {
         break
     }
 
+    // Success! Clear any error tracking
+    await clearErrorTracking(accountId)
+
     // Check if account should advance to next phase
     await checkPhaseAdvancement(accountId)
 
@@ -287,13 +372,23 @@ async function processWarmupJob(job: Job<WarmupJobData>): Promise<void> {
   } catch (error) {
     console.error(`❌ Error processing warmup job:`, error)
 
-    // Check if account might be shadowbanned
-    if (error instanceof Error && error.message.includes('403')) {
-      await prisma.redditAccount.update({
-        where: { id: accountId },
-        data: { warmupStatus: 'FAILED' },
-      })
-      console.log(`🚫 Account ${accountId} marked as FAILED (possible shadowban)`)
+    // FIX #3: Progressive error handling - don't fail immediately on first 403
+    if (error instanceof Error && (error.message.includes('403') || error.message.includes('429'))) {
+      const errorCount = await recordError(accountId, error.message.includes('403') ? '403' : '429')
+
+      console.log(`⚠️  Account ${accountId} error ${errorCount}/${MAX_CONSECUTIVE_ERRORS}`)
+
+      if (errorCount >= MAX_CONSECUTIVE_ERRORS) {
+        // 3 strikes - mark as failed
+        await prisma.redditAccount.update({
+          where: { id: accountId },
+          data: { warmupStatus: 'FAILED' },
+        })
+        console.log(`🚫 Account ${accountId} marked as FAILED after ${errorCount} consecutive errors`)
+      } else {
+        // Not failed yet - will enter cooldown and retry later
+        console.log(`⏸️  Account ${accountId} entering ${COOLDOWN_HOURS}hr cooldown (${errorCount}/${MAX_CONSECUTIVE_ERRORS} errors)`)
+      }
     }
 
     throw error
@@ -309,9 +404,11 @@ export function startWarmupWorker(): Worker {
     return warmupWorker
   }
 
+  // FIX #4: Use concurrency of 1 to ensure jobs are processed sequentially
+  // Combined with job deduplication (jobId), this prevents multiple jobs for same account
   warmupWorker = new Worker('warmup-jobs', processWarmupJob, {
     connection: getConnection(),
-    concurrency: 5, // Process up to 5 accounts simultaneously
+    concurrency: 1, // Process one job at a time to prevent race conditions
     limiter: {
       max: 10, // Max 10 jobs
       duration: 60000, // per minute (Reddit API limit is 60/min)

@@ -61,7 +61,7 @@ export default function FounderBanner({
   }
 
   return (
-    <div className={`fixed top-0 left-0 right-0 w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white py-2 px-4 z-[60] transition-transform duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+    <div className={`fixed top-0 left-0 right-0 w-full bg-gradient-to-r from-slate-800 to-slate-900 text-white py-2 px-4 z-[60] transition-transform duration-500 ease-out ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
           <span className="text-2xl">🎉</span>
@@ -75,14 +75,14 @@ export default function FounderBanner({
         <div className="flex items-center gap-3">
           <div className="text-sm opacity-90 hidden md:block">
             Lock in <span className="font-bold">LIFETIME</span> access for just{' '}
-            <span className="font-bold">$59</span>
-            <span className="text-xs opacity-75 ml-1">(normally $39/month)</span>
+            <span className="font-bold">$29</span>
+            <span className="text-xs opacity-75 ml-1">(normally $299)</span>
           </div>
 
           <button
             onClick={handleGetLifetimeDeal}
             disabled={isLoading}
-            className="bg-white text-emerald-700 px-5 py-2 rounded-lg font-bold hover:bg-emerald-50 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap animate-pulse hover:animate-none hover:scale-105 hover:shadow-xl"
+            className="bg-white text-red-600 px-5 py-2 rounded-lg font-bold hover:bg-red-50 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap animate-pulse hover:animate-none hover:scale-105 hover:shadow-xl"
           >
             {isLoading ? 'Loading...' : 'Get Lifetime Deal →'}
           </button>

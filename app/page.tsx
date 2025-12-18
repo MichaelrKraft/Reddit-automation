@@ -21,14 +21,30 @@ interface UserStats {
   canPurchaseLifetime?: boolean
 }
 
+interface PricingInfo {
+  currentTier: {
+    tier: number
+    maxCount: number
+    price: number
+    label: string
+    discount: string
+    spotsRemaining: number
+    currentCount: number
+    isSoldOut: boolean
+  }
+  totalSold: number
+}
+
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [pricingInfo, setPricingInfo] = useState<PricingInfo | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
     fetchUserStats();
+    fetchPricingInfo();
   }, []);
 
   async function fetchUserStats() {
@@ -38,6 +54,16 @@ export default function Home() {
       setUserStats(data);
     } catch (error) {
       console.error('Failed to fetch user stats:', error);
+    }
+  }
+
+  async function fetchPricingInfo() {
+    try {
+      const response = await fetch('/api/pricing/current');
+      const data = await response.json();
+      setPricingInfo(data);
+    } catch (error) {
+      console.error('Failed to fetch pricing info:', error);
     }
   }
 
@@ -101,18 +127,26 @@ export default function Home() {
   // Calculate spots remaining for display
   const spotsRemaining = userStats?.founderSpotsRemaining ?? 10;
 
+  // Format price for display (cents to dollars)
+  const formatPrice = (cents: number) => `$${(cents / 100).toFixed(0)}`;
+  const currentPrice = pricingInfo?.currentTier?.price ?? 2900;
+  const currentLabel = pricingInfo?.currentTier?.label ?? 'Founding Alpha';
+  const currentDiscount = pricingInfo?.currentTier?.discount ?? '90% off';
+  const tierSpotsRemaining = pricingInfo?.currentTier?.spotsRemaining ?? 10;
+  const isSoldOut = pricingInfo?.currentTier?.isSoldOut ?? false;
+
   return (
     <ScrollReveal>
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-[112px]">
-      {/* Alpha Banner - Dynamic based on user status */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-center py-2 px-4">
+      {/* Alpha Banner - Dynamic based on tiered pricing */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center py-2 px-4">
         <span className="font-semibold">
-          {userStats?.isFounder ? (
-            <>🎉 You're one of our first 20 founders! Thank you for believing in us!</>
-          ) : spotsRemaining > 0 ? (
-            <>🎉 Alpha Launch: Only {spotsRemaining} founder spot{spotsRemaining !== 1 ? 's' : ''} left for lifetime deal!</>
+          {userStats?.hasLifetimeDeal ? (
+            <>🎉 You have lifetime access! Thank you for believing in us!</>
+          ) : isSoldOut ? (
+            <>🎉 Alpha Launch: Get lifetime access for {formatPrice(currentPrice)}!</>
           ) : (
-            <>🎉 Alpha Launch: Join now for FREE access during alpha!</>
+            <>🔥 {currentLabel} Deal: Only {tierSpotsRemaining} spot{tierSpotsRemaining !== 1 ? 's' : ''} left at {formatPrice(currentPrice)} ({currentDiscount})!</>
           )}
         </span>
       </div>
@@ -145,9 +179,10 @@ export default function Home() {
             {userStats?.isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+                className="group relative px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
               >
-                Dashboard →
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                <span className="relative">Dashboard →</span>
               </Link>
             ) : (
               <>
@@ -159,9 +194,10 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+                  className="group relative px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
                 >
-                  Get Started →
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                  <span className="relative">Get Started →</span>
                 </Link>
               </>
             )}
@@ -198,10 +234,11 @@ export default function Home() {
             {userStats?.isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="block px-4 py-3 bg-slate-900 text-white rounded-lg font-medium text-center hover:bg-slate-800 transition-all border-2 border-red-500/70"
+                className="group relative block px-4 py-3 bg-slate-900 text-white rounded-lg font-medium text-center hover:bg-slate-800 transition-all border-2 border-red-500/70 overflow-hidden"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Dashboard →
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                <span className="relative">Dashboard →</span>
               </Link>
             ) : (
               <>
@@ -214,10 +251,11 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="block px-4 py-3 bg-slate-900 text-white rounded-lg font-medium text-center hover:bg-slate-800 transition-all border-2 border-red-500/70"
+                  className="group relative block px-4 py-3 bg-slate-900 text-white rounded-lg font-medium text-center hover:bg-slate-800 transition-all border-2 border-red-500/70 overflow-hidden"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Get Started →
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                  <span className="relative">Get Started →</span>
                 </Link>
               </>
             )}
@@ -277,9 +315,7 @@ export default function Home() {
                 text="."
                 typingSpeed={50}
                 initialDelay={2350}
-                showCursor={true}
-                cursorCharacter="|"
-                cursorClassName="text-purple-600"
+                showCursor={false}
                 loop={false}
               />
             </span>
@@ -292,15 +328,17 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/sign-up"
-              className="px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+              className="group relative px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
             >
-              Join Alpha Free
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+              <span className="relative">Get Lifetime Access</span>
             </Link>
             <a
               href="#features"
-              className="px-8 py-4 bg-white border-2 border-slate-200 text-slate-900 rounded-xl font-semibold hover:border-slate-300 transition-all hover:shadow-lg"
+              className="group relative px-8 py-4 bg-white border-2 border-slate-200 text-slate-900 rounded-xl font-semibold hover:border-slate-300 transition-all hover:shadow-lg overflow-hidden"
             >
-              See Features
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+              <span className="relative">See Features</span>
             </a>
           </div>
 
@@ -748,9 +786,10 @@ export default function Home() {
           <div className="text-center mt-12">
             <Link
               href="/sign-up"
-              className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+              className="group relative inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
             >
-              Start Your Success Story →
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+              <span className="relative">Start Your Success Story →</span>
             </Link>
           </div>
         </div>
@@ -824,9 +863,10 @@ export default function Home() {
           <div className="text-center mt-10">
             <Link
               href="/sign-up"
-              className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+              className="group relative inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
             >
-              Start Free with ReddRide →
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+              <span className="relative">Start with Redd Ride →</span>
             </Link>
           </div>
         </div>
@@ -971,14 +1011,22 @@ export default function Home() {
           <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-6">
             Ready to Grow Your Reddit Presence?
           </h2>
-          <p className="reveal-up text-xl text-slate-600 mb-10">
-            Join our alpha program and get free access as one of the first 20 users
+          <p className="reveal-up text-xl text-slate-600 mb-4">
+            {isSoldOut ? (
+              <>Get lifetime access for {formatPrice(currentPrice)}</>
+            ) : (
+              <>🔥 <span className="text-orange-600 font-semibold">{currentLabel}</span>: Only {tierSpotsRemaining} spot{tierSpotsRemaining !== 1 ? 's' : ''} left at <span className="text-green-600 font-bold">{formatPrice(currentPrice)}</span> ({currentDiscount})</>
+            )}
+          </p>
+          <p className="reveal-up text-sm text-slate-500 mb-10">
+            One-time payment. Lifetime access. Never pay again.
           </p>
           <Link
             href="/sign-up"
-            className="reveal-up inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]"
+            className="reveal-up group relative inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
           >
-            Get Started →
+            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+            <span className="relative">Get Lifetime Access →</span>
           </Link>
         </div>
       </section>

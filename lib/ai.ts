@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { getViralBodyPrompt } from './viral-body-score'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
@@ -12,6 +13,7 @@ export interface ContentGenerationOptions {
 
 export async function generatePostContent(options: ContentGenerationOptions) {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+  const viralBodyRules = getViralBodyPrompt()
 
   const prompt = `
 Generate a Reddit post for r/${options.subreddit}.
@@ -21,22 +23,28 @@ Post Type: ${options.postType || 'text'}
 Tone: ${options.tone || 'casual'}
 ${options.additionalContext ? `Additional Context: ${options.additionalContext}` : ''}
 
+${viralBodyRules}
+
 Requirements:
 1. Create an engaging, authentic title (max 300 characters)
-2. Write compelling content that fits the subreddit's culture
+2. Write compelling content that follows the VIRAL BODY COPY RULES above
 3. Use proper Reddit formatting (markdown)
-4. Be natural and conversational
-5. Avoid overly promotional language
-6. Make it valuable to the community
+4. Start with an emotional hook or context-setting opener
+5. Include dialogue where appropriate to make the story vivid
+6. Add emotional reactions throughout the post
+7. Use transformation words (but, finally, realized, then) for story arc
+8. Keep paragraphs to 3-5 sentences each
+9. Add TL;DR at the end for posts over 300 words
+10. Be natural and conversational - avoid overly promotional language
 
 Return the response in the following JSON format:
 {
   "title": "Your engaging title here",
-  "content": "Your post content here with proper markdown formatting",
-  "reasoning": "Brief explanation of why this content works for this subreddit"
+  "content": "Your post content here with proper markdown formatting and viral structure",
+  "reasoning": "Brief explanation of which viral patterns this uses"
 }
 
-Generate 3 different variations.
+Generate 3 different variations, each using different viral opening patterns.
 `
 
   try {

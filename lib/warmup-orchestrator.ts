@@ -3,6 +3,31 @@ import { prisma } from '@/lib/prisma'
 import { getConnection } from '@/lib/queue'
 import { WARMUP_PHASES, calculatePhase } from '@/lib/warmup-worker'
 
+// Helper to get today's date string in YYYY-MM-DD format
+function getTodayDateString(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+// Helper to count today's actions from warmup progress
+function getTodayActionCounts(warmupProgress: any): { upvotes: number; comments: number; posts: number } {
+  const counts = { upvotes: 0, comments: 0, posts: 0 }
+
+  if (!warmupProgress?.daily) return counts
+
+  const today = getTodayDateString()
+  const todayEntry = warmupProgress.daily.find((d: any) => d.date === today)
+
+  if (!todayEntry?.actions) return counts
+
+  for (const action of todayEntry.actions) {
+    if (action.type === 'upvote') counts.upvotes += action.count || 1
+    if (action.type === 'comment') counts.comments += action.count || 1
+    if (action.type === 'post') counts.posts += action.count || 1
+  }
+
+  return counts
+}
+
 // Warmup orchestrator for coordinating multiple Reddit accounts
 class WarmupOrchestrator {
   private warmupQueue: Queue
@@ -123,64 +148,107 @@ class WarmupOrchestrator {
       const phaseConfig = WARMUP_PHASES[account.warmupStatus as keyof typeof WARMUP_PHASES]
       if (!phaseConfig) return
 
-      // Schedule upvote jobs
-      if (phaseConfig.actions.upvotes > 0) {
-        await this.warmupQueue.add(
-          `upvote-${account.id}`,
-          {
-            accountId: account.id,
-            action: 'upvote',
-            targetSubreddit: 'CasualConversation',
-          },
-          {
-            delay: this.getRandomDelay(0, 30 * 60 * 1000), // 0-30 min random delay
-            attempts: 3,
-            backoff: {
-              type: 'exponential',
-              delay: 5000,
-            },
-          }
-        )
+      // FIX #1: Check daily limits before scheduling
+      const todayActions = getTodayActionCounts(account.warmupProgress)
+      const today = getTodayDateString()
+
+      // Calculate remaining actions allowed today
+      const remainingUpvotes = Math.max(0, phaseConfig.actions.upvotes - todayActions.upvotes)
+      const remainingComments = Math.max(0, phaseConfig.actions.comments - todayActions.comments)
+      const remainingPosts = Math.max(0, phaseConfig.actions.posts - todayActions.posts)
+
+      // Log limit status
+      if (remainingUpvotes === 0 && remainingComments === 0 && remainingPosts === 0) {
+        console.log(`⏳ Account ${account.username} has reached daily limits, skipping scheduling`)
+        return
       }
 
-      // Schedule comment jobs
-      if (phaseConfig.actions.comments > 0) {
-        await this.warmupQueue.add(
-          `comment-${account.id}`,
-          {
-            accountId: account.id,
-            action: 'comment',
-            targetSubreddit: 'CasualConversation',
-          },
-          {
-            delay: this.getRandomDelay(30 * 60 * 1000, 2 * 60 * 60 * 1000), // 30min-2hr delay
-            attempts: 3,
-            backoff: {
-              type: 'exponential',
-              delay: 5000,
+      // FIX #2: Use jobId for deduplication - jobs with same ID won't be duplicated
+      // Schedule upvote jobs (only if under daily limit)
+      if (remainingUpvotes > 0) {
+        const jobId = `upvote-${account.id}-${today}`
+        const existingJob = await this.warmupQueue.getJob(jobId)
+
+        if (!existingJob) {
+          await this.warmupQueue.add(
+            'upvote',
+            {
+              accountId: account.id,
+              action: 'upvote',
+              targetSubreddit: 'CasualConversation',
             },
-          }
-        )
+            {
+              jobId, // Prevents duplicate jobs for same account on same day
+              delay: this.getRandomDelay(0, 30 * 60 * 1000),
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 5000,
+              },
+            }
+          )
+          console.log(`  📤 Scheduled upvote job (${remainingUpvotes} remaining today)`)
+        } else {
+          console.log(`  ⏭️  Upvote job already exists for ${account.username} today`)
+        }
       }
 
-      // Schedule post jobs
-      if (phaseConfig.actions.posts > 0) {
-        await this.warmupQueue.add(
-          `post-${account.id}`,
-          {
-            accountId: account.id,
-            action: 'post',
-            targetSubreddit: 'CasualConversation',
-          },
-          {
-            delay: this.getRandomDelay(2 * 60 * 60 * 1000, 4 * 60 * 60 * 1000), // 2-4hr delay
-            attempts: 3,
-            backoff: {
-              type: 'exponential',
-              delay: 5000,
+      // Schedule comment jobs (only if under daily limit)
+      if (remainingComments > 0) {
+        const jobId = `comment-${account.id}-${today}`
+        const existingJob = await this.warmupQueue.getJob(jobId)
+
+        if (!existingJob) {
+          await this.warmupQueue.add(
+            'comment',
+            {
+              accountId: account.id,
+              action: 'comment',
+              targetSubreddit: 'CasualConversation',
             },
-          }
-        )
+            {
+              jobId,
+              delay: this.getRandomDelay(30 * 60 * 1000, 2 * 60 * 60 * 1000),
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 5000,
+              },
+            }
+          )
+          console.log(`  💬 Scheduled comment job (${remainingComments} remaining today)`)
+        } else {
+          console.log(`  ⏭️  Comment job already exists for ${account.username} today`)
+        }
+      }
+
+      // Schedule post jobs (only if under daily limit)
+      if (remainingPosts > 0) {
+        const jobId = `post-${account.id}-${today}`
+        const existingJob = await this.warmupQueue.getJob(jobId)
+
+        if (!existingJob) {
+          await this.warmupQueue.add(
+            'post',
+            {
+              accountId: account.id,
+              action: 'post',
+              targetSubreddit: 'CasualConversation',
+            },
+            {
+              jobId,
+              delay: this.getRandomDelay(2 * 60 * 60 * 1000, 4 * 60 * 60 * 1000),
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 5000,
+              },
+            }
+          )
+          console.log(`  📝 Scheduled post job (${remainingPosts} remaining today)`)
+        } else {
+          console.log(`  ⏭️  Post job already exists for ${account.username} today`)
+        }
       }
 
       console.log(`📋 Scheduled jobs for account ${account.username} (${account.warmupStatus})`)

@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe, LIFETIME_DEAL_PRICE, LIFETIME_DEAL_PRODUCT_NAME } from '@/lib/stripe'
+import { stripe, getCurrentTierInfo, LIFETIME_DEAL_PRODUCT_NAME } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
 
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser()
-
-    // Check if user is a founder (only founders can buy lifetime deal)
-    if (user.tier !== 'FOUNDER') {
-      return NextResponse.json(
-        { error: 'Lifetime deal is only available to founding members' },
-        { status: 403 }
-      )
-    }
 
     // Check if user already has lifetime deal
     if (user.hasLifetimeDeal) {
@@ -22,6 +14,14 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Get count of lifetime deals already sold
+    const lifetimeDealsSold = await prisma.user.count({
+      where: { hasLifetimeDeal: true }
+    })
+
+    // Get current tier pricing
+    const tierInfo = getCurrentTierInfo(lifetimeDealsSold)
 
     // Create or get Stripe customer
     let customerId = user.stripeCustomerId
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Create checkout session for one-time payment
+    // Create checkout session with tiered pricing
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -52,10 +52,10 @@ export async function POST(req: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: LIFETIME_DEAL_PRODUCT_NAME,
-              description: 'One-time payment for lifetime access to ReddRide. Never pay again!',
+              name: `${LIFETIME_DEAL_PRODUCT_NAME} - ${tierInfo.label}`,
+              description: `One-time payment for lifetime access to ReddRide (${tierInfo.discount}). Never pay again!`,
             },
-            unit_amount: LIFETIME_DEAL_PRICE,
+            unit_amount: tierInfo.price,
           },
           quantity: 1,
         },
@@ -66,6 +66,8 @@ export async function POST(req: NextRequest) {
       metadata: {
         userId: user.id,
         type: 'lifetime_deal',
+        tier: tierInfo.tier.toString(),
+        tierLabel: tierInfo.label,
       },
     })
 
