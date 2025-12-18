@@ -41,6 +41,10 @@ export default function PostDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [showReschedule, setShowReschedule] = useState(false)
+  const [rescheduling, setRescheduling] = useState(false)
+  const [newDate, setNewDate] = useState('')
+  const [newTime, setNewTime] = useState('')
 
   useEffect(() => {
     fetchPost()
@@ -58,6 +62,43 @@ export default function PostDetailPage() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleReschedule() {
+    if (!newDate || !newTime) {
+      setMessage({ type: 'error', text: 'Please select both date and time' })
+      return
+    }
+
+    const scheduledAt = new Date(`${newDate}T${newTime}`)
+    if (scheduledAt <= new Date()) {
+      setMessage({ type: 'error', text: 'Scheduled time must be in the future' })
+      return
+    }
+
+    setRescheduling(true)
+    setMessage(null)
+
+    try {
+      const response = await fetch(`/api/posts/${postId}/reschedule`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scheduledAt: scheduledAt.toISOString() }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to reschedule')
+      }
+
+      setMessage({ type: 'success', text: `Rescheduled to ${scheduledAt.toLocaleString()}` })
+      setShowReschedule(false)
+      fetchPost() // Refresh post data
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setRescheduling(false)
     }
   }
 
@@ -189,33 +230,97 @@ export default function PostDetailPage() {
         {/* Post Details Card */}
         <div className="feature-card rounded-lg p-6 space-y-6">
           {/* Timing Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-[#0a0a0f] rounded-lg">
-            <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Scheduled For</p>
-              <p className="text-white font-medium">
-                {post.scheduledAt
-                  ? new Date(post.scheduledAt).toLocaleString()
-                  : 'Not scheduled'}
-              </p>
-            </div>
-            {post.postedAt && (
+          <div className="p-4 bg-[#0a0a0f] rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Posted At</p>
+                <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Scheduled For</p>
                 <p className="text-white font-medium">
-                  {new Date(post.postedAt).toLocaleString()}
+                  {post.scheduledAt
+                    ? new Date(post.scheduledAt).toLocaleString()
+                    : 'Not scheduled'}
                 </p>
               </div>
+              {post.postedAt && (
+                <div>
+                  <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Posted At</p>
+                  <p className="text-white font-medium">
+                    {new Date(post.postedAt).toLocaleString()}
+                  </p>
+                </div>
+              )}
+              <div>
+                <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Post Type</p>
+                <p className="text-white font-medium capitalize">{post.postType}</p>
+              </div>
+              <div>
+                <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Created</p>
+                <p className="text-white font-medium">
+                  {new Date(post.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            {/* Reschedule Section - only show for scheduled (not posted) posts */}
+            {post.status === 'scheduled' && (
+              <div className="mt-4 pt-4 border-t border-gray-700">
+                {!showReschedule ? (
+                  <button
+                    onClick={() => {
+                      setShowReschedule(true)
+                      // Pre-fill with current scheduled time
+                      if (post.scheduledAt) {
+                        const d = new Date(post.scheduledAt)
+                        setNewDate(d.toISOString().split('T')[0])
+                        setNewTime(d.toTimeString().slice(0, 5))
+                      }
+                    }}
+                    className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-medium text-sm"
+                  >
+                    🕐 Change Scheduled Time
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-white font-medium text-sm">Reschedule Post</p>
+                    <div className="flex flex-wrap gap-3">
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Date</label>
+                        <input
+                          type="date"
+                          value={newDate}
+                          onChange={(e) => setNewDate(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          className="px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-gray-400 mb-1">Time</label>
+                        <input
+                          type="time"
+                          value={newTime}
+                          onChange={(e) => setNewTime(e.target.value)}
+                          className="px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleReschedule}
+                        disabled={rescheduling}
+                        className="bg-[#00D9FF] text-black px-4 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition font-medium text-sm disabled:opacity-50"
+                      >
+                        {rescheduling ? 'Saving...' : 'Save New Time'}
+                      </button>
+                      <button
+                        onClick={() => setShowReschedule(false)}
+                        className="text-gray-400 hover:text-white px-4 py-2 text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
-            <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Post Type</p>
-              <p className="text-white font-medium capitalize">{post.postType}</p>
-            </div>
-            <div>
-              <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Created</p>
-              <p className="text-white font-medium">
-                {new Date(post.createdAt).toLocaleDateString()}
-              </p>
-            </div>
           </div>
 
           {/* Content */}
