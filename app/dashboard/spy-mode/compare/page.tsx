@@ -146,7 +146,7 @@ function ComparePageContent() {
             >
               ← Back
             </Link>
-            <h1 className="text-2xl font-bold text-white">📊 Compare Accounts</h1>
+            <h1 className="text-2xl font-bold text-white">Compare Accounts</h1>
           </div>
         </div>
 

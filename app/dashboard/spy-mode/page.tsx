@@ -357,9 +357,8 @@ export default function SpyModePage() {
           <div className="mt-8 text-center">
             <Link
               href={`/dashboard/spy-mode/compare?ids=${accounts.slice(0, 2).map(a => a.id).join(',')}`}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-8 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition"
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-8 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition"
             >
-              <span>📊</span>
               Compare Accounts
             </Link>
           </div>
