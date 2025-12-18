@@ -48,8 +48,14 @@ export class TimingAnalyzer {
       await this.processTimingData(timingData)
 
       console.log(`✅ Analyzed ${timingData.length} posts from r/${subredditName}`)
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ Error analyzing r/${subredditName}:`, error)
+
+      // Check for Reddit API 404 errors (banned, private, or non-existent subreddits)
+      if (error.statusCode === 404 || error.message?.includes('404') || error.message?.includes('banned')) {
+        throw new Error(`Subreddit "r/${subredditName}" not found. It may not exist, be private, or be banned.`)
+      }
+
       throw error
     }
   }

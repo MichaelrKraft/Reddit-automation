@@ -837,14 +837,59 @@ export default function WarmupDashboard() {
       <div className="feature-card rounded-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-white">Warmup Accounts</h3>
-          {!showAddAccount && (
-            <button
-              onClick={() => setShowAddAccount(true)}
-              className="px-4 py-2 bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 rounded-lg hover:bg-[#00D9FF]/30 transition text-sm font-medium"
-            >
-              + Add Account
-            </button>
-          )}
+          <div className="flex gap-2">
+            {/* Pause/Stop buttons for all active accounts */}
+            {accounts.some(a => a.status !== 'COMPLETED' && a.status !== 'FAILED' && a.status !== 'PAUSED') && (
+              <button
+                onClick={() => {
+                  const activeAccounts = accounts.filter(a => a.status !== 'COMPLETED' && a.status !== 'FAILED' && a.status !== 'PAUSED')
+                  if (activeAccounts.length > 0 && confirm('Pause all active warmup accounts?')) {
+                    activeAccounts.forEach(a => handleAccountAction(a.id, 'pause'))
+                  }
+                }}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 rounded-lg hover:bg-yellow-500/30 transition text-sm font-medium disabled:opacity-50"
+              >
+                Pause All
+              </button>
+            )}
+            {accounts.some(a => a.status === 'PAUSED') && (
+              <button
+                onClick={() => {
+                  const pausedAccounts = accounts.filter(a => a.status === 'PAUSED')
+                  if (pausedAccounts.length > 0 && confirm('Resume all paused accounts?')) {
+                    pausedAccounts.forEach(a => handleAccountAction(a.id, 'resume'))
+                  }
+                }}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-green-500/20 text-green-400 border border-green-500/50 rounded-lg hover:bg-green-500/30 transition text-sm font-medium disabled:opacity-50"
+              >
+                Resume All
+              </button>
+            )}
+            {accounts.some(a => a.status !== 'COMPLETED' && a.status !== 'FAILED') && (
+              <button
+                onClick={() => {
+                  const stoppableAccounts = accounts.filter(a => a.status !== 'COMPLETED' && a.status !== 'FAILED')
+                  if (stoppableAccounts.length > 0 && confirm('Stop all warmup accounts? This cannot be undone.')) {
+                    stoppableAccounts.forEach(a => handleAccountAction(a.id, 'stop'))
+                  }
+                }}
+                disabled={actionLoading}
+                className="px-4 py-2 bg-red-500/20 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500/30 transition text-sm font-medium disabled:opacity-50"
+              >
+                Stop All
+              </button>
+            )}
+            {!showAddAccount && (
+              <button
+                onClick={() => setShowAddAccount(true)}
+                className="px-4 py-2 bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 rounded-lg hover:bg-[#00D9FF]/30 transition text-sm font-medium"
+              >
+                + Add Account
+              </button>
+            )}
+          </div>
         </div>
 
         {loading && accounts.length === 0 ? (
@@ -890,25 +935,25 @@ export default function WarmupDashboard() {
                           <button
                             onClick={() => handleAccountAction(account.id, 'pause')}
                             disabled={actionLoading && selectedAccount === account.id}
-                            className="glass-button text-yellow-400 px-3 py-1 rounded text-sm disabled:opacity-50"
+                            className="px-3 py-1 bg-yellow-500/20 text-yellow-400 border border-yellow-500/50 rounded-lg hover:bg-yellow-500/30 transition text-sm font-medium disabled:opacity-50"
                           >
-                            ⏸️ Pause
+                            Pause
                           </button>
                         ) : (
                           <button
                             onClick={() => handleAccountAction(account.id, 'resume')}
                             disabled={actionLoading && selectedAccount === account.id}
-                            className="glass-button text-green-400 px-3 py-1 rounded text-sm disabled:opacity-50"
+                            className="px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/50 rounded-lg hover:bg-green-500/30 transition text-sm font-medium disabled:opacity-50"
                           >
-                            ▶️ Resume
+                            Resume
                           </button>
                         )}
                         <button
                           onClick={() => handleAccountAction(account.id, 'stop')}
                           disabled={actionLoading && selectedAccount === account.id}
-                          className="glass-button text-red-400 px-3 py-1 rounded text-sm disabled:opacity-50"
+                          className="px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/50 rounded-lg hover:bg-red-500/30 transition text-sm font-medium disabled:opacity-50"
                         >
-                          🛑 Stop
+                          Stop
                         </button>
                       </>
                     )}

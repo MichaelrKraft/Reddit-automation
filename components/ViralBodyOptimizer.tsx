@@ -123,8 +123,8 @@ export default function ViralBodyOptimizer() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-            <span className="text-2xl">📝</span> Viral Body Copy Optimizer
+          <h2 className="text-xl sm:text-2xl font-bold text-white">
+            Viral Body Copy Optimizer
           </h2>
           <p className="text-gray-400 mt-1 text-sm">
             Analyze your post body based on patterns from viral Reddit posts

@@ -274,8 +274,10 @@ export default function PostsPage() {
         </div>
 
         {/* Optimal Times Section */}
+        <div className="mt-10 mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Optimal Posting Times</h2>
+        </div>
         <div className="feature-card rounded-lg p-4 sm:p-6 mb-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Optimal Posting Times</h2>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-end">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -314,45 +316,62 @@ export default function PostsPage() {
               <p className="text-sm text-red-300">{timingError}</p>
             </div>
           )}
-        </div>
 
-        {/* Heatmap Results */}
-        {analyzing ? (
-          <div className="feature-card rounded-lg p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
-            <p className="text-gray-400 mt-4">Analyzing r/{subredditName}...</p>
-            <p className="text-gray-500 text-sm mt-1">This may take 15-30 seconds</p>
-          </div>
-        ) : timingLoading ? (
-          <div className="feature-card rounded-lg p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
-            <p className="text-gray-400 mt-4">Loading heatmap data...</p>
-          </div>
-        ) : !analyzed ? (
-          <div className="feature-card rounded-lg p-8 text-center">
-            <p className="text-gray-400">Enter a subreddit name and click "Analyze" to generate timing insights</p>
-          </div>
-        ) : heatmapData.length === 0 ? (
-          <div className="feature-card rounded-lg p-8 text-center">
-            <p className="text-gray-400">Unable to find enough activity data for r/{subredditName}</p>
-          </div>
-        ) : (
-          <div className="feature-card rounded-lg p-4 sm:p-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-white mb-1">
-                Activity Heatmap for r/{subredditName}
-              </h3>
-              <p className="text-xs text-gray-400">
-                Brighter colors = higher engagement. Times in Mountain Time (MT).
-              </p>
+          {/* Hint text - shows when not analyzed yet */}
+          {!analyzed && !analyzing && (
+            <p className="text-gray-400 text-sm mt-4">Enter a subreddit name and click "Analyze" to generate timing insights</p>
+          )}
+
+          {/* Loading states inside the card */}
+          {analyzing && (
+            <div className="mt-6 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              <p className="text-gray-400 mt-3">Analyzing r/{subredditName}...</p>
+              <p className="text-gray-500 text-sm mt-1">This may take 15-30 seconds</p>
+            </div>
+          )}
+
+          {timingLoading && !analyzing && (
+            <div className="mt-6 text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+              <p className="text-gray-400 mt-3">Loading heatmap data...</p>
+            </div>
+          )}
+
+          {/* No data message */}
+          {heatmapData.length === 0 && analyzed && !analyzing && !timingLoading && (
+            <div className="mt-4 text-center">
+              <p className="text-gray-400 text-sm">Unable to find enough activity data for r/{subredditName}</p>
+            </div>
+          )}
+
+          {/* Heatmap Grid - Always shown */}
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="mb-2 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-white">
+                  {subredditName ? `r/${subredditName} Activity` : 'Subreddit Activity'}
+                </h3>
+                <p className="text-[10px] text-gray-400">
+                  Times in Mountain Time (MT)
+                </p>
+              </div>
+              {heatmapData.length > 0 && subredditName && (
+                <Link
+                  href={`/dashboard/new-post?subreddit=${subredditName}`}
+                  className="px-3 py-1.5 bg-reddit-orange text-white rounded-lg hover:bg-orange-600 transition text-xs"
+                >
+                  Create Post →
+                </Link>
+              )}
             </div>
 
             <div className="overflow-x-auto">
               <div className="inline-block min-w-full">
                 <div className="flex">
-                  <div className="w-12"></div>
+                  <div className="w-10"></div>
                   {dayNames.map((day, idx) => (
-                    <div key={idx} className="flex-1 text-center font-semibold text-gray-300 text-xs py-2">
+                    <div key={idx} className="flex-1 text-center font-semibold text-gray-300 text-[10px] py-1">
                       {day}
                     </div>
                   ))}
@@ -360,7 +379,7 @@ export default function PostsPage() {
 
                 {hours.map((hour) => (
                   <div key={hour} className="flex">
-                    <div className="w-12 flex items-center justify-end pr-2 text-xs text-gray-400">
+                    <div className="w-10 flex items-center justify-end pr-1 text-[10px] text-gray-400">
                       {hour.toString().padStart(2, '0')}:00
                     </div>
                     {dayNames.map((_, dayIdx) => {
@@ -368,23 +387,23 @@ export default function PostsPage() {
                       return (
                         <div
                           key={`${dayIdx}-${hour}`}
-                          className="flex-1 p-0.5"
+                          className="flex-1 p-px"
                         >
                           {cellData ? (
                             <div
                               className={`
                                 ${getHeatmapColor(cellData.normalizedEngagement)}
-                                rounded cursor-pointer hover:opacity-80 transition
-                                h-6 flex items-center justify-center
+                                rounded-sm cursor-pointer hover:opacity-80 transition
+                                h-4 flex items-center justify-center
                               `}
                               title={`${dayNames[dayIdx]} ${hour}:00\nEngagement: ${cellData.engagementRate.toFixed(1)}\nAvg Score: ${cellData.avgScore.toFixed(0)}\nSample Size: ${cellData.sampleSize}`}
                             >
-                              <span className="text-white text-[10px] font-semibold">
+                              <span className="text-white text-[8px] font-semibold">
                                 {cellData.engagementRate.toFixed(0)}
                               </span>
                             </div>
                           ) : (
-                            <div className="bg-gray-700 rounded h-6"></div>
+                            <div className="bg-gray-700 rounded-sm h-4"></div>
                           )}
                         </div>
                       )
@@ -394,29 +413,19 @@ export default function PostsPage() {
               </div>
             </div>
 
-            <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-400">Engagement:</span>
-                <div className="flex items-center gap-1">
-                  <div className="w-5 h-5 bg-red-500 rounded"></div>
-                  <span className="text-xs text-gray-400">Low</span>
-                  <div className="w-5 h-5 bg-orange-500 rounded ml-1"></div>
-                  <div className="w-5 h-5 bg-yellow-500 rounded"></div>
-                  <div className="w-5 h-5 bg-green-500 rounded"></div>
-                  <div className="w-5 h-5 bg-green-600 rounded"></div>
-                  <span className="text-xs text-gray-400">High</span>
-                </div>
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-[10px] text-gray-400">Low</span>
+              <div className="flex items-center gap-0.5">
+                <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
+                <div className="w-3 h-3 bg-orange-500 rounded-sm"></div>
+                <div className="w-3 h-3 bg-yellow-500 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-sm"></div>
+                <div className="w-3 h-3 bg-green-600 rounded-sm"></div>
               </div>
-
-              <Link
-                href={`/dashboard/new-post?subreddit=${subredditName}`}
-                className="px-4 py-2 bg-reddit-orange text-white rounded-lg hover:bg-orange-600 transition text-sm"
-              >
-                Create Post for r/{subredditName} →
-              </Link>
+              <span className="text-[10px] text-gray-400">High</span>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
