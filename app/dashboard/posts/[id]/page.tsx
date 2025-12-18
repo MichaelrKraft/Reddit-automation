@@ -335,7 +335,7 @@ export default function PostDetailPage() {
             {(post.status === 'scheduled' || post.status === 'draft') && (
               <div className="mt-4 pt-4 border-t border-gray-700">
                 {!showReschedule ? (
-                  <div className="space-y-4">
+                  <div className="flex justify-between items-start">
                     <div className="flex flex-wrap gap-3">
                       <button
                         onClick={handlePostNow}
@@ -361,17 +361,15 @@ export default function PostDetailPage() {
                         </button>
                       )}
                     </div>
-                    {/* Cancel button below the action buttons */}
+                    {/* Cancel button - same size as Save Draft, aligned right below it */}
                     {post.status === 'scheduled' && (
-                      <div className="pt-3 border-t border-gray-700">
-                        <button
-                          onClick={handleCancelScheduled}
-                          disabled={cancelling}
-                          className="w-full bg-red-600/20 text-red-400 border border-red-600/50 px-4 py-2 rounded-lg hover:bg-red-600/30 transition font-medium text-sm disabled:opacity-50"
-                        >
-                          {cancelling ? 'Cancelling...' : 'Cancel Scheduled Post'}
-                        </button>
-                      </div>
+                      <button
+                        onClick={handleCancelScheduled}
+                        disabled={cancelling}
+                        className="bg-red-600/20 text-red-400 border border-red-600/50 px-3 py-1.5 rounded-lg hover:bg-red-600/30 transition font-medium text-xs disabled:opacity-50"
+                      >
+                        {cancelling ? 'Cancelling...' : 'Cancel'}
+                      </button>
                     )}
                   </div>
                 ) : (
