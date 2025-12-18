@@ -232,15 +232,19 @@ async function performPost(
     const { title, content } = post as { title: string; content: string }
 
     // Submit post
-    await subredditObj.submitSelfpost({
+    const submission = await subredditObj.submitSelfpost({
       title,
       text: content,
     })
 
-    console.log(`📝 Posted: ${title}`)
+    // Get post URL and ID
+    const postUrl = `https://reddit.com${submission.permalink}`
+    const postId = submission.name
 
-    // Update progress
-    await updateProgress(accountId, 'post', 1)
+    console.log(`📝 Posted: ${title} - ${postUrl}`)
+
+    // Update progress with post details
+    await updateProgress(accountId, 'post', 1, { title, url: postUrl, redditId: postId, subreddit })
   } catch (error) {
     console.error('Error performing post:', error)
     throw error
@@ -251,7 +255,8 @@ async function performPost(
 async function updateProgress(
   accountId: string,
   action: 'upvote' | 'comment' | 'post',
-  count: number
+  count: number,
+  postDetails?: { title: string; url: string; redditId: string; subreddit: string }
 ): Promise<void> {
   const account = await prisma.redditAccount.findUnique({
     where: { id: accountId },
@@ -260,8 +265,13 @@ async function updateProgress(
   if (!account) return
 
   // Get existing progress or initialize
-  const progress = (account.warmupProgress as any) || { daily: [] }
+  const progress = (account.warmupProgress as any) || { daily: [], posts: [] }
   const today = new Date().toISOString().split('T')[0]
+
+  // Initialize posts array if not exists
+  if (!progress.posts) {
+    progress.posts = []
+  }
 
   // Find or create today's entry
   let todayEntry = progress.daily.find((d: any) => d.date === today)
@@ -271,11 +281,29 @@ async function updateProgress(
   }
 
   // Add action
-  todayEntry.actions.push({
+  const actionEntry: any = {
     type: action,
     count,
     timestamp: new Date().toISOString(),
-  })
+  }
+
+  // If this is a post with details, add post URL to action and to posts array
+  if (action === 'post' && postDetails) {
+    actionEntry.url = postDetails.url
+    actionEntry.title = postDetails.title
+    actionEntry.subreddit = postDetails.subreddit
+
+    // Also add to posts array for easy access
+    progress.posts.push({
+      title: postDetails.title,
+      url: postDetails.url,
+      redditId: postDetails.redditId,
+      subreddit: postDetails.subreddit,
+      createdAt: new Date().toISOString(),
+    })
+  }
+
+  todayEntry.actions.push(actionEntry)
 
   // Update database
   await prisma.redditAccount.update({

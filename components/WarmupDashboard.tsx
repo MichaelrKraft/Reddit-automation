@@ -4,6 +4,14 @@ import { useState, useEffect } from 'react'
 import WarmupOnboarding from './WarmupOnboarding'
 import WarmupJourneyStepper from './WarmupJourneyStepper'
 
+interface WarmupPost {
+  title: string
+  url: string
+  redditId: string
+  subreddit: string
+  createdAt: string
+}
+
 interface WarmupAccount {
   id: string
   username: string
@@ -18,8 +26,9 @@ interface WarmupAccount {
   totalActions: number
   recentActions: Array<{
     date: string
-    actions: Array<{ type: string; count: number; timestamp: string }>
+    actions: Array<{ type: string; count: number; timestamp: string; url?: string; title?: string; subreddit?: string }>
   }>
+  posts?: WarmupPost[]
 }
 
 interface SystemHealth {
@@ -500,6 +509,18 @@ export default function WarmupDashboard() {
                     {action.type === 'comment' && '💬'}
                     {action.type === 'post' && '📝'}
                     {' '}{action.type} x{action.count}
+                    {/* Show clickable link for posts */}
+                    {action.type === 'post' && action.url && (
+                      <a
+                        href={action.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 text-[#00D9FF] hover:underline"
+                        title={action.title}
+                      >
+                        r/{action.subreddit} →
+                      </a>
+                    )}
                   </span>
                   <span className="text-gray-500">
                     {new Date(action.timestamp).toLocaleTimeString()}
@@ -508,6 +529,43 @@ export default function WarmupDashboard() {
               ))}
             </div>
           </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Render Warmup Posts section
+  function renderWarmupPosts(account: WarmupAccount) {
+    if (!account.posts || account.posts.length === 0) {
+      return (
+        <div className="text-gray-400 text-center py-4">
+          No warmup posts yet. Posts will appear here once you reach Phase 3.
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-2">
+        {account.posts.slice().reverse().map((post, idx) => (
+          <a
+            key={idx}
+            href={post.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block p-3 bg-[#12121a] rounded-lg border border-gray-700 hover:border-[#00D9FF] transition group"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1 min-w-0">
+                <div className="text-sm text-white group-hover:text-[#00D9FF] transition truncate">
+                  {post.title}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">
+                  r/{post.subreddit} • {new Date(post.createdAt).toLocaleDateString()}
+                </div>
+              </div>
+              <span className="text-[#00D9FF] text-xs ml-2">View →</span>
+            </div>
+          </a>
         ))}
       </div>
     )
@@ -594,7 +652,7 @@ export default function WarmupDashboard() {
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          📋 Overview
+          Overview
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
@@ -604,7 +662,7 @@ export default function WarmupDashboard() {
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          📊 Analytics
+          Analytics
         </button>
         <button
           onClick={() => setActiveTab('queue')}
@@ -614,7 +672,7 @@ export default function WarmupDashboard() {
               : 'text-gray-400 hover:text-white'
           }`}
         >
-          ⏳ Queue
+          Queue
         </button>
       </div>
 
@@ -932,6 +990,12 @@ export default function WarmupDashboard() {
                     <div>
                       <h4 className="text-sm font-semibold text-white mb-2">📊 Phase Progress (Target vs Actual)</h4>
                       {renderPhaseProgressDetails(account)}
+                    </div>
+
+                    {/* Warmup Posts */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-white mb-2">📝 Warmup Posts ({account.posts?.length || 0})</h4>
+                      {renderWarmupPosts(account)}
                     </div>
 
                     {/* Detailed Action Log */}
