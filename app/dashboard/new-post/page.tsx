@@ -336,7 +336,7 @@ export default function NewPost() {
                   placeholder={
                     formData.postType === 'text'
                       ? 'Enter post content'
-                      : 'https://example.com'
+                      : 'Paste your YouTube URL'
                   }
                   value={formData.content}
                   onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}

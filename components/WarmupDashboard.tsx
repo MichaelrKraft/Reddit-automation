@@ -633,13 +633,21 @@ export default function WarmupDashboard() {
           <h2 className="text-2xl font-bold text-white">Warmup Dashboard</h2>
           <p className="text-gray-400 mt-1">Monitor and manage Reddit account warm-up system</p>
         </div>
-        <button
-          onClick={fetchData}
-          disabled={loading}
-          className="glass-button text-gray-300 px-4 py-2 rounded-lg transition disabled:opacity-50"
-        >
-          {loading ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className="flex gap-2">
+          <a
+            href="/dashboard"
+            className="glass-button text-gray-300 px-4 py-2 rounded-lg transition"
+          >
+            ← Back
+          </a>
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="glass-button text-gray-300 px-4 py-2 rounded-lg transition disabled:opacity-50"
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       {/* Tab Navigation */}

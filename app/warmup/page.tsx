@@ -1,4 +1,5 @@
 import WarmupDashboard from '@/components/WarmupDashboard'
+import DashboardNav from '@/components/DashboardNav'
 import Link from 'next/link'
 
 export default function WarmupPage() {
@@ -16,15 +17,8 @@ export default function WarmupPage() {
           </Link>
         </div>
 
-        {/* Back Button */}
-        <div className="mb-6 sm:mb-8">
-          <Link
-            href="/dashboard"
-            className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
-          >
-            ← Back
-          </Link>
-        </div>
+        {/* Navigation */}
+        <DashboardNav />
 
         <WarmupDashboard />
       </div>

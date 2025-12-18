@@ -88,18 +88,24 @@ export default function AIContentGenerator({ subreddit, onSelectContent }: AICon
             Tone
           </label>
           <div className="grid grid-cols-4 gap-2">
-            {(['casual', 'professional', 'humorous', 'informative'] as const).map((t) => (
+            {([
+              { value: 'casual', tooltip: 'Friendly and conversational, like chatting with a friend' },
+              { value: 'professional', tooltip: 'Polished and formal, suitable for business or expert discussions' },
+              { value: 'humorous', tooltip: 'Witty and entertaining, great for engaging audiences' },
+              { value: 'informative', tooltip: 'Educational and fact-focused, ideal for sharing knowledge' },
+            ] as const).map((t) => (
               <button
-                key={t}
+                key={t.value}
                 type="button"
-                onClick={() => setTone(t)}
+                onClick={() => setTone(t.value)}
+                title={t.tooltip}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                  tone === t
+                  tone === t.value
                     ? 'bg-[#00D9FF] text-black'
                     : 'bg-[#0a0a0f] text-gray-300 border border-gray-600 hover:bg-gray-800'
                 }`}
               >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
+                {t.value.charAt(0).toUpperCase() + t.value.slice(1)}
               </button>
             ))}
           </div>

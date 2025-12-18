@@ -314,17 +314,17 @@ export default function EditDraft() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition disabled:opacity-50 font-semibold"
+                className="flex-1 bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition disabled:opacity-50 font-semibold"
               >
-                {saving ? 'Saving...' : '💾 Save Draft'}
+                {saving ? 'Saving...' : 'Save Draft'}
               </button>
               <button
                 type="button"
                 onClick={handleSchedule}
                 disabled={scheduling || !formData.scheduledDate || !formData.scheduledTime}
-                className="flex-1 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition disabled:opacity-50 font-semibold"
+                className="flex-1 bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition disabled:opacity-50 font-semibold"
               >
-                {scheduling ? 'Scheduling...' : '📅 Schedule Post'}
+                {scheduling ? 'Scheduling...' : 'Schedule Post'}
               </button>
               <button
                 type="button"
@@ -332,7 +332,7 @@ export default function EditDraft() {
                 disabled={scheduling}
                 className="flex-1 bg-[#00D9FF] text-black px-6 py-3 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:opacity-50 font-semibold"
               >
-                {scheduling ? 'Posting...' : '🚀 Post Now'}
+                {scheduling ? 'Posting...' : 'Post Now'}
               </button>
             </div>
 
