@@ -1009,7 +1009,7 @@ export default function WarmupDashboard() {
                 {/* Expand/Collapse Button */}
                 <button
                   onClick={() => setExpandedAccount(expandedAccount === account.id ? null : account.id)}
-                  className="w-full mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400 hover:text-[#00D9FF] transition flex items-center justify-center gap-2"
+                  className="w-full mt-3 pt-3 border-t border-gray-700 text-sm text-gray-400 hover:text-[#00D9FF] transition flex items-center justify-center gap-2"
                 >
                   {expandedAccount === account.id ? (
                     <>
