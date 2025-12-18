@@ -229,15 +229,6 @@ export default function PostDetailPage() {
           </div>
 
           <div className="flex gap-2">
-            {(post.status === 'scheduled' || post.status === 'draft') && (
-              <button
-                onClick={handlePostNow}
-                disabled={postingNow}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium text-sm disabled:opacity-50"
-              >
-                {postingNow ? 'Posting...' : '🚀 Post Now'}
-              </button>
-            )}
             {post.status === 'draft' && (
               <Link
                 href={`/dashboard/new-post?edit=${post.id}`}
@@ -300,24 +291,35 @@ export default function PostDetailPage() {
               </div>
             </div>
 
-            {/* Reschedule Section - only show for scheduled (not posted) posts */}
-            {post.status === 'scheduled' && (
+            {/* Actions Section - show for scheduled or draft posts */}
+            {(post.status === 'scheduled' || post.status === 'draft') && (
               <div className="mt-4 pt-4 border-t border-gray-700">
                 {!showReschedule ? (
-                  <button
-                    onClick={() => {
-                      setShowReschedule(true)
-                      // Pre-fill with current scheduled time
-                      if (post.scheduledAt) {
-                        const d = new Date(post.scheduledAt)
-                        setNewDate(d.toISOString().split('T')[0])
-                        setNewTime(d.toTimeString().slice(0, 5))
-                      }
-                    }}
-                    className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-medium text-sm"
-                  >
-                    🕐 Change Scheduled Time
-                  </button>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={handlePostNow}
+                      disabled={postingNow}
+                      className="bg-green-500/20 text-green-400 border border-green-500/50 px-4 py-2 rounded-lg hover:bg-green-500/30 transition font-medium text-sm disabled:opacity-50"
+                    >
+                      {postingNow ? 'Posting...' : '🚀 Post Now'}
+                    </button>
+                    {post.status === 'scheduled' && (
+                      <button
+                        onClick={() => {
+                          setShowReschedule(true)
+                          // Pre-fill with current scheduled time
+                          if (post.scheduledAt) {
+                            const d = new Date(post.scheduledAt)
+                            setNewDate(d.toISOString().split('T')[0])
+                            setNewTime(d.toTimeString().slice(0, 5))
+                          }
+                        }}
+                        className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-medium text-sm"
+                      >
+                        🕐 Change Scheduled Time
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     <p className="text-white font-medium text-sm">Reschedule Post</p>
