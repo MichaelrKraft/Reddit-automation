@@ -264,20 +264,10 @@ export default function NewPost() {
 
         <div className="feature-card rounded-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <AIContentGenerator
-              subreddit={formData.subredditName}
-              onSelectContent={(title, content) => {
-                setFormData(prev => ({ ...prev, title, content }))
-              }}
-            />
-
-            <div className="border-t border-gray-700 pt-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Post Details</h3>
-            </div>
-
+            {/* Subreddit input first - AI Content Generator needs it */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Subreddit
+                Target Subreddit
               </label>
               <input
                 type="text"
@@ -288,16 +278,23 @@ export default function NewPost() {
                 className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Enter subreddit name without "r/"
+                Enter subreddit name without "r/" - needed for AI content generation
               </p>
             </div>
+
+            <AIContentGenerator
+              subreddit={formData.subredditName}
+              onSelectContent={(title, content) => {
+                setFormData(prev => ({ ...prev, title, content }))
+              }}
+            />
 
             {formData.subredditName && (
               <SubredditAnalysis subreddit={formData.subredditName} />
             )}
 
             {formData.subredditName && (
-              <OptimalTimingWidget 
+              <OptimalTimingWidget
                 subreddit={formData.subredditName}
                 onSelectTime={(time) => {
                   const date = time.toISOString().split('T')[0]
@@ -311,6 +308,10 @@ export default function NewPost() {
                 }}
               />
             )}
+
+            <div className="border-t border-gray-700 pt-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Post Details</h3>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
