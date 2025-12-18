@@ -19,7 +19,7 @@ export default function DashboardNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
+    <nav className="flex flex-wrap gap-2 sm:gap-3 mt-6 sm:mt-8 mb-6 sm:mb-8">
       {navItems.map((item) => {
         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
 
