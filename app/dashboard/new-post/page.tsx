@@ -500,14 +500,14 @@ export default function NewPost() {
                     Saving...
                   </span>
                 ) : (
-                  '💾 Save Draft'
+                  'Save Draft'
                 )}
               </button>
               <Link
                 href="/dashboard/drafts"
                 className="flex-1 bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-6 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition text-center font-semibold"
               >
-                📝 Drafts
+                Drafts
               </Link>
               <Link
                 href="/dashboard"
