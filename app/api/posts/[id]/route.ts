@@ -89,7 +89,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Post not found' }, { status: 404 })
     }
 
-    const { title, content, postType } = body
+    const { title, content, postType, status, scheduledAt } = body
 
     const post = await prisma.post.update({
       where: { id },
@@ -97,6 +97,8 @@ export async function PATCH(
         ...(title !== undefined && { title }),
         ...(content !== undefined && { content }),
         ...(postType !== undefined && { postType }),
+        ...(status !== undefined && { status }),
+        ...(scheduledAt !== undefined && { scheduledAt: scheduledAt ? new Date(scheduledAt) : null }),
       },
       include: {
         subreddit: true,

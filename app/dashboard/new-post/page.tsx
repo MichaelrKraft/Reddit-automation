@@ -509,9 +509,13 @@ export default function NewPost() {
               >
                 Drafts
               </Link>
+            </div>
+
+            {/* Cancel Button - Below action buttons */}
+            <div className="pt-4 border-t border-gray-700 mt-4">
               <Link
                 href="/dashboard"
-                className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition text-center"
+                className="block w-full px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition text-center"
               >
                 Cancel
               </Link>

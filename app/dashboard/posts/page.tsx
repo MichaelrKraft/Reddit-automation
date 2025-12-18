@@ -288,14 +288,14 @@ export default function PostsPage() {
                 placeholder="e.g., technology"
                 value={subredditName}
                 onChange={(e) => setSubredditName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-gray-500 text-sm"
+                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500 text-sm"
               />
             </div>
             <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={handleAnalyze}
                 disabled={analyzing || !subredditName}
-                className="px-4 sm:px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 font-medium text-sm"
+                className="px-4 sm:px-6 py-2 bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 rounded-lg hover:bg-[#00D9FF]/30 transition disabled:opacity-50 font-semibold text-sm"
               >
                 {analyzing ? 'Analyzing...' : 'Analyze'}
               </button>

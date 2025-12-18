@@ -46,6 +46,7 @@ export default function PostDetailPage() {
   const [newDate, setNewDate] = useState('')
   const [newTime, setNewTime] = useState('')
   const [postingNow, setPostingNow] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
 
   useEffect(() => {
     fetchPost()
@@ -156,6 +157,35 @@ export default function PostDetailPage() {
     }
   }
 
+  async function handleCancelScheduled() {
+    if (!confirm('Cancel this scheduled post? It will be moved back to drafts.')) {
+      return
+    }
+
+    setCancelling(true)
+    setMessage(null)
+
+    try {
+      const response = await fetch(`/api/posts/${postId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'draft', scheduledAt: null }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to cancel scheduled post')
+      }
+
+      setMessage({ type: 'success', text: 'Scheduled post cancelled. Moved to drafts.' })
+      fetchPost() // Refresh post data
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setCancelling(false)
+    }
+  }
+
   function getStatusBadge(status: string) {
     switch (status) {
       case 'posted':
@@ -261,7 +291,17 @@ export default function PostDetailPage() {
         {/* Post Details Card */}
         <div className="feature-card rounded-lg p-6 space-y-6">
           {/* Timing Info */}
-          <div className="p-4 bg-[#0a0a0f] rounded-lg">
+          <div className="p-4 bg-[#0a0a0f] rounded-lg relative">
+            {/* Cancel button in upper right for scheduled posts */}
+            {post.status === 'scheduled' && (
+              <button
+                onClick={handleCancelScheduled}
+                disabled={cancelling}
+                className="absolute top-3 right-3 bg-red-600/20 text-red-400 border border-red-600/50 px-3 py-1.5 rounded-lg hover:bg-red-600/30 transition font-medium text-xs disabled:opacity-50"
+              >
+                {cancelling ? 'Cancelling...' : '✕ Cancel'}
+              </button>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-500 text-xs uppercase tracking-wide mb-1">Scheduled For</p>
