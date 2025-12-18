@@ -126,7 +126,7 @@ export default function AnalyticsDashboard() {
             onClick={exportCSV}
             className="glass-button text-gray-300 px-3 sm:px-4 py-2 rounded-lg transition text-sm sm:text-base"
           >
-            📊 Export CSV
+            Export CSV
           </button>
         </div>
       </div>
