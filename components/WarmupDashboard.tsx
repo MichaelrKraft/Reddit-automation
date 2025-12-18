@@ -302,7 +302,7 @@ export default function WarmupDashboard() {
 
     return (
       <div className="feature-card rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">📊 Activity Timeline (Last 7 Days)</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Activity Timeline (Last 7 Days)</h3>
         <div className="flex items-end justify-between gap-2 h-40">
           {last7Days.map((day, idx) => (
             <div key={day.date} className="flex-1 flex flex-col items-center">
@@ -376,7 +376,7 @@ export default function WarmupDashboard() {
 
     return (
       <div className="feature-card rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">⚡ Action Statistics</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Action Statistics</h3>
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center p-4 bg-[#1a1a24] rounded-lg border border-gray-700">
             <div className="text-3xl font-bold text-orange-400">⬆️</div>
@@ -404,7 +404,7 @@ export default function WarmupDashboard() {
 
     return (
       <div className="feature-card rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">📊 Portfolio Analytics</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Portfolio Analytics</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center p-4 bg-[#1a1a24] rounded-lg border border-gray-700">
             <div className="text-2xl font-bold text-green-400">{analytics.summary.successRate}%</div>
@@ -435,7 +435,7 @@ export default function WarmupDashboard() {
   function renderQueueMonitor() {
     return (
       <div className="feature-card rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">⏳ Job Queue Monitor</h3>
+        <h3 className="text-lg font-semibold text-white mb-4">Job Queue Monitor</h3>
         {queueStatus ? (
           <div className="space-y-4">
             <div className="grid grid-cols-5 gap-3">
