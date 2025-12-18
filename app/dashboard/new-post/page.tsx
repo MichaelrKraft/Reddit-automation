@@ -346,7 +346,7 @@ export default function NewPost() {
                     onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
                     className="mr-2"
                   />
-                  📷 Image Post
+                  Image Post
                 </label>
               </div>
             </div>
