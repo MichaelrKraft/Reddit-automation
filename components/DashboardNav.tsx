@@ -6,13 +6,13 @@ import { usePathname } from 'next/navigation'
 const navItems = [
   { href: '/dashboard/spy-mode', label: 'Spy Mode' },
   { href: '/dashboard/speed-alerts', label: 'Speed Alerts' },
-  { href: '/dashboard/viral', label: 'Viral Optimizer' },
   { href: '/dashboard/timing', label: 'Optimal Times' },
   { href: '/dashboard/analytics', label: 'Analytics' },
   { href: '/dashboard/comments', label: 'Comments' },
   { href: '/dashboard/calendar', label: 'Calendar' },
   { href: '/warmup', label: 'Warmup' },
   { href: '/dashboard/new-post', label: '+ New Post' },
+  { href: '/dashboard/viral', label: 'Viral Optimizer' },
 ]
 
 export default function DashboardNav() {
