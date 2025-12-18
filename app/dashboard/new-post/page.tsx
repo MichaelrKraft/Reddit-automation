@@ -257,9 +257,19 @@ export default function NewPost() {
 
         {/* Page Header */}
         <div className="max-w-3xl mx-auto">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Create New Post</h1>
-            <p className="text-gray-400 mt-1 text-sm sm:text-base">Schedule a post to Reddit</p>
+          <div className="mb-6 sm:mb-8 flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">Create New Post</h1>
+              <p className="text-gray-400 mt-1 text-sm sm:text-base">Schedule a post to Reddit</p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              disabled={savingDraft || loading || !formData.title || !formData.content || !formData.subredditName}
+              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition disabled:opacity-50 font-semibold text-sm"
+            >
+              {savingDraft ? 'Saving...' : 'Save Draft'}
+            </button>
           </div>
 
         <div className="feature-card rounded-lg p-6">
