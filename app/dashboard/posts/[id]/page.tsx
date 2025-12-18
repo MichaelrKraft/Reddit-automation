@@ -158,11 +158,7 @@ export default function PostDetailPage() {
     }
   }
 
-  async function handleCancelScheduled() {
-    if (!confirm('Cancel this scheduled post? It will be moved back to drafts.')) {
-      return
-    }
-
+  async function handleSaveDraft() {
     setCancelling(true)
     setMessage(null)
 
@@ -175,16 +171,24 @@ export default function PostDetailPage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Failed to cancel scheduled post')
+        throw new Error(data.error || 'Failed to save as draft')
       }
 
-      setMessage({ type: 'success', text: 'Scheduled post cancelled. Moved to drafts.' })
+      setMessage({ type: 'success', text: 'Post saved as draft.' })
       fetchPost() // Refresh post data
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message })
     } finally {
       setCancelling(false)
     }
+  }
+
+  async function handleCancelScheduled() {
+    if (!confirm('Cancel this scheduled post? It will be moved back to drafts.')) {
+      return
+    }
+
+    await handleSaveDraft()
   }
 
   function getStatusBadge(status: string) {
@@ -297,7 +301,7 @@ export default function PostDetailPage() {
             {post.status === 'scheduled' && (
               <div className="absolute top-3 right-3 flex">
                 <button
-                  onClick={handleCancelScheduled}
+                  onClick={handleSaveDraft}
                   disabled={cancelling}
                   className="bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 border-r-0 px-3 py-1.5 rounded-l-lg hover:bg-[#00D9FF]/30 transition font-medium text-xs disabled:opacity-50"
                 >

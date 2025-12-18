@@ -198,11 +198,11 @@ I (26F) live pretty close to my workplace..."
           <button
             onClick={analyzeBody}
             disabled={isAnalyzing || !content.trim()}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg"
+            className="w-full bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-lg"
           >
             {isAnalyzing ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span className="w-5 h-5 border-2 border-[#00D9FF] border-t-transparent rounded-full animate-spin"></span>
                 Analyzing Body Copy...
               </span>
             ) : (
