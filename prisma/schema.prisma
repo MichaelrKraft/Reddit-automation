@@ -74,25 +74,26 @@ model Subreddit {
 }
 
 model Post {
-  id          String         @id @default(cuid())
-  title       String
-  content     String
-  postType    String         @default("text")
-  status      String         @default("scheduled")
-  scheduledAt DateTime?
-  postedAt    DateTime?
-  redditId    String?        @unique
-  url         String?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  accountId   String
-  campaignId  String?
-  subredditId String
-  comments    Comment[]
-  account     RedditAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  campaign    Campaign?      @relation(fields: [campaignId], references: [id])
-  subreddit   Subreddit      @relation(fields: [subredditId], references: [id], onDelete: Cascade)
-  analytics   PostAnalytics?
+  id           String         @id @default(cuid())
+  title        String
+  content      String
+  postType     String         @default("text")
+  status       String         @default("scheduled")
+  scheduledAt  DateTime?
+  postedAt     DateTime?
+  redditId     String?        @unique
+  url          String?
+  firstComment String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  accountId    String
+  campaignId   String?
+  subredditId  String
+  comments     Comment[]
+  account      RedditAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  campaign     Campaign?      @relation(fields: [campaignId], references: [id])
+  subreddit    Subreddit      @relation(fields: [subredditId], references: [id], onDelete: Cascade)
+  analytics    PostAnalytics?
 }
 
 model PostAnalytics {

@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireUser()
     const body = await request.json()
-    const { title, content, subredditName, accountId, campaignId, postType = 'text', isDraft = false } = body
+    const { title, content, subredditName, accountId, campaignId, postType = 'text', isDraft = false, firstComment = null } = body
 
     if (!title || !subredditName || !accountId) {
       return NextResponse.json(
@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
         accountId,
         subredditId: subreddit.id,
         campaignId: campaignId || null,
+        firstComment: firstComment || null,
       },
       include: {
         subreddit: true,

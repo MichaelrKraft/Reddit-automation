@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
         subreddit: post.subreddit.name,
         title: post.title,
         text: post.postType === 'text' ? post.content : undefined,
-        url: post.postType === 'link' ? post.content : undefined,
+        url: (post.postType === 'link' || post.postType === 'image') ? post.content : undefined,
+        firstComment: post.firstComment || undefined,
       },
       scheduledDate
     )

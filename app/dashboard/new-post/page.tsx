@@ -19,6 +19,7 @@ export default function NewPost() {
     scheduleNow: true,
     scheduledDate: '',
     scheduledTime: '',
+    firstComment: '',
   })
   const [savingDraft, setSavingDraft] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -72,6 +73,7 @@ export default function NewPost() {
           accountId,
           postType: formData.postType,
           isDraft: true,
+          firstComment: formData.firstComment || null,
         }),
       })
 
@@ -111,6 +113,7 @@ export default function NewPost() {
           subredditName: formData.subredditName,
           accountId,
           postType: formData.postType,
+          firstComment: formData.firstComment || null,
         }),
       })
 
@@ -392,6 +395,25 @@ export default function NewPost() {
                 </div>
               )}
             </div>
+
+            {/* First Comment - shows for image and link posts */}
+            {(formData.postType === 'image' || formData.postType === 'link') && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  First Comment (optional)
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Add context, details, or your pitch here. This will be automatically posted as the first comment on your post."
+                  value={formData.firstComment}
+                  onChange={(e) => setFormData(prev => ({ ...prev, firstComment: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  💡 Pro tip: Many Redditors put their detailed explanation in the first comment rather than the title
+                </p>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">

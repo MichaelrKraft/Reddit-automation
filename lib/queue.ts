@@ -44,6 +44,7 @@ export interface SchedulePostData {
   title: string
   text?: string
   url?: string
+  firstComment?: string
 }
 
 export async function schedulePost(data: SchedulePostData, scheduledAt: Date) {
@@ -95,6 +96,19 @@ export function startPostWorker() {
             engagement: 0,
           },
         })
+
+        // Auto-post first comment if provided
+        if (data.firstComment) {
+          try {
+            console.log(`Adding first comment to post: ${data.postId}`)
+            const reddit: any = await import('./reddit').then(m => m.getRedditClient())
+            await submission.reply(data.firstComment)
+            console.log(`First comment added successfully to post: ${data.postId}`)
+          } catch (commentError: any) {
+            console.error(`Failed to add first comment to post: ${data.postId}`, commentError)
+            // Don't fail the whole job if comment fails - the post itself succeeded
+          }
+        }
 
         return { success: true, redditId: submission.id }
       } catch (error: any) {
