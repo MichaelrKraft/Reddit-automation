@@ -6,12 +6,11 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireUser()
 
-    // Drafts are posts with status 'scheduled' but no scheduledAt date
+    // Drafts are posts with status 'draft'
     const drafts = await prisma.post.findMany({
       where: {
         account: { userId: user.id },
-        status: 'scheduled',
-        scheduledAt: null,
+        status: 'draft',
       },
       include: {
         subreddit: true,

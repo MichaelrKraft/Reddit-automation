@@ -483,3 +483,15 @@ model AlphaFeedback {
   @@index([status])
   @@index([createdAt])
 }
+
+model DripEmail {
+  id        String   @id @default(cuid())
+  userId    String
+  emailType String   // welcome, gettingStarted, tips, caseStudy, feature, checkIn
+  sentAt    DateTime @default(now())
+  resendId  String?  // Resend message ID for tracking
+
+  @@unique([userId, emailType])
+  @@index([userId])
+  @@index([emailType])
+}

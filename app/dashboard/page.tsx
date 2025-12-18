@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import FounderBanner from '@/components/FounderBanner'
+import UserDropdown from '@/components/UserDropdown'
 
 interface UserStats {
   isLoggedIn: boolean
@@ -101,15 +102,18 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Logo in upper left - moves down when founder banner is showing */}
+      {/* Header with Logo and User Dropdown */}
       <div className={`absolute z-20 px-4 sm:px-6 lg:px-8 max-w-7xl left-1/2 -translate-x-1/2 w-full ${userStats?.canPurchaseLifetime ? 'top-16' : 'top-4 sm:top-6'}`}>
-        <Link href="/">
-          <img
-            src="/reddride-logo-dark.png"
-            alt="ReddRide - The Reddit AI Automation Platform"
-            className="h-16 sm:h-[101px] object-contain cursor-pointer"
-          />
-        </Link>
+        <div className="flex justify-between items-start">
+          <Link href="/">
+            <img
+              src="/reddride-logo-dark.png"
+              alt="ReddRide - The Reddit AI Automation Platform"
+              className="h-16 sm:h-[101px] object-contain cursor-pointer"
+            />
+          </Link>
+          <UserDropdown />
+        </div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
