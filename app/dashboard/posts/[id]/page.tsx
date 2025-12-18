@@ -45,6 +45,7 @@ export default function PostDetailPage() {
   const [rescheduling, setRescheduling] = useState(false)
   const [newDate, setNewDate] = useState('')
   const [newTime, setNewTime] = useState('')
+  const [postingNow, setPostingNow] = useState(false)
 
   useEffect(() => {
     fetchPost()
@@ -62,6 +63,34 @@ export default function PostDetailPage() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handlePostNow() {
+    if (!confirm('Post to Reddit right now?')) {
+      return
+    }
+
+    setPostingNow(true)
+    setMessage(null)
+
+    try {
+      const response = await fetch(`/api/posts/${postId}/post-now`, {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to post')
+      }
+
+      setMessage({ type: 'success', text: `Posted successfully! View on Reddit: ${data.redditUrl}` })
+      fetchPost() // Refresh to show updated status
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setPostingNow(false)
     }
   }
 
@@ -200,6 +229,15 @@ export default function PostDetailPage() {
           </div>
 
           <div className="flex gap-2">
+            {(post.status === 'scheduled' || post.status === 'draft') && (
+              <button
+                onClick={handlePostNow}
+                disabled={postingNow}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-medium text-sm disabled:opacity-50"
+              >
+                {postingNow ? 'Posting...' : '🚀 Post Now'}
+              </button>
+            )}
             {post.status === 'draft' && (
               <Link
                 href={`/dashboard/new-post?edit=${post.id}`}
