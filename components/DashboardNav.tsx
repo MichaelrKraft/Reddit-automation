@@ -7,7 +7,7 @@ const navItems = [
   { href: '/dashboard/spy-mode', label: 'Spy Mode' },
   { href: '/dashboard/speed-alerts', label: 'Speed Alerts' },
   { href: '/dashboard/timing', label: 'Optimal Times' },
-  { href: '/dashboard/analytics', label: 'Analytics' },
+  { href: '/dashboard/posts', label: 'Posts' },
   { href: '/dashboard/comments', label: 'Comments' },
   { href: '/dashboard/calendar', label: 'Calendar' },
   { href: '/warmup', label: 'Warmup' },

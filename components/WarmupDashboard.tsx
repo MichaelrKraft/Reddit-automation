@@ -988,19 +988,19 @@ export default function WarmupDashboard() {
                   <div className="mt-4 pt-4 border-t border-gray-600 space-y-4">
                     {/* Phase Progress Details */}
                     <div>
-                      <h4 className="text-sm font-semibold text-white mb-2">📊 Phase Progress (Target vs Actual)</h4>
+                      <h4 className="text-sm font-semibold text-white mb-2">Phase Progress (Target vs Actual)</h4>
                       {renderPhaseProgressDetails(account)}
                     </div>
 
                     {/* Warmup Posts */}
                     <div>
-                      <h4 className="text-sm font-semibold text-white mb-2">📝 Warmup Posts ({account.posts?.length || 0})</h4>
+                      <h4 className="text-sm font-semibold text-white mb-2">Warmup Posts ({account.posts?.length || 0})</h4>
                       {renderWarmupPosts(account)}
                     </div>
 
                     {/* Detailed Action Log */}
                     <div>
-                      <h4 className="text-sm font-semibold text-white mb-2">📋 Recent Activity Log</h4>
+                      <h4 className="text-sm font-semibold text-white mb-2">Recent Activity Log</h4>
                       {renderDetailedActionLog(account)}
                     </div>
                   </div>
