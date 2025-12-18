@@ -265,33 +265,43 @@ export default function PostCalendar({ onPostRescheduled }: PostCalendarProps) {
                   </div>
 
                   <div className="space-y-1">
-                    {dayPosts.slice(0, 3).map((post) => (
-                      <div
-                        key={post.id}
-                        draggable
-                        onDragStart={(e) => {
-                          e.stopPropagation()
-                          handleDragStart(e, post.id)
-                        }}
-                        onDragEnd={handleDragEnd}
-                        onClick={(e) => e.stopPropagation()}
-                        className={`
-                          text-xs p-1.5 rounded cursor-grab truncate
-                          ${post.status === 'posted'
-                            ? 'bg-green-900/50 text-green-300 border border-green-700'
-                            : post.status === 'failed'
-                            ? 'bg-red-900/50 text-red-300 border border-red-700'
-                            : 'bg-blue-900/50 text-blue-300 border border-blue-700'
-                          }
-                          ${draggedPost === post.id ? 'opacity-50' : ''}
-                          hover:opacity-80 transition
-                        `}
-                        title={`${post.title} - r/${post.subreddit.name}`}
-                      >
-                        <span className="font-medium">r/{post.subreddit.name}</span>
-                        <div className="truncate text-gray-400">{post.title}</div>
-                      </div>
-                    ))}
+                    {dayPosts.slice(0, 3).map((post) => {
+                      const postTime = new Date(post.scheduledAt)
+                      const timeStr = postTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+                      return (
+                        <div
+                          key={post.id}
+                          draggable
+                          onDragStart={(e) => {
+                            e.stopPropagation()
+                            handleDragStart(e, post.id)
+                          }}
+                          onDragEnd={handleDragEnd}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/dashboard/posts/${post.id}`)
+                          }}
+                          className={`
+                            text-xs p-1.5 rounded cursor-pointer truncate
+                            ${post.status === 'posted'
+                              ? 'bg-green-900/50 text-green-300 border border-green-700'
+                              : post.status === 'failed'
+                              ? 'bg-red-900/50 text-red-300 border border-red-700'
+                              : 'bg-blue-900/50 text-blue-300 border border-blue-700'
+                            }
+                            ${draggedPost === post.id ? 'opacity-50' : ''}
+                            hover:opacity-80 hover:ring-1 hover:ring-white/30 transition
+                          `}
+                          title={`${post.title} - r/${post.subreddit.name} at ${timeStr}`}
+                        >
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="font-medium truncate">r/{post.subreddit.name}</span>
+                            <span className="text-[10px] opacity-75 shrink-0">{timeStr}</span>
+                          </div>
+                          <div className="truncate text-gray-400">{post.title}</div>
+                        </div>
+                      )
+                    })}
                     {dayPosts.length > 3 && (
                       <div className="text-xs text-gray-500 pl-1">
                         +{dayPosts.length - 3} more
@@ -320,7 +330,7 @@ export default function PostCalendar({ onPostRescheduled }: PostCalendarProps) {
           <span>Failed</span>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <span className="text-gray-500">Drag posts to reschedule • Click a day to create post</span>
+          <span className="text-gray-500">Click post to view • Drag to reschedule • Click day to create</span>
         </div>
       </div>
     </div>

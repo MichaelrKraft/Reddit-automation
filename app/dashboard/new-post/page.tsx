@@ -95,9 +95,10 @@ export default function NewPost() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    
+    setMessage(null)
+
     if (!accountId) {
-      alert('No Reddit account found. Please check your .env.local configuration.')
+      setMessage({ type: 'error', text: 'No Reddit account found. Please check your .env.local configuration.' })
       return
     }
 
@@ -123,6 +124,7 @@ export default function NewPost() {
 
       const { post } = await postResponse.json()
 
+      let scheduledTime = ''
       if (formData.scheduleNow) {
         const scheduleResponse = await fetch('/api/posts/schedule', {
           method: 'POST',
@@ -136,9 +138,10 @@ export default function NewPost() {
         if (!scheduleResponse.ok) {
           throw new Error('Failed to schedule post')
         }
+        scheduledTime = 'immediately'
       } else if (formData.scheduledDate && formData.scheduledTime) {
         const scheduledAt = new Date(`${formData.scheduledDate}T${formData.scheduledTime}`)
-        
+
         const scheduleResponse = await fetch('/api/posts/schedule', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -151,13 +154,16 @@ export default function NewPost() {
         if (!scheduleResponse.ok) {
           throw new Error('Failed to schedule post')
         }
+        scheduledTime = scheduledAt.toLocaleString()
       }
 
-      alert('Post created and scheduled successfully!')
-      router.push('/dashboard')
+      const successMsg = scheduledTime
+        ? `Post scheduled for ${scheduledTime}! Redirecting to dashboard...`
+        : 'Post created successfully! Redirecting to dashboard...'
+      setMessage({ type: 'success', text: successMsg })
+      setTimeout(() => router.push('/dashboard'), 2000)
     } catch (error: any) {
-      alert(`Error: ${error.message}`)
-    } finally {
+      setMessage({ type: 'error', text: `Error: ${error.message}` })
       setLoading(false)
     }
   }
