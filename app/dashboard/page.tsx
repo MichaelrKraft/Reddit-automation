@@ -68,7 +68,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40 pb-16">
         <div className="mb-8">
           <div className="mb-4 text-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-white">Dashboard</h1>
