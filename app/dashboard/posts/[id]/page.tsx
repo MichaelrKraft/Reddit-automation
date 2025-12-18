@@ -72,8 +72,10 @@ export default function PostDetailPage() {
     }
 
     const scheduledAt = new Date(`${newDate}T${newTime}`)
-    if (scheduledAt <= new Date()) {
-      setMessage({ type: 'error', text: 'Scheduled time must be in the future' })
+    // Allow times up to 1 minute in the past (to account for form submission delay)
+    const oneMinuteAgo = new Date(Date.now() - 60000)
+    if (scheduledAt < oneMinuteAgo) {
+      setMessage({ type: 'error', text: 'Scheduled time must not be in the past' })
       return
     }
 

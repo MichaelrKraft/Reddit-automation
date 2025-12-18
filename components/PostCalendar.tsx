@@ -162,9 +162,19 @@ export default function PostCalendar({ onPostRescheduled }: PostCalendarProps) {
     e.preventDefault()
     const postId = e.dataTransfer.getData('postId')
     if (postId) {
-      // Set time to noon on the target date
+      // Find the original post to preserve its time
+      const originalPost = posts.find(p => p.id === postId)
       const newDate = new Date(date)
-      newDate.setHours(12, 0, 0, 0)
+
+      if (originalPost?.scheduledAt) {
+        // Preserve the original scheduled time, just change the date
+        const originalTime = new Date(originalPost.scheduledAt)
+        newDate.setHours(originalTime.getHours(), originalTime.getMinutes(), 0, 0)
+      } else {
+        // Default to noon if no original time
+        newDate.setHours(12, 0, 0, 0)
+      }
+
       reschedulePost(postId, newDate)
     }
     setDropTarget(null)
