@@ -210,7 +210,7 @@ export default function SpyModePage() {
                 <button
                   onClick={startMonitoring}
                   disabled={accounts.length === 0}
-                  className="bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:bg-gray-600 disabled:cursor-not-allowed text-sm sm:text-base"
+                  className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
                 >
                   Start Monitoring
                 </button>

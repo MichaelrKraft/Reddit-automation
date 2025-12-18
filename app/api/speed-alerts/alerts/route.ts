@@ -86,13 +86,14 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// DELETE /api/speed-alerts/alerts - Delete single alert or clear old alerts
+// DELETE /api/speed-alerts/alerts - Delete single alert or clear old/all alerts
 export async function DELETE(request: NextRequest) {
   try {
     const user = await requireUser()
     const { searchParams } = new URL(request.url)
     const alertId = searchParams.get('id')
     const olderThanDays = searchParams.get('olderThanDays')
+    const clearAll = searchParams.get('clearAll')
 
     // Delete single alert by ID
     if (alertId) {
@@ -118,6 +119,19 @@ export async function DELETE(request: NextRequest) {
       })
 
       return NextResponse.json({ success: true, deletedId: alertId })
+    }
+
+    // Clear all alerts
+    if (clearAll === 'true') {
+      const deleted = await prisma.alertHistory.deleteMany({
+        where: {
+          monitoredSubreddit: {
+            userId: user.id,
+          },
+        },
+      })
+
+      return NextResponse.json({ success: true, deletedCount: deleted.count })
     }
 
     // Bulk delete old alerts
