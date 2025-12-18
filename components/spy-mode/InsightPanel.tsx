@@ -17,10 +17,10 @@ interface InsightPanelProps {
 }
 
 const insightIcons: Record<string, string> = {
-  pattern: '🔍',
-  timing: '⏰',
-  subreddit: '📍',
-  recommendation: '💡',
+  pattern: '',
+  timing: '',
+  subreddit: '',
+  recommendation: '',
 }
 
 const insightColors: Record<string, string> = {
@@ -35,7 +35,6 @@ export default function InsightPanel({ insights, isLoading, onGenerate }: Insigh
     return (
       <div className="feature-card rounded-lg p-6">
         <div className="text-center py-8">
-          <div className="text-4xl mb-4">🧠</div>
           <h3 className="text-lg font-semibold text-white mb-2">
             AI Insights Available
           </h3>
@@ -58,8 +57,8 @@ export default function InsightPanel({ insights, isLoading, onGenerate }: Insigh
   return (
     <div className="feature-card rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-          🧠 AI Insights
+        <h2 className="text-lg font-semibold text-white">
+          AI Insights
         </h2>
         <button
           onClick={onGenerate}
@@ -93,9 +92,6 @@ export default function InsightPanel({ insights, isLoading, onGenerate }: Insigh
               }`}
             >
               <div className="flex items-start gap-3">
-                <span className="text-2xl">
-                  {insightIcons[insight.insightType] || '📌'}
-                </span>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="text-white font-semibold">{insight.title}</h3>
