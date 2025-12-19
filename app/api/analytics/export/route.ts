@@ -1,18 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getOrCreateUser } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
+    // Authenticate user
+    const user = await getOrCreateUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Get user's Reddit accounts
+    const userAccounts = await prisma.redditAccount.findMany({
+      where: { userId: user.id },
+      select: { id: true }
+    })
+    const accountIds = userAccounts.map(a => a.id)
+
     const { searchParams } = new URL(request.url)
     const days = parseInt(searchParams.get('days') || '30')
-    
+
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
-    
+
     const posts = await prisma.post.findMany({
       where: {
         status: 'posted',
         postedAt: { gte: startDate },
+        accountId: { in: accountIds },  // Filter by user's accounts
       },
       include: {
         analytics: true,

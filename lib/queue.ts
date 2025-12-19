@@ -79,7 +79,16 @@ export async function schedulePost(data: SchedulePostData, scheduledAt: Date) {
   console.log(`[Queue] Scheduled for: ${scheduledAt.toISOString()}, delay: ${delay}ms`)
 
   try {
-    const job = await getPostQueue().add(
+    const queue = getPostQueue()
+
+    // Remove existing job if rescheduling (prevents "Job already exists" error)
+    const existingJob = await queue.getJob(data.postId)
+    if (existingJob) {
+      console.log(`[Queue] Removing existing job for post ${data.postId}`)
+      await existingJob.remove()
+    }
+
+    const job = await queue.add(
       'submit-post',
       data,
       {

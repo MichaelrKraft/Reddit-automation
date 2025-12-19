@@ -251,6 +251,51 @@ async function performPost(
   }
 }
 
+// Track failed attempts in database (for visibility in dashboard)
+async function trackFailedAttempt(
+  accountId: string,
+  action: 'upvote' | 'comment' | 'post',
+  errorMessage: string
+): Promise<void> {
+  try {
+    const account = await prisma.redditAccount.findUnique({
+      where: { id: accountId },
+    })
+
+    if (!account) return
+
+    const progress = (account.warmupProgress as any) || { daily: [], posts: [], failedAttempts: [] }
+    const today = new Date().toISOString().split('T')[0]
+
+    // Initialize failedAttempts array if not exists
+    if (!progress.failedAttempts) {
+      progress.failedAttempts = []
+    }
+
+    // Add failed attempt record
+    progress.failedAttempts.push({
+      date: today,
+      action,
+      error: errorMessage.substring(0, 200), // Truncate long errors
+      timestamp: new Date().toISOString(),
+    })
+
+    // Keep only last 20 failed attempts to prevent bloat
+    if (progress.failedAttempts.length > 20) {
+      progress.failedAttempts = progress.failedAttempts.slice(-20)
+    }
+
+    await prisma.redditAccount.update({
+      where: { id: accountId },
+      data: { warmupProgress: progress },
+    })
+
+    console.log(`📋 Tracked failed ${action} attempt for account ${accountId}`)
+  } catch (err) {
+    console.error('Error tracking failed attempt:', err)
+  }
+}
+
 // Update account progress in database
 async function updateProgress(
   accountId: string,
@@ -399,6 +444,10 @@ async function processWarmupJob(job: Job<WarmupJobData>): Promise<void> {
     console.log(`✅ Completed ${action} for account ${accountId}`)
   } catch (error) {
     console.error(`❌ Error processing warmup job:`, error)
+
+    // Track all failed attempts for dashboard visibility
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    await trackFailedAttempt(accountId, action, errorMessage)
 
     // FIX #3: Progressive error handling - don't fail immediately on first 403
     if (error instanceof Error && (error.message.includes('403') || error.message.includes('429'))) {

@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getRedditClient } from '@/lib/reddit'
+import { getOrCreateUser } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const user = await getOrCreateUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Get user's Reddit accounts
+    const userAccounts = await prisma.redditAccount.findMany({
+      where: { userId: user.id },
+      select: { id: true }
+    })
+    const accountIds = userAccounts.map(a => a.id)
+
     // Handle empty body gracefully
     let postId: string | undefined
     try {
@@ -12,12 +26,16 @@ export async function POST(request: NextRequest) {
     } catch {
       // No body sent - that's fine, we'll refresh all posts
     }
-    
+
     let posts
-    
+
     if (postId) {
-      const post = await prisma.post.findUnique({
-        where: { id: postId },
+      // Verify the post belongs to user's account
+      const post = await prisma.post.findFirst({
+        where: {
+          id: postId,
+          accountId: { in: accountIds }
+        },
       })
       posts = post ? [post] : []
     } else {
@@ -25,6 +43,7 @@ export async function POST(request: NextRequest) {
         where: {
           status: 'posted',
           redditId: { not: null },
+          accountId: { in: accountIds },  // Filter by user's accounts
         },
       })
     }
@@ -40,16 +59,18 @@ export async function POST(request: NextRequest) {
 
       try {
         const submission = await reddit.getSubmission(post.redditId)
-        await submission.fetch()
+        // fetch() resolves lazy-loaded properties and returns the resolved submission
+        const fetchedSubmission = await submission.fetch()
 
         const existingAnalytics = await prisma.postAnalytics.findUnique({
           where: { postId: post.id },
         })
-        
-        const upvotes = submission.ups || 0
-        const downvotes = submission.downs || 0
-        const score = submission.score || 0
-        const commentCount = submission.num_comments || 0
+
+        // Use fetchedSubmission to get resolved values (not lazy proxies)
+        const upvotes = fetchedSubmission.ups || 0
+        const downvotes = fetchedSubmission.downs || 0
+        const score = fetchedSubmission.score || 0
+        const commentCount = fetchedSubmission.num_comments || 0
         const engagement = upvotes + downvotes + commentCount
         
         if (existingAnalytics) {

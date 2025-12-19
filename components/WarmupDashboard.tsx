@@ -12,6 +12,13 @@ interface WarmupPost {
   createdAt: string
 }
 
+interface FailedAttempt {
+  date: string
+  action: string
+  error: string
+  timestamp: string
+}
+
 interface WarmupAccount {
   id: string
   username: string
@@ -29,6 +36,7 @@ interface WarmupAccount {
     actions: Array<{ type: string; count: number; timestamp: string; url?: string; title?: string; subreddit?: string }>
   }>
   posts?: WarmupPost[]
+  failedAttempts?: FailedAttempt[]
 }
 
 interface SystemHealth {
@@ -93,6 +101,52 @@ const WARMUP_PHASE_TARGETS = {
   PHASE_2_COMMENTS: { days: 4, upvotes: 5, comments: 2, posts: 0 },
   PHASE_3_POSTS: { days: 7, upvotes: 3, comments: 2, posts: 1 },
   PHASE_4_MIXED: { days: 16, upvotes: 4, comments: 3, posts: 1 },
+}
+
+// Helper to get phase-specific guidance
+function getPhaseGuidance(status: string, daysInWarmup: number): { message: string; icon: string; color: string } | null {
+  const daysUntilPosts = Math.max(0, 8 - daysInWarmup)
+
+  switch (status) {
+    case 'PHASE_1_UPVOTES':
+      return {
+        message: `Building trust with upvotes. Posts will begin in ${daysUntilPosts} days (Day 8).`,
+        icon: '⬆️',
+        color: 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+      }
+    case 'PHASE_2_COMMENTS':
+      return {
+        message: `Engaging with comments. Posts will begin in ${daysUntilPosts} days (Day 8).`,
+        icon: '💬',
+        color: 'bg-purple-500/10 border-purple-500/30 text-purple-300'
+      }
+    case 'PHASE_3_POSTS':
+      return {
+        message: 'Now making posts! Your account is actively building karma through original content.',
+        icon: '📝',
+        color: 'bg-green-500/10 border-green-500/30 text-green-300'
+      }
+    case 'PHASE_4_MIXED':
+      return {
+        message: 'Full activity mode! Upvotes, comments, and posts are all active.',
+        icon: '🚀',
+        color: 'bg-pink-500/10 border-pink-500/30 text-pink-300'
+      }
+    case 'PAUSED':
+      return {
+        message: 'Warmup is paused. Resume to continue building account trust.',
+        icon: '⏸️',
+        color: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-300'
+      }
+    case 'FAILED':
+      return {
+        message: 'Warmup failed. Check for Reddit API errors or account restrictions.',
+        icon: '❌',
+        color: 'bg-red-500/10 border-red-500/30 text-red-300'
+      }
+    default:
+      return null
+  }
 }
 
 export default function WarmupDashboard() {
@@ -527,6 +581,39 @@ export default function WarmupDashboard() {
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  // Render Failed Attempts section
+  function renderFailedAttempts(account: WarmupAccount) {
+    if (!account.failedAttempts || account.failedAttempts.length === 0) {
+      return null // Don't show section if no failures
+    }
+
+    return (
+      <div className="space-y-2">
+        <div className="text-xs text-red-400 mb-2">
+          Recent failures ({account.failedAttempts.length}):
+        </div>
+        {account.failedAttempts.slice(-5).reverse().map((attempt, idx) => (
+          <div key={idx} className="p-2 bg-red-900/20 border border-red-700/50 rounded text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-red-300">
+                {attempt.action === 'upvote' && '⬆️'}
+                {attempt.action === 'comment' && '💬'}
+                {attempt.action === 'post' && '📝'}
+                {' '}{attempt.action} failed
+              </span>
+              <span className="text-gray-500">
+                {new Date(attempt.timestamp).toLocaleString()}
+              </span>
+            </div>
+            <div className="text-red-400/70 mt-1 truncate" title={attempt.error}>
+              {attempt.error}
             </div>
           </div>
         ))}
@@ -1004,6 +1091,20 @@ export default function WarmupDashboard() {
                   </div>
                 </div>
 
+                {/* Phase Guidance Banner */}
+                {(() => {
+                  const guidance = getPhaseGuidance(account.status, account.daysInWarmup)
+                  if (!guidance) return null
+                  return (
+                    <div className={`mt-3 p-3 rounded-lg border ${guidance.color}`}>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{guidance.icon}</span>
+                        <span className="text-sm">{guidance.message}</span>
+                      </div>
+                    </div>
+                  )
+                })()}
+
                 {/* Timeline */}
                 {account.startedAt && (
                   <div className="mt-3 pt-3 border-t border-gray-700 text-xs text-gray-400">
@@ -1044,6 +1145,14 @@ export default function WarmupDashboard() {
                       <h4 className="text-sm font-semibold text-white mb-2">Phase Progress (Target vs Actual)</h4>
                       {renderPhaseProgressDetails(account)}
                     </div>
+
+                    {/* Failed Attempts (if any) */}
+                    {account.failedAttempts && account.failedAttempts.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-red-400 mb-2">Failed Attempts</h4>
+                        {renderFailedAttempts(account)}
+                      </div>
+                    )}
 
                     {/* Warmup Posts */}
                     <div>

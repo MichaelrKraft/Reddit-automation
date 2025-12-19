@@ -56,6 +56,7 @@ export async function GET(request: NextRequest) {
       const progress = account.warmupProgress as any
       const recentActions = progress?.daily?.slice(-7) || []
       const posts = progress?.posts || []
+      const failedAttempts = progress?.failedAttempts || []
 
       return {
         id: account.id,
@@ -70,6 +71,7 @@ export async function GET(request: NextRequest) {
         completedAt: account.warmupCompletedAt,
         recentActions,
         posts,
+        failedAttempts,
         totalActions: progress?.daily?.reduce(
           (sum: number, day: any) => sum + (day.actions?.length || 0),
           0
