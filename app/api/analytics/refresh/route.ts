@@ -28,7 +28,10 @@ export async function POST(request: NextRequest) {
         },
       })
     }
-    
+
+    console.log(`[Analytics Refresh] Found ${posts.length} posts to update`)
+    console.log(`[Analytics Refresh] Posts:`, posts.map(p => ({ id: p.id, status: p.status, redditId: p.redditId })))
+
     const reddit: any = getRedditClient()
     let updatedCount = 0
 
@@ -82,6 +85,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       message: 'Analytics refreshed successfully',
+      postsFound: posts.length,
       updatedCount,
     })
   } catch (error: any) {
