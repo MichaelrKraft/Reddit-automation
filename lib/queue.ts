@@ -68,6 +68,8 @@ export interface SchedulePostData {
   text?: string
   url?: string
   firstComment?: string
+  flairId?: string
+  flairText?: string
 }
 
 export async function schedulePost(data: SchedulePostData, scheduledAt: Date) {
@@ -107,6 +109,8 @@ export function startPostWorker() {
           title: data.title,
           text: data.text,
           url: data.url,
+          flairId: data.flairId,
+          flairText: data.flairText,
         })
 
         // Fetch the submission to resolve lazy-loaded properties

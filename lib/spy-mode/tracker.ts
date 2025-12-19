@@ -28,7 +28,7 @@ const RATE_LIMIT_DELAY = 1100 // 1.1 seconds between requests
 
 let lastRequestTime = 0
 
-async function rateLimitedFetch(url: string): Promise<Response> {
+async function rateLimitedFetch(url: string, timeoutMs: number = 5000): Promise<Response> {
   const now = Date.now()
   const timeSinceLastRequest = now - lastRequestTime
 
@@ -38,11 +38,26 @@ async function rateLimitedFetch(url: string): Promise<Response> {
 
   lastRequestTime = Date.now()
 
-  return fetch(url, {
-    headers: {
-      'User-Agent': 'Redoit:v1.0 (Competitor Intelligence Tool)',
-    },
-  })
+  // Add timeout to prevent hanging requests
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Redoit:v1.0 (Competitor Intelligence Tool)',
+      },
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+    return response
+  } catch (error: any) {
+    clearTimeout(timeoutId)
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms`)
+    }
+    throw error
+  }
 }
 
 export async function fetchUserProfile(username: string): Promise<RedditUserProfile | null> {

@@ -6,12 +6,27 @@ let redditClient: any = null
 
 export function getRedditClient(): any {
   if (!redditClient) {
+    const clientId = process.env.REDDIT_CLIENT_ID
+    const clientSecret = process.env.REDDIT_CLIENT_SECRET
+    const username = process.env.REDDIT_USERNAME
+    const password = process.env.REDDIT_PASSWORD
+
+    // Validate all required credentials are present
+    if (!clientId || !clientSecret || !username || !password) {
+      const missing = []
+      if (!clientId) missing.push('REDDIT_CLIENT_ID')
+      if (!clientSecret) missing.push('REDDIT_CLIENT_SECRET')
+      if (!username) missing.push('REDDIT_USERNAME')
+      if (!password) missing.push('REDDIT_PASSWORD')
+      throw new Error(`Missing Reddit API credentials: ${missing.join(', ')}. Please check your .env.local file.`)
+    }
+
     redditClient = new snoowrap({
       userAgent: 'RedditAutomation/1.0.0',
-      clientId: process.env.REDDIT_CLIENT_ID!,
-      clientSecret: process.env.REDDIT_CLIENT_SECRET!,
-      username: process.env.REDDIT_USERNAME!,
-      password: process.env.REDDIT_PASSWORD!,
+      clientId,
+      clientSecret,
+      username,
+      password,
     })
   }
 
@@ -23,21 +38,31 @@ export interface PostOptions {
   title: string
   text?: string
   url?: string
+  flairId?: string
+  flairText?: string
 }
 
 export async function submitPost(options: PostOptions): Promise<any> {
   const reddit = getRedditClient()
   const subreddit = reddit.getSubreddit(options.subreddit)
 
+  // Build flair options if provided
+  const flairOptions = options.flairId ? {
+    flair_id: options.flairId,
+    flair_text: options.flairText || undefined,
+  } : {}
+
   if (options.url) {
     return await subreddit.submitLink({
       title: options.title,
       url: options.url,
+      ...flairOptions,
     })
   } else {
     return await subreddit.submitSelfpost({
       title: options.title,
       text: options.text || '',
+      ...flairOptions,
     })
   }
 }
@@ -77,4 +102,34 @@ export async function searchSubreddits(query: string, limit: number = 10): Promi
     subscribers: child.data.subscribers,
     description: child.data.public_description,
   }))
+}
+
+export interface SubredditFlair {
+  id: string
+  text: string
+  textEditable: boolean
+  backgroundColor: string
+  textColor: string
+}
+
+export async function getSubredditFlairs(subredditName: string): Promise<SubredditFlair[]> {
+  const reddit = getRedditClient()
+  const subreddit = reddit.getSubreddit(subredditName)
+
+  try {
+    // getLinkFlairTemplates returns flairs available for posts
+    const flairs = await subreddit.getLinkFlairTemplates()
+
+    return flairs.map((flair: any) => ({
+      id: flair.flair_template_id,
+      text: flair.flair_text,
+      textEditable: flair.flair_text_editable || false,
+      backgroundColor: flair.background_color || '',
+      textColor: flair.text_color || 'dark',
+    }))
+  } catch (error: any) {
+    // Some subreddits don't have flairs or restrict access
+    console.log(`[Reddit] Could not fetch flairs for r/${subredditName}:`, error.message)
+    return []
+  }
 }

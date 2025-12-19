@@ -51,6 +51,11 @@ export class TimingAnalyzer {
     } catch (error: any) {
       console.error(`❌ Error analyzing r/${subredditName}:`, error)
 
+      // Check for missing credentials error
+      if (error.message?.includes('Missing Reddit API credentials') || error.message?.includes('Missing credentials')) {
+        throw new Error('Reddit API credentials are not configured. Please check your .env.local file.')
+      }
+
       // Check for Reddit API 404 errors (banned, private, or non-existent subreddits)
       if (error.statusCode === 404 || error.message?.includes('404') || error.message?.includes('banned')) {
         throw new Error(`Subreddit "r/${subredditName}" not found. It may not exist, be private, or be banned.`)

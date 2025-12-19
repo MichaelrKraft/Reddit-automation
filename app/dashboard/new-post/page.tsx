@@ -22,19 +22,53 @@ export default function NewPost() {
     scheduledDate: '',
     scheduledTime: '',
     firstComment: '',
+    flairId: '',
+    flairText: '',
   })
   const [savingDraft, setSavingDraft] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [flairs, setFlairs] = useState<Array<{ id: string; text: string; backgroundColor: string; textColor: string }>>([])
+  const [flairsLoading, setFlairsLoading] = useState(false)
 
   useEffect(() => {
     fetchAccount()
-    
+
     const params = new URLSearchParams(window.location.search)
     const subreddit = params.get('subreddit')
     if (subreddit) {
       setFormData(prev => ({ ...prev, subredditName: subreddit }))
     }
   }, [])
+
+  // Fetch flairs when subreddit changes
+  useEffect(() => {
+    async function fetchFlairs() {
+      if (!formData.subredditName || formData.subredditName.length < 2) {
+        setFlairs([])
+        return
+      }
+
+      setFlairsLoading(true)
+      try {
+        const response = await fetch(`/api/subreddits/${formData.subredditName}/flairs`)
+        const data = await response.json()
+        if (data.flairs) {
+          setFlairs(data.flairs)
+        } else {
+          setFlairs([])
+        }
+      } catch (error) {
+        console.error('Failed to fetch flairs:', error)
+        setFlairs([])
+      } finally {
+        setFlairsLoading(false)
+      }
+    }
+
+    // Debounce the fetch
+    const timeoutId = setTimeout(fetchFlairs, 500)
+    return () => clearTimeout(timeoutId)
+  }, [formData.subredditName])
 
   async function fetchAccount() {
     try {
@@ -76,6 +110,8 @@ export default function NewPost() {
           postType: formData.postType,
           isDraft: true,
           firstComment: formData.firstComment || null,
+          flairId: formData.flairId || null,
+          flairText: formData.flairText || null,
         }),
       })
 
@@ -122,6 +158,8 @@ export default function NewPost() {
           accountId,
           postType: formData.postType,
           firstComment: formData.firstComment || null,
+          flairId: formData.flairId || null,
+          flairText: formData.flairText || null,
         }),
       })
 
@@ -233,13 +271,52 @@ export default function NewPost() {
                 required
                 placeholder="e.g., technology"
                 value={formData.subredditName}
-                onChange={(e) => setFormData(prev => ({ ...prev, subredditName: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, subredditName: e.target.value, flairId: '', flairText: '' }))}
                 className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Enter subreddit name without "r/" - needed for AI content generation
               </p>
             </div>
+
+            {/* Flair Selector */}
+            {formData.subredditName && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Post Flair {flairs.length > 0 && <span className="text-yellow-400 text-xs ml-1">(may be required)</span>}
+                </label>
+                {flairsLoading ? (
+                  <div className="text-gray-400 text-sm">Loading flairs...</div>
+                ) : flairs.length > 0 ? (
+                  <select
+                    value={formData.flairId}
+                    onChange={(e) => {
+                      const selectedFlair = flairs.find(f => f.id === e.target.value)
+                      setFormData(prev => ({
+                        ...prev,
+                        flairId: e.target.value,
+                        flairText: selectedFlair?.text || '',
+                      }))
+                    }}
+                    className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white"
+                  >
+                    <option value="">Select a flair (optional)</option>
+                    {flairs.map((flair) => (
+                      <option key={flair.id} value={flair.id}>
+                        {flair.text}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="text-gray-500 text-sm">No flairs available for this subreddit</div>
+                )}
+                {formData.flairId && (
+                  <p className="text-xs text-green-400 mt-1">
+                    ✓ Flair selected: {formData.flairText}
+                  </p>
+                )}
+              </div>
+            )}
 
             <AIContentGenerator
               subreddit={formData.subredditName}

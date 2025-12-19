@@ -63,6 +63,8 @@ export async function POST(request: NextRequest) {
         text: post.postType === 'text' ? post.content : undefined,
         url: (post.postType === 'link' || post.postType === 'image') ? post.content : undefined,
         firstComment: post.firstComment || undefined,
+        flairId: post.flairId || undefined,
+        flairText: post.flairText || undefined,
       },
       scheduledDate
     )
