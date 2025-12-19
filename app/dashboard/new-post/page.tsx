@@ -106,10 +106,15 @@ export default function NewPost() {
 
     setLoading(true)
 
+    // 30-second timeout to prevent infinite "Creating..." state
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000)
+
     try {
       const postResponse = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({
           title: formData.title,
           content: formData.content,
@@ -131,6 +136,7 @@ export default function NewPost() {
         const scheduleResponse = await fetch('/api/posts/schedule', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             postId: post.id,
             scheduledAt: new Date().toISOString(),
@@ -147,6 +153,7 @@ export default function NewPost() {
         const scheduleResponse = await fetch('/api/posts/schedule', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
           body: JSON.stringify({
             postId: post.id,
             scheduledAt: scheduledAt.toISOString(),
@@ -165,7 +172,13 @@ export default function NewPost() {
       setMessage({ type: 'success', text: successMsg })
       setTimeout(() => router.push('/dashboard'), 2000)
     } catch (error: any) {
-      setMessage({ type: 'error', text: `Error: ${error.message}` })
+      if (error.name === 'AbortError') {
+        setMessage({ type: 'error', text: 'Request timed out. Your post may have been created - please check the dashboard.' })
+      } else {
+        setMessage({ type: 'error', text: `Error: ${error.message}` })
+      }
+    } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }
