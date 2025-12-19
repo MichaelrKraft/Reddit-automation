@@ -3,24 +3,24 @@ import { getSubredditFlairs } from '@/lib/reddit'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ name: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { name } = await params
+    const { id } = await params
 
-    if (!name) {
+    if (!id) {
       return NextResponse.json(
         { error: 'Subreddit name is required' },
         { status: 400 }
       )
     }
 
-    const flairs = await getSubredditFlairs(name)
+    const flairs = await getSubredditFlairs(id)
 
     return NextResponse.json({
-      subreddit: name,
+      subreddit: id,
       flairs,
-      flairRequired: flairs.length > 0, // Heuristic: if flairs exist, they may be required
+      flairRequired: flairs.length > 0,
     })
   } catch (error: any) {
     console.error(`[Flairs API] Error fetching flairs:`, error.message)
