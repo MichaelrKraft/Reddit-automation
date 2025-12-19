@@ -109,13 +109,17 @@ export function startPostWorker() {
           url: data.url,
         })
 
+        // Fetch the submission to resolve lazy-loaded properties
+        // Snoowrap returns proxy objects - .fetch() resolves them to actual values
+        const fetchedSubmission = await submission.fetch()
+
         await prisma.post.update({
           where: { id: data.postId },
           data: {
             status: 'posted',
             postedAt: new Date(),
-            redditId: submission.id,
-            url: `https://reddit.com${submission.permalink}`,
+            redditId: fetchedSubmission.id,
+            url: `https://reddit.com${fetchedSubmission.permalink}`,
           },
         })
 
@@ -134,8 +138,7 @@ export function startPostWorker() {
         if (data.firstComment) {
           try {
             console.log(`Adding first comment to post: ${data.postId}`)
-            const reddit: any = await import('./reddit').then(m => m.getRedditClient())
-            await submission.reply(data.firstComment)
+            await fetchedSubmission.reply(data.firstComment)
             console.log(`First comment added successfully to post: ${data.postId}`)
           } catch (commentError: any) {
             console.error(`Failed to add first comment to post: ${data.postId}`, commentError)
@@ -143,7 +146,7 @@ export function startPostWorker() {
           }
         }
 
-        return { success: true, redditId: submission.id }
+        return { success: true, redditId: fetchedSubmission.id }
       } catch (error: any) {
         console.error(`Failed to post: ${data.postId}`, error)
 
