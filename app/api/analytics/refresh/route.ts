@@ -4,8 +4,14 @@ import { getRedditClient } from '@/lib/reddit'
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { postId } = body
+    // Handle empty body gracefully
+    let postId: string | undefined
+    try {
+      const body = await request.json()
+      postId = body.postId
+    } catch {
+      // No body sent - that's fine, we'll refresh all posts
+    }
     
     let posts
     
