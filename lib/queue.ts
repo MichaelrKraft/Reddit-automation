@@ -13,13 +13,36 @@ let _replyQueueEvents: QueueEvents | null = null
 export function getConnection(): IORedis {
   if (!_connection) {
     const redisUrl = process.env.REDIS_URL || ''
+    console.log(`[Queue] Connecting to Redis: ${redisUrl.substring(0, 20)}...`)
     _connection = new IORedis(redisUrl, {
       maxRetriesPerRequest: null,
       // Enable TLS for rediss:// URLs (Upstash)
       tls: redisUrl.startsWith('rediss://') ? {} : undefined,
+      connectTimeout: 10000, // 10 second timeout
+      retryStrategy: (times) => {
+        if (times > 3) {
+          console.error(`[Queue] Redis connection failed after ${times} attempts`)
+          return null // Stop retrying
+        }
+        return Math.min(times * 200, 2000) // Exponential backoff
+      },
     })
+
+    _connection.on('connect', () => console.log('[Queue] Redis connected'))
+    _connection.on('error', (err) => console.error('[Queue] Redis error:', err.message))
+    _connection.on('close', () => console.log('[Queue] Redis connection closed'))
   }
   return _connection
+}
+
+export async function checkRedisConnection(): Promise<{ connected: boolean; error?: string }> {
+  try {
+    const connection = getConnection()
+    const ping = await connection.ping()
+    return { connected: ping === 'PONG' }
+  } catch (error: any) {
+    return { connected: false, error: error.message }
+  }
 }
 
 export function getPostQueue(): Queue {
@@ -50,14 +73,24 @@ export interface SchedulePostData {
 export async function schedulePost(data: SchedulePostData, scheduledAt: Date) {
   const delay = scheduledAt.getTime() - Date.now()
 
-  return await getPostQueue().add(
-    'submit-post',
-    data,
-    {
-      delay: delay > 0 ? delay : 0,
-      jobId: data.postId,
-    }
-  )
+  console.log(`[Queue] Scheduling post ${data.postId} to r/${data.subreddit}`)
+  console.log(`[Queue] Scheduled for: ${scheduledAt.toISOString()}, delay: ${delay}ms`)
+
+  try {
+    const job = await getPostQueue().add(
+      'submit-post',
+      data,
+      {
+        delay: delay > 0 ? delay : 0,
+        jobId: data.postId,
+      }
+    )
+    console.log(`[Queue] Job added successfully: ${job.id}`)
+    return job
+  } catch (error: any) {
+    console.error(`[Queue] Failed to schedule post ${data.postId}:`, error.message)
+    throw error
+  }
 }
 
 export function startPostWorker() {
