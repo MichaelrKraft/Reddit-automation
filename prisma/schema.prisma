@@ -29,6 +29,7 @@ model User {
   opportunityActions   OpportunityAction[]
   queuedReplies        QueuedReply[]
   redditAccounts       RedditAccount[]
+  seoSearches          SEOSearch[]
   spyAccounts          SpyAccount[]
   userKeywords         UserKeyword[]
 }
@@ -608,4 +609,34 @@ model BusinessAnalysis {
 
   @@index([userId])
   @@index([url])
+}
+
+// SEO Thread Finder - Find Reddit threads ranking on Google
+model SEOSearch {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyword      String
+  resultsCount Int         @default(0)
+  searchedAt   DateTime    @default(now())
+  threads      SEOThread[]
+
+  @@index([userId])
+  @@index([searchedAt])
+}
+
+model SEOThread {
+  id           String    @id @default(cuid())
+  searchId     String
+  search       SEOSearch @relation(fields: [searchId], references: [id], onDelete: Cascade)
+  googleRank   Int
+  redditUrl    String
+  postTitle    String
+  subreddit    String
+  snippet      String?   @db.Text
+  commentCount Int?
+  upvotes      Int?
+  postAge      String?
+
+  @@index([searchId])
 }
