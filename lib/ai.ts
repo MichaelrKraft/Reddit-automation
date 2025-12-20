@@ -1,7 +1,46 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 import { getViralBodyPrompt } from './viral-body-score'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
+const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null
+
+// Generic AI completion with Gemini -> OpenAI fallback
+async function generateCompletion(prompt: string): Promise<string> {
+  // Try Gemini first
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      return response.text()
+    } catch (error: any) {
+      // If rate limited (429), try OpenAI fallback
+      if (error.message?.includes('429') || error.message?.includes('quota')) {
+        console.log('[AI] Gemini rate limited, trying OpenAI fallback...')
+      } else {
+        throw error
+      }
+    }
+  }
+
+  // Fallback to OpenAI
+  if (openai) {
+    try {
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 4096,
+      })
+      return completion.choices[0]?.message?.content || ''
+    } catch (error: any) {
+      console.error('[AI] OpenAI error:', error.message)
+      throw new Error(`AI service unavailable: ${error.message}`)
+    }
+  }
+
+  throw new Error('No AI service available. Please configure GEMINI_API_KEY or OPENAI_API_KEY in your environment.')
+}
 
 export interface ContentGenerationOptions {
   topic: string
@@ -183,9 +222,70 @@ export interface ReplyGenerationOptions {
   commentAuthor: string
 }
 
-export async function generateReply(options: ReplyGenerationOptions) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+export interface BusinessAnalysisResult {
+  businessName: string
+  businessType: string
+  description: string
+  targetAudience: { segment: string; description: string }[]
+  painPoints: { pain: string; howToAddress: string }[]
+  subreddits: { name: string; subscribers?: string; relevance: number; reason: string }[]
+  keywords: string[]
+}
 
+export async function analyzeBusiness(url: string, websiteContent: string): Promise<BusinessAnalysisResult> {
+  const prompt = `
+Analyze this business website and provide Reddit marketing insights.
+
+URL: ${url}
+Website Content:
+${websiteContent.slice(0, 8000)}
+
+Based on this website, provide:
+
+1. **Business Name**: The company/product name
+2. **Business Type**: Category (SaaS, E-commerce, Service, etc.)
+3. **Description**: 1-2 sentence summary of what they do
+4. **Target Audience**: 3-4 specific audience segments with descriptions
+5. **Pain Points**: 4-5 specific problems their target audience has that this product solves. For each pain point, include how to address it in Reddit comments.
+6. **Recommended Subreddits**: 6-8 relevant subreddits where their target audience hangs out. Must be REAL subreddits. Include estimated subscriber count and relevance score (1-10).
+7. **Keywords to Monitor**: 8-10 high-intent keywords/phrases people might search when looking for this solution
+
+Return as JSON with this exact structure:
+{
+  "businessName": "string",
+  "businessType": "string",
+  "description": "string",
+  "targetAudience": [
+    {"segment": "string", "description": "string"}
+  ],
+  "painPoints": [
+    {"pain": "string", "howToAddress": "string"}
+  ],
+  "subreddits": [
+    {"name": "string (without r/)", "subscribers": "string like '500k'", "relevance": number, "reason": "string"}
+  ],
+  "keywords": ["string"]
+}
+
+Be specific and actionable. Focus on subreddits that allow self-promotion or discussion, avoid heavily moderated ones like r/technology.
+`
+
+  try {
+    const text = await generateCompletion(prompt)
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+
+    throw new Error('Failed to parse AI response')
+  } catch (error: any) {
+    console.error('Business analysis failed:', error)
+    throw new Error('Failed to analyze business: ' + error.message)
+  }
+}
+
+export async function generateReply(options: ReplyGenerationOptions) {
   const prompt = `
 Generate a thoughtful, authentic reply to this Reddit comment.
 
@@ -209,10 +309,7 @@ Return ONLY the reply text, no JSON or formatting.
 `
 
   try {
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
-    
+    const text = await generateCompletion(prompt)
     return text.trim()
   } catch (error: any) {
     console.error('Reply generation failed:', error)

@@ -8,25 +8,29 @@ datasource db {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  clerkId             String               @unique
-  email               String               @unique
-  plan                String               @default("free")
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  hasLifetimeDeal     Boolean              @default(false)
-  lifetimePurchasedAt DateTime?
-  signupNumber        Int?
-  stripeCustomerId    String?
-  stripePaymentId     String?
-  tier                UserTier             @default(ALPHA)
-  brandKeywords       BrandKeyword[]
-  draftPosts          DraftPost[]
-  monitoredSubreddits MonitoredSubreddit[]
-  opportunities       Opportunity[]
-  opportunityActions  OpportunityAction[]
-  redditAccounts      RedditAccount[]
-  spyAccounts         SpyAccount[]
+  id                   String                @id @default(cuid())
+  clerkId              String                @unique
+  email                String                @unique
+  plan                 String                @default("free")
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  hasLifetimeDeal      Boolean               @default(false)
+  lifetimePurchasedAt  DateTime?
+  signupNumber         Int?
+  stripeCustomerId     String?
+  stripePaymentId      String?
+  tier                 UserTier              @default(ALPHA)
+  brandKeywords        BrandKeyword[]
+  draftPosts           DraftPost[]
+  keywordMatches       KeywordMatch[]
+  monitoredSubreddits  MonitoredSubreddit[]
+  notificationSettings NotificationSettings?
+  opportunities        Opportunity[]
+  opportunityActions   OpportunityAction[]
+  queuedReplies        QueuedReply[]
+  redditAccounts       RedditAccount[]
+  spyAccounts          SpyAccount[]
+  userKeywords         UserKeyword[]
 }
 
 model RedditAccount {
@@ -113,16 +117,17 @@ model PostAnalytics {
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  redditId  String   @unique
-  content   String
-  author    String
-  replied   Boolean  @default(false)
-  replyText String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  postId    String
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id            String        @id @default(cuid())
+  redditId      String        @unique
+  content       String
+  author        String
+  replied       Boolean       @default(false)
+  replyText     String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  postId        String
+  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  queuedReplies QueuedReply[]
 }
 
 model SubredditActivity {
@@ -497,4 +502,110 @@ model DripEmail {
   @@unique([userId, emailType])
   @@index([userId])
   @@index([emailType])
+}
+
+// Reply Queue - Auto-generated AI replies awaiting user approval
+enum ReplyQueueStatus {
+  PENDING    // Awaiting user approval
+  APPROVED   // User approved, waiting to post
+  POSTED     // Successfully posted to Reddit
+  DISMISSED  // User dismissed this reply
+  FAILED     // Failed to post
+}
+
+model QueuedReply {
+  id          String           @id @default(cuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  commentId   String
+  comment     Comment          @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  aiReplyText String           @db.Text
+  status      ReplyQueueStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  approvedAt  DateTime?
+  postedAt    DateTime?
+
+  @@index([userId, status])
+  @@index([createdAt])
+}
+
+// Keyword Alerts - Monitor Reddit for high-intent keywords
+model UserKeyword {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keyword       String
+  isActive      Boolean        @default(true)
+  lastCheckedAt DateTime?
+  matchCount    Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  matches       KeywordMatch[]
+
+  @@unique([userId, keyword])
+  @@index([isActive])
+}
+
+model KeywordMatch {
+  id            String      @id @default(cuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keywordId     String
+  keyword       UserKeyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  redditPostId  String
+  postTitle     String
+  postUrl       String
+  postAuthor    String?
+  subreddit     String
+  commentCount  Int         @default(0)
+  upvotes       Int         @default(0)
+  aiSuggestions String?     @db.Text  // JSON array of comment suggestions
+  isRead        Boolean     @default(false)
+  isActedOn     Boolean     @default(false)
+  matchedAt     DateTime    @default(now())
+
+  @@unique([keywordId, redditPostId])
+  @@index([userId, isRead])
+  @@index([matchedAt])
+}
+
+model NotificationSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailEnabled    Boolean  @default(true)
+  emailFrequency  String   @default("instant")  // instant, daily, weekly
+  discordWebhook  String?
+  discordEnabled  Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+// Track dismissed DMs so they don't reappear after navigation
+model DismissedDM {
+  id            String   @id @default(cuid())
+  clerkId       String   // User's Clerk ID (don't need full User relation for this simple case)
+  redditMsgId   String   // The Reddit message ID
+  dismissedAt   DateTime @default(now())
+
+  @@unique([clerkId, redditMsgId])
+  @@index([clerkId])
+}
+
+// Business Analysis - AI-powered business insights from URL
+model BusinessAnalysis {
+  id              String   @id @default(cuid())
+  userId          String
+  url             String
+  businessName    String?
+  businessType    String?
+  description     String?  @db.Text
+  targetAudience  String?  @db.Text  // JSON array of audience segments
+  painPoints      String?  @db.Text  // JSON array of pain points
+  subreddits      String?  @db.Text  // JSON array of {name, relevance, reason}
+  keywords        String?  @db.Text  // JSON array of suggested keywords
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@index([url])
 }

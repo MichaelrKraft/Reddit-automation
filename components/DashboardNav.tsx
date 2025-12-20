@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navItems = [
+  { href: '/dashboard/analyze', label: '🎯 Analyze Business', highlight: true },
   { href: '/dashboard/new-post', label: '+ New Post' },
   { href: '/dashboard/viral', label: 'Viral Optimizer' },
   { href: '/warmup', label: 'Warmup' },
@@ -12,6 +13,7 @@ const navItems = [
   { href: '/dashboard/posts', label: 'Posts' },
   { href: '/dashboard/calendar', label: 'Calendar' },
   { href: '/dashboard/comments', label: 'Comments' },
+  { href: '/dashboard/keyword-alerts', label: 'Keyword Alerts' },
 ]
 
 export default function DashboardNav() {
@@ -21,13 +23,18 @@ export default function DashboardNav() {
     <nav className="flex flex-wrap gap-2 sm:gap-3 mt-6 sm:mt-8 mb-6 sm:mb-8">
       {navItems.map((item) => {
         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+        const isHighlight = 'highlight' in item && item.highlight
 
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D9FF]/30 transition font-semibold text-sm sm:text-base ${
-              isActive ? 'bg-[#00D9FF]/40' : ''
+            className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg transition font-semibold text-sm sm:text-base ${
+              isHighlight
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 border-0'
+                : `bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 hover:bg-[#00D9FF]/30 ${
+                    isActive ? 'bg-[#00D9FF]/40' : ''
+                  }`
             }`}
           >
             {item.label}

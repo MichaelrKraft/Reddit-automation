@@ -36,3 +36,4 @@ CREDENTIALS.md
 # Typescript
 *.tsbuildinfo
 next-env.d.ts
+prisma/dev.db

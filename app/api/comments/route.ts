@@ -1,24 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getRedditClient } from '@/lib/reddit'
+import { getOrCreateUser } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await getOrCreateUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const postId = searchParams.get('postId')
-    
+    const includeQueue = searchParams.get('includeQueue') === 'true'
+
+    // Get user's accounts to filter comments
+    const userAccounts = await prisma.redditAccount.findMany({
+      where: { userId: user.id },
+      select: { id: true },
+    })
+    const accountIds = userAccounts.map(a => a.id)
+
     const comments = await prisma.comment.findMany({
-      where: postId ? { postId } : {},
+      where: {
+        ...(postId ? { postId } : {}),
+        post: {
+          accountId: { in: accountIds },
+        },
+      },
       include: {
         post: {
           include: {
             subreddit: true,
           },
         },
+        ...(includeQueue ? {
+          queuedReplies: {
+            where: { userId: user.id },
+            orderBy: { createdAt: 'desc' as const },
+          },
+        } : {}),
       },
       orderBy: { createdAt: 'desc' },
     })
-    
+
     return NextResponse.json({ comments })
   } catch (error: any) {
     return NextResponse.json(
