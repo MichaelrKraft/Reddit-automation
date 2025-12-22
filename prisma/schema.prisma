@@ -84,6 +84,7 @@ model Post {
   content      String
   postType     String         @default("text")
   status       String         @default("scheduled")
+  failureReason String?       // Stores error message when post fails
   scheduledAt  DateTime?
   postedAt     DateTime?
   redditId     String?        @unique

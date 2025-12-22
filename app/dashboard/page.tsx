@@ -6,6 +6,7 @@ import FounderBanner from '@/components/FounderBanner'
 import UserDropdown from '@/components/UserDropdown'
 import AnalyticsDashboard from '@/components/AnalyticsDashboard'
 import DashboardNav from '@/components/DashboardNav'
+import AnalyzeBusinessSection from '@/components/AnalyzeBusinessSection'
 
 interface UserStats {
   isLoggedIn: boolean
@@ -77,7 +78,7 @@ export default function Dashboard() {
           <DashboardNav />
         </div>
 
-        <AnalyticsDashboard />
+        <AnalyticsDashboard middleContent={<AnalyzeBusinessSection />} />
 
         <div className="text-center mt-8">
           <Link href="/" className="text-gray-400 hover:text-white transition">

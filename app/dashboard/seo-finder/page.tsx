@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import DashboardNav from '@/components/DashboardNav'
 
 interface SEOThread {
@@ -31,6 +32,7 @@ export default function SEOFinderPage() {
   const [error, setError] = useState<string | null>(null)
   const [searchesRemaining, setSearchesRemaining] = useState<number | null>(null)
   const [upgradeRequired, setUpgradeRequired] = useState(false)
+  const [demoMode, setDemoMode] = useState(false)
 
   // Load search history on mount
   useEffect(() => {
@@ -90,6 +92,7 @@ export default function SEOFinderPage() {
 
       setThreads(data.threads || [])
       setSearchesRemaining(data.searchesRemaining)
+      setDemoMode(data.demoMode || false)
 
       // Refresh history
       loadHistory()
@@ -98,13 +101,6 @@ export default function SEOFinderPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  function getRankBadge(rank: number) {
-    if (rank === 1) return { emoji: '🥇', color: 'from-yellow-500 to-amber-600' }
-    if (rank === 2) return { emoji: '🥈', color: 'from-gray-400 to-gray-500' }
-    if (rank === 3) return { emoji: '🥉', color: 'from-orange-400 to-orange-600' }
-    return { emoji: `#${rank}`, color: 'from-blue-500 to-blue-600' }
   }
 
   function formatTraffic(traffic?: number) {
@@ -117,7 +113,7 @@ export default function SEOFinderPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f1629] to-[#0a0a1a] text-white p-4 sm:p-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2">🏆 SEO Thread Finder</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">SEO Thread Finder</h1>
           <p className="text-gray-400 mb-6">Find Reddit threads ranking on Google for your keywords</p>
 
           <DashboardNav />
@@ -142,21 +138,36 @@ export default function SEOFinderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f1629] to-[#0a0a1a] text-white p-4 sm:p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-start mb-2">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">🏆 SEO Thread Finder</h1>
-            <p className="text-gray-400">Find Reddit threads ranking on Google for your keywords</p>
-          </div>
-          {searchesRemaining !== null && (
-            <div className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-lg">
-              {searchesRemaining} searches left today
-            </div>
-          )}
+    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
+      <div className="dot-grid-background">
+        <div className="dot-grid-container">
+          <div className="dot-grid"></div>
+          <div className="dot-grid-overlay"></div>
         </div>
+      </div>
 
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-white">
         <DashboardNav />
+
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">SEO Thread Finder</h1>
+            <p className="text-gray-400 mt-1 text-sm sm:text-base">Find Reddit threads ranking on Google for your keywords</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {searchesRemaining !== null && (
+              <div className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-lg">
+                {searchesRemaining} searches left today
+              </div>
+            )}
+            <Link
+              href="/dashboard"
+              className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
+            >
+              ← Back
+            </Link>
+          </div>
+        </div>
 
         {/* Search Form */}
         <form onSubmit={handleSearch} className="mb-8">
@@ -184,52 +195,60 @@ export default function SEOFinderPage() {
           </div>
         )}
 
+        {/* Demo Mode Banner */}
+        {demoMode && threads.length > 0 && (
+          <div className="mb-6 p-4 bg-amber-900/30 border border-amber-500/30 rounded-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🧪</span>
+              <div>
+                <p className="font-semibold text-amber-400">Demo Mode</p>
+                <p className="text-sm text-amber-300/80">
+                  Showing sample data. Add SERPAPI_KEY to your environment for real Google results.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Results */}
         {threads.length > 0 && (
           <div className="mb-8">
             <h2 className="text-xl font-semibold mb-4">
               Found {threads.length} Reddit threads ranking for "{keyword}"
+              {demoMode && <span className="text-amber-400 text-sm ml-2">(demo)</span>}
             </h2>
 
             <div className="space-y-4">
               {threads.map((thread, index) => {
-                const badge = getRankBadge(thread.rank)
                 return (
                   <div
                     key={index}
                     className="bg-gray-800/50 border border-gray-700 rounded-xl p-5 hover:border-cyan-500/50 transition"
                   >
-                    <div className="flex items-start gap-4">
-                      <div className={`flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br ${badge.color} flex items-center justify-center text-xl font-bold`}>
-                        {badge.emoji}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm text-cyan-400">r/{thread.subreddit}</span>
-                          {thread.postAge && (
-                            <span className="text-sm text-gray-500">• {thread.postAge}</span>
-                          )}
-                        </div>
-                        <h3 className="font-semibold text-lg mb-2 line-clamp-2">{thread.title}</h3>
-                        {thread.snippet && (
-                          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{thread.snippet}</p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-4 text-sm">
-                          {thread.commentCount !== undefined && (
-                            <span className="text-gray-400">
-                              💬 {thread.commentCount} comments
-                            </span>
-                          )}
-                          {thread.upvotes !== undefined && (
-                            <span className="text-gray-400">
-                              ⬆️ {thread.upvotes} upvotes
-                            </span>
-                          )}
-                          <span className="text-green-400 font-medium">
-                            📈 {formatTraffic(thread.estimatedTraffic)} monthly visits
-                          </span>
-                        </div>
-                      </div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm text-cyan-400">r/{thread.subreddit}</span>
+                      {thread.postAge && (
+                        <span className="text-sm text-gray-500">• {thread.postAge}</span>
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">{thread.title}</h3>
+                    {thread.snippet && (
+                      <p className="text-gray-400 text-sm mb-3 line-clamp-2">{thread.snippet}</p>
+                    )}
+                    <div className="flex flex-wrap items-center gap-4 text-sm">
+                      {thread.commentCount !== undefined && (
+                        <span className="text-gray-400">
+                          💬 {thread.commentCount} comments
+                        </span>
+                      )}
+                      {thread.upvotes !== undefined && (
+                        <span className="text-gray-400">
+                          ⬆️ {thread.upvotes} upvotes
+                        </span>
+                      )}
+                      <span className="text-green-400 font-medium">
+                        📈 {formatTraffic(thread.estimatedTraffic)} monthly visits
+                      </span>
                     </div>
                     <div className="flex gap-3 mt-4 pt-4 border-t border-gray-700">
                       <a

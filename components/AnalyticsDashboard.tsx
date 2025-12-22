@@ -38,7 +38,11 @@ interface TimelineData {
   engagement: number
 }
 
-export default function AnalyticsDashboard() {
+interface AnalyticsDashboardProps {
+  middleContent?: React.ReactNode
+}
+
+export default function AnalyticsDashboard({ middleContent }: AnalyticsDashboardProps) {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null)
   const [topSubreddits, setTopSubreddits] = useState<SubredditStats[]>([])
   const [topPosts, setTopPosts] = useState<TopPost[]>([])
@@ -165,6 +169,9 @@ export default function AnalyticsDashboard() {
               <div className="text-3xl font-bold text-white mt-2">{summary?.avgScore || 0}</div>
             </div>
           </div>
+
+          {/* Middle Content Slot (e.g., Analyze Business Section) */}
+          {middleContent}
 
           {/* Top Subreddits */}
           <div className="feature-card rounded-lg p-6">

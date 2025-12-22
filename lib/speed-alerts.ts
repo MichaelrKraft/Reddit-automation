@@ -101,7 +101,7 @@ Return ONLY valid JSON in this exact format:
 
     // Fallback if JSON parsing fails
     return [
-      { style: 'helpful', text: 'Great post! Let me know if you need any help with this.' },
+      { style: 'helpful', text: 'Thanks for sharing, keep up the good work!' },
       { style: 'curious', text: 'Interesting topic! What made you decide to explore this?' },
       { style: 'supportive', text: 'This is really insightful, thanks for sharing!' },
     ]
@@ -109,7 +109,7 @@ Return ONLY valid JSON in this exact format:
     console.error('Failed to generate comments:', error)
     // Return fallback comments
     return [
-      { style: 'helpful', text: 'Thanks for sharing! Happy to help if you have questions.' },
+      { style: 'helpful', text: 'Thanks for sharing, keep up the good work!' },
       { style: 'curious', text: 'I\'d love to hear more about your experience with this.' },
       { style: 'supportive', text: 'Really appreciate you posting this!' },
     ]

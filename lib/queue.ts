@@ -163,9 +163,30 @@ export function startPostWorker() {
       } catch (error: any) {
         console.error(`Failed to post: ${data.postId}`, error)
 
+        // Extract meaningful error message from Reddit API errors
+        let failureReason = error.message || 'Unknown error'
+        if (error.message?.includes('FLAIR_REQUIRED')) {
+          failureReason = 'This subreddit requires post flair. Please select a flair before posting.'
+        } else if (error.message?.includes('SUBREDDIT_NOTALLOWED')) {
+          failureReason = 'You are not allowed to post in this subreddit. Check karma requirements or subreddit rules.'
+        } else if (error.message?.includes('RATELIMIT')) {
+          failureReason = 'Rate limited by Reddit. Try again later.'
+        } else if (error.message?.includes('403')) {
+          failureReason = 'Access denied. Your account may not have permission to post here.'
+        } else if (error.message?.includes('401')) {
+          failureReason = 'Authentication failed. Please reconnect your Reddit account.'
+        } else if (error.message?.includes('NO_SELFS')) {
+          failureReason = 'This subreddit does not allow text posts, only links.'
+        } else if (error.message?.includes('NO_LINKS')) {
+          failureReason = 'This subreddit does not allow link posts, only text.'
+        }
+
         await prisma.post.update({
           where: { id: data.postId },
-          data: { status: 'failed' },
+          data: {
+            status: 'failed',
+            failureReason: failureReason.substring(0, 500), // Limit length
+          },
         })
 
         throw error

@@ -4,17 +4,14 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navItems = [
-  { href: '/dashboard/analyze', label: '🎯 Analyze Business', highlight: true },
   { href: '/dashboard/new-post', label: '+ New Post' },
-  { href: '/dashboard/viral', label: 'Viral Optimizer' },
   { href: '/warmup', label: 'Warmup' },
   { href: '/dashboard/spy-mode', label: 'Spy Mode' },
-  { href: '/dashboard/speed-alerts', label: 'Speed Alerts' },
+  { href: '/dashboard/speed-alerts', label: 'AI Alerts' },
   { href: '/dashboard/posts', label: 'Posts' },
   { href: '/dashboard/calendar', label: 'Calendar' },
   { href: '/dashboard/comments', label: 'Comments' },
-  { href: '/dashboard/keyword-alerts', label: 'Keyword Alerts' },
-  { href: '/dashboard/seo-finder', label: '🏆 SEO Finder', premium: true },
+  { href: '/dashboard/seo-finder', label: 'SEO Finder' },
 ]
 
 export default function DashboardNav() {

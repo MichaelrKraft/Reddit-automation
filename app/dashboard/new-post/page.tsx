@@ -29,6 +29,13 @@ export default function NewPost() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [flairs, setFlairs] = useState<Array<{ id: string; text: string; backgroundColor: string; textColor: string }>>([])
   const [flairsLoading, setFlairsLoading] = useState(false)
+  const [contentMode, setContentMode] = useState<'ai' | 'manual' | null>('manual')
+
+  // Viral analysis states
+  const [analyzingTitle, setAnalyzingTitle] = useState(false)
+  const [titleAnalysis, setTitleAnalysis] = useState<any>(null)
+  const [analyzingBody, setAnalyzingBody] = useState(false)
+  const [bodyAnalysis, setBodyAnalysis] = useState<any>(null)
 
   useEffect(() => {
     fetchAccount()
@@ -221,6 +228,63 @@ export default function NewPost() {
     }
   }
 
+  async function analyzeTitle() {
+    if (!formData.title.trim()) return
+    setAnalyzingTitle(true)
+    setTitleAnalysis(null)
+    try {
+      const response = await fetch('/api/viral/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: formData.title.trim(),
+          subreddit: formData.subredditName.trim() || 'general',
+          postType: formData.postType,
+        }),
+      })
+      const data = await response.json()
+      if (response.ok) setTitleAnalysis(data)
+    } catch (err) {
+      console.error('Title analysis failed:', err)
+    } finally {
+      setAnalyzingTitle(false)
+    }
+  }
+
+  async function analyzeBody() {
+    if (!formData.content.trim()) return
+    setAnalyzingBody(true)
+    setBodyAnalysis(null)
+    try {
+      const response = await fetch('/api/viral/analyze-body', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: formData.content.trim(),
+          subreddit: formData.subredditName.trim() || 'general',
+          postType: 'story',
+          generateImproved: true,
+        }),
+      })
+      const data = await response.json()
+      if (response.ok) setBodyAnalysis(data)
+    } catch (err) {
+      console.error('Body analysis failed:', err)
+    } finally {
+      setAnalyzingBody(false)
+    }
+  }
+
+  function useSuggestedTitle(title: string) {
+    setFormData(prev => ({ ...prev, title }))
+    setTitleAnalysis(null)
+  }
+
+  function useSuggestedContent(content: string) {
+    setFormData(prev => ({ ...prev, content }))
+    setBodyAnalysis(null)
+  }
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
       {/* Dot Grid Background */}
@@ -318,12 +382,50 @@ export default function NewPost() {
               </div>
             )}
 
-            <AIContentGenerator
-              subreddit={formData.subredditName}
-              onSelectContent={(title, content) => {
-                setFormData(prev => ({ ...prev, title, content }))
-              }}
-            />
+            {/* Content Creation Mode Picker */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                Content Creation Method
+              </label>
+              <div className="flex gap-4">
+                <label className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition ${
+                  contentMode === 'manual'
+                    ? 'bg-[#00D9FF]/20 border border-[#00D9FF] text-[#00D9FF]'
+                    : 'bg-[#12121a] border border-gray-600 text-gray-300 hover:border-gray-500'
+                }`}>
+                  <input
+                    type="radio"
+                    checked={contentMode === 'manual'}
+                    onChange={() => setContentMode('manual')}
+                    className="sr-only"
+                  />
+                  <span className="font-medium">Custom Post</span>
+                </label>
+                <label className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition ${
+                  contentMode === 'ai'
+                    ? 'bg-[#00D9FF]/20 border border-[#00D9FF] text-[#00D9FF]'
+                    : 'bg-[#12121a] border border-gray-600 text-gray-300 hover:border-gray-500'
+                }`}>
+                  <input
+                    type="radio"
+                    checked={contentMode === 'ai'}
+                    onChange={() => setContentMode('ai')}
+                    className="sr-only"
+                  />
+                  <span className="font-medium">AI Content Generator</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Conditional: AI Content Generator */}
+            {contentMode === 'ai' && (
+              <AIContentGenerator
+                subreddit={formData.subredditName}
+                onSelectContent={(title, content) => {
+                  setFormData(prev => ({ ...prev, title, content }))
+                }}
+              />
+            )}
 
             {formData.subredditName && (
               <SubredditAnalysis subreddit={formData.subredditName} />
@@ -345,64 +447,177 @@ export default function NewPost() {
               />
             )}
 
-            <div className="border-t border-gray-700 pt-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Post Details</h3>
-            </div>
+            {/* Conditional: Manual Post Type Selection */}
+            {contentMode === 'manual' && (
+              <>
+                <div className="border-t border-gray-700 pt-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">Post Details</h3>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Post Type
-              </label>
-              <div className="flex flex-wrap gap-4">
-                <label className="flex items-center text-gray-300">
-                  <input
-                    type="radio"
-                    value="text"
-                    checked={formData.postType === 'text'}
-                    onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
-                    className="mr-2"
-                  />
-                  Text Post
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Post Type
+                  </label>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center text-gray-300">
+                      <input
+                        type="radio"
+                        value="text"
+                        checked={formData.postType === 'text'}
+                        onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
+                        className="mr-2"
+                      />
+                      Text Post
+                    </label>
+                    <label className="flex items-center text-gray-300">
+                      <input
+                        type="radio"
+                        value="link"
+                        checked={formData.postType === 'link'}
+                        onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
+                        className="mr-2"
+                      />
+                      Link Post
+                    </label>
+                    <label className="flex items-center text-gray-300">
+                      <input
+                        type="radio"
+                        value="image"
+                        checked={formData.postType === 'image'}
+                        onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
+                        className="mr-2"
+                      />
+                      Image Post
+                    </label>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Show Title/Content/Scheduling for Custom Post mode, or AI mode after content is generated */}
+            {(contentMode === 'manual' || (contentMode === 'ai' && formData.title)) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Title
                 </label>
-                <label className="flex items-center text-gray-300">
-                  <input
-                    type="radio"
-                    value="link"
-                    checked={formData.postType === 'link'}
-                    onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
-                    className="mr-2"
-                  />
-                  Link Post
-                </label>
-                <label className="flex items-center text-gray-300">
-                  <input
-                    type="radio"
-                    value="image"
-                    checked={formData.postType === 'image'}
-                    onChange={(e) => setFormData(prev => ({ ...prev, postType: e.target.value }))}
-                    className="mr-2"
-                  />
-                  Image Post
-                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter post title"
+                  value={formData.title}
+                  onChange={(e) => { setFormData(prev => ({ ...prev, title: e.target.value })); setTitleAnalysis(null); }}
+                  className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
+                />
+
+                {/* Analyze Viral Potential - Title (Manual mode only) */}
+                {contentMode === 'manual' && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wide">New</span>
+                    <button
+                      type="button"
+                      onClick={analyzeTitle}
+                      disabled={analyzingTitle || !formData.title.trim()}
+                      className="text-sm px-4 py-2 bg-transparent border border-orange-500 text-[#00D9FF] rounded-lg hover:bg-[#00D9FF]/10 transition disabled:opacity-50 shadow-[0_0_12px_rgba(249,115,22,0.6)]"
+                    >
+                      {analyzingTitle ? 'Analyzing...' : '+ Analyze Viral Potential'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Title Analysis Results */}
+                {titleAnalysis && contentMode === 'manual' && (
+                  <div className="mt-3 p-4 bg-[#1a1a24] border border-gray-700 rounded-lg space-y-3">
+                    <div className="relative group">
+                      <div className="flex items-center justify-between cursor-help">
+                        <span className="text-sm font-medium text-white">Viral Score <span className="text-xs text-gray-500">(hover for breakdown)</span></span>
+                        <span className={`text-2xl font-bold ${
+                          titleAnalysis.score >= 70 ? 'text-green-400' :
+                          titleAnalysis.score >= 40 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>{titleAnalysis.score}/100</span>
+                      </div>
+                      <div className="h-2 bg-gray-700 rounded-full overflow-hidden mt-2">
+                        <div
+                          className={`h-full transition-all ${
+                            titleAnalysis.score >= 70 ? 'bg-green-500' :
+                            titleAnalysis.score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${titleAnalysis.score}%` }}
+                        />
+                      </div>
+                      {/* Score Breakdown Tooltip */}
+                      {titleAnalysis.breakdown && (
+                        <div className="absolute left-0 right-0 top-full mt-2 p-4 bg-[#12121a] border border-gray-600 rounded-lg shadow-xl z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                          <p className="text-sm font-semibold text-white mb-3">Score Breakdown</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            {[
+                              { key: 'titleLength', label: 'Title Length', hint: 'Optimal: 8-15 words' },
+                              { key: 'firstPerson', label: 'First-Person', hint: '35% of viral posts use I/my/me' },
+                              { key: 'questionFormat', label: 'Statement vs Question', hint: 'Statements get more upvotes' },
+                              { key: 'punctuation', label: 'Punctuation', hint: 'Quotes and ellipsis boost engagement' },
+                              { key: 'capitalization', label: 'Capitalization', hint: 'Sentence case is best' },
+                              { key: 'wordSimplicity', label: 'Word Simplicity', hint: 'Avg 4.75 chars/word' },
+                              { key: 'powerWords', label: 'Power Words', hint: 'you, people, just, never, realized' },
+                              { key: 'semanticTheme', label: 'Clear Theme', hint: 'Relationship, advice, work, discovery' },
+                            ].map(({ key, label, hint }) => {
+                              const score = titleAnalysis.breakdown[key] || 0
+                              return (
+                                <div key={key} className="p-2 bg-[#1a1a24] rounded border border-gray-700">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs font-medium text-white">{label}</span>
+                                    <span className={`text-xs font-bold ${
+                                      score >= 70 ? 'text-green-400' :
+                                      score >= 40 ? 'text-yellow-400' : 'text-red-400'
+                                    }`}>{score}%</span>
+                                  </div>
+                                  <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full ${
+                                        score >= 70 ? 'bg-green-500' :
+                                        score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                                      }`}
+                                      style={{ width: `${score}%` }}
+                                    />
+                                  </div>
+                                  <p className="text-[10px] text-gray-500 mt-1">{hint}</p>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {titleAnalysis.suggestions?.length > 0 && (
+                      <div className="text-xs text-gray-400">
+                        <p className="font-medium text-gray-300 mb-1">Suggestions:</p>
+                        <ul className="list-disc list-inside space-y-0.5">
+                          {titleAnalysis.suggestions.slice(0, 3).map((s: string, i: number) => (
+                            <li key={i}>{s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {titleAnalysis.improvedTitles?.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-gray-300">AI Alternatives:</p>
+                        {titleAnalysis.improvedTitles.slice(0, 2).map((alt: string, i: number) => (
+                          <div
+                            key={i}
+                            onClick={() => useSuggestedTitle(alt)}
+                            className="p-2 bg-gray-800 rounded text-sm text-gray-300 cursor-pointer hover:bg-gray-700 transition"
+                          >
+                            {alt}
+                            <span className="text-purple-400 text-xs ml-2">Use →</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Title
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="Enter post title"
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
-              />
-            </div>
-
-            {/* Image Upload - only for image posts */}
-            {formData.postType === 'image' && (
+            {/* Image Upload - only for image posts in manual mode */}
+            {contentMode === 'manual' && formData.postType === 'image' && (
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   Upload Image
@@ -414,29 +629,135 @@ export default function NewPost() {
               </div>
             )}
 
-            {/* Content/URL field - for text and link posts */}
-            {formData.postType !== 'image' && (
+            {/* Content/URL field - for text and link posts in Custom mode, or AI mode after content is generated */}
+            {((contentMode === 'manual' && formData.postType !== 'image') || (contentMode === 'ai' && formData.title)) && (
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  {formData.postType === 'text' ? 'Content' : 'URL'}
+                  {contentMode === 'ai' ? 'Content' : (formData.postType === 'text' ? 'Content' : 'URL')}
                 </label>
                 <textarea
                   required
-                  rows={formData.postType === 'text' ? 6 : 2}
+                  rows={contentMode === 'ai' ? 6 : (formData.postType === 'text' ? 6 : 2)}
                   placeholder={
-                    formData.postType === 'text'
-                      ? 'Enter post content'
-                      : 'Paste your YouTube URL'
+                    contentMode === 'ai'
+                      ? 'AI-generated content will appear here, or enter your own'
+                      : (formData.postType === 'text' ? 'Enter post content' : 'Paste your YouTube URL')
                   }
                   value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                  onChange={(e) => { setFormData(prev => ({ ...prev, content: e.target.value })); setBodyAnalysis(null); }}
                   className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
                 />
+
+                {/* Analyze Viral Potential - Body (Manual text posts only) */}
+                {contentMode === 'manual' && formData.postType === 'text' && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-xs font-bold text-orange-400 uppercase tracking-wide">New</span>
+                    <button
+                      type="button"
+                      onClick={analyzeBody}
+                      disabled={analyzingBody || !formData.content.trim()}
+                      className="text-sm px-4 py-2 bg-transparent border border-orange-500 text-[#00D9FF] rounded-lg hover:bg-[#00D9FF]/10 transition disabled:opacity-50 shadow-[0_0_12px_rgba(249,115,22,0.6)]"
+                    >
+                      {analyzingBody ? 'Analyzing...' : '+ Analyze Viral Potential'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Body Analysis Results */}
+                {bodyAnalysis && contentMode === 'manual' && formData.postType === 'text' && (
+                  <div className="mt-3 p-4 bg-[#1a1a24] border border-gray-700 rounded-lg space-y-3">
+                    <div className="relative group">
+                      <div className="flex items-center justify-between cursor-help">
+                        <span className="text-sm font-medium text-white">Body Copy Score <span className="text-xs text-gray-500">(hover for breakdown)</span></span>
+                        <span className={`text-2xl font-bold ${
+                          bodyAnalysis.score >= 70 ? 'text-green-400' :
+                          bodyAnalysis.score >= 40 ? 'text-yellow-400' : 'text-red-400'
+                        }`}>{bodyAnalysis.score}/100</span>
+                      </div>
+                      <div className="h-2 bg-gray-700 rounded-full overflow-hidden mt-2">
+                        <div
+                          className={`h-full transition-all ${
+                            bodyAnalysis.score >= 70 ? 'bg-green-500' :
+                            bodyAnalysis.score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${bodyAnalysis.score}%` }}
+                        />
+                      </div>
+                      {/* Score Breakdown Tooltip */}
+                      {bodyAnalysis.breakdown && (
+                        <div className="absolute left-0 right-0 top-full mt-2 p-4 bg-[#12121a] border border-gray-600 rounded-lg shadow-xl z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                          <p className="text-sm font-semibold text-white mb-3">Score Breakdown</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            {[
+                              { key: 'openingHook', label: 'Opening Hook', hint: 'Strong emotional/context opener' },
+                              { key: 'storyStructure', label: 'Story Structure', hint: 'Beginning, conflict, resolution' },
+                              { key: 'paragraphFlow', label: 'Paragraph Flow', hint: 'Well-paced paragraph breaks' },
+                              { key: 'emotionalTriggers', label: 'Emotional Triggers', hint: 'Relatable reactions and feelings' },
+                              { key: 'dialogueUsage', label: 'Dialogue Usage', hint: 'Quoted conversations add life' },
+                              { key: 'lengthOptimization', label: 'Length', hint: 'Optimal word count for subreddit' },
+                              { key: 'formatting', label: 'Formatting', hint: 'Readable structure and spacing' },
+                            ].map(({ key, label, hint }) => {
+                              const score = bodyAnalysis.breakdown[key] || 0
+                              return (
+                                <div key={key} className="p-2 bg-[#1a1a24] rounded border border-gray-700">
+                                  <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs font-medium text-white">{label}</span>
+                                    <span className={`text-xs font-bold ${
+                                      score >= 70 ? 'text-green-400' :
+                                      score >= 40 ? 'text-yellow-400' : 'text-red-400'
+                                    }`}>{score}%</span>
+                                  </div>
+                                  <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full ${
+                                        score >= 70 ? 'bg-green-500' :
+                                        score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                                      }`}
+                                      style={{ width: `${score}%` }}
+                                    />
+                                  </div>
+                                  <p className="text-[10px] text-gray-500 mt-1">{hint}</p>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {bodyAnalysis.detectedPattern && (
+                      <span className="inline-block px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-xs">
+                        Detected: {bodyAnalysis.detectedPattern} pattern
+                      </span>
+                    )}
+                    {bodyAnalysis.suggestions?.length > 0 && (
+                      <div className="text-xs text-gray-400">
+                        <p className="font-medium text-gray-300 mb-1">Suggestions:</p>
+                        <ul className="list-disc list-inside space-y-0.5">
+                          {bodyAnalysis.suggestions.slice(0, 3).map((s: string, i: number) => (
+                            <li key={i}>{s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {bodyAnalysis.improvedVersions?.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-gray-300">AI Improved Version:</p>
+                        <div
+                          onClick={() => useSuggestedContent(bodyAnalysis.improvedVersions[0])}
+                          className="p-2 bg-gray-800 rounded text-xs text-gray-300 cursor-pointer hover:bg-gray-700 transition max-h-32 overflow-y-auto"
+                        >
+                          <pre className="whitespace-pre-wrap font-sans">{bodyAnalysis.improvedVersions[0].substring(0, 300)}...</pre>
+                          <span className="text-purple-400 text-xs mt-2 inline-block">Use this version →</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
-            {/* First Comment - shows for image and link posts */}
-            {(formData.postType === 'image' || formData.postType === 'link') && (
+            {/* First Comment - only for image and link posts in manual mode */}
+            {contentMode === 'manual' && (formData.postType === 'image' || formData.postType === 'link') && (
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   First Comment (optional)
@@ -454,56 +775,59 @@ export default function NewPost() {
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Scheduling
-              </label>
-              <div className="space-y-3">
-                <label className="flex items-center text-gray-300">
-                  <input
-                    type="radio"
-                    checked={formData.scheduleNow}
-                    onChange={() => setFormData(prev => ({ ...prev, scheduleNow: true }))}
-                    className="mr-2"
-                  />
-                  Post immediately
+            {/* Scheduling - show for Custom Post mode, or AI mode after content is generated */}
+            {(contentMode === 'manual' || (contentMode === 'ai' && formData.title)) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Scheduling
                 </label>
-                <label className="flex items-center text-gray-300">
-                  <input
-                    type="radio"
-                    checked={!formData.scheduleNow}
-                    onChange={() => setFormData(prev => ({ ...prev, scheduleNow: false }))}
-                    className="mr-2"
-                  />
-                  Schedule for later
-                </label>
-              </div>
-
-              {!formData.scheduleNow && (
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">Date</label>
+                <div className="space-y-3">
+                  <label className="flex items-center text-gray-300">
                     <input
-                      type="date"
-                      required
-                      value={formData.scheduledDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, scheduledDate: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
+                      type="radio"
+                      checked={formData.scheduleNow}
+                      onChange={() => setFormData(prev => ({ ...prev, scheduleNow: true }))}
+                      className="mr-2"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-400 mb-1">Time</label>
+                    Post immediately
+                  </label>
+                  <label className="flex items-center text-gray-300">
                     <input
-                      type="time"
-                      required
-                      value={formData.scheduledTime}
-                      onChange={(e) => setFormData(prev => ({ ...prev, scheduledTime: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
+                      type="radio"
+                      checked={!formData.scheduleNow}
+                      onChange={() => setFormData(prev => ({ ...prev, scheduleNow: false }))}
+                      className="mr-2"
                     />
-                  </div>
+                    Schedule for later
+                  </label>
                 </div>
-              )}
-            </div>
+
+                {!formData.scheduleNow && (
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Date</label>
+                      <input
+                        type="date"
+                        required
+                        value={formData.scheduledDate}
+                        onChange={(e) => setFormData(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-400 mb-1">Time</label>
+                      <input
+                        type="time"
+                        required
+                        value={formData.scheduledTime}
+                        onChange={(e) => setFormData(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Inline Message Display */}
             {message && (

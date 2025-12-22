@@ -51,7 +51,11 @@ export interface ContentGenerationOptions {
 }
 
 export async function generatePostContent(options: ContentGenerationOptions) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+  // Validate API keys first
+  if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) {
+    throw new Error('No AI service configured. Please set GEMINI_API_KEY or OPENAI_API_KEY in your environment.')
+  }
+
   const viralBodyRules = getViralBodyPrompt()
 
   const prompt = `
@@ -86,11 +90,8 @@ Return the response in the following JSON format:
 Generate 3 different variations, each using different viral opening patterns.
 `
 
-  try {
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
-    
+  // Helper to parse AI response
+  const parseResponse = (text: string) => {
     const jsonMatch = text.match(/\{[\s\S]*\}/g)
     if (jsonMatch) {
       try {
@@ -100,12 +101,49 @@ Generate 3 different variations, each using different viral opening patterns.
         return parseNonJsonResponse(text)
       }
     }
-    
     return parseNonJsonResponse(text)
-  } catch (error: any) {
-    console.error('AI generation failed:', error)
-    throw new Error('Failed to generate content: ' + error.message)
   }
+
+  // Try Gemini first
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      return parseResponse(text)
+    } catch (error: any) {
+      // If rate limited (429) or quota exceeded, try OpenAI fallback
+      if (error.message?.includes('429') || error.message?.includes('quota')) {
+        console.log('[AI] Gemini rate limited for content generation, trying OpenAI fallback...')
+      } else {
+        // For other Gemini errors, still try OpenAI if available
+        console.error('[AI] Gemini error:', error.message)
+        if (!openai) {
+          throw new Error('AI service error: ' + error.message)
+        }
+      }
+    }
+  }
+
+  // Fallback to OpenAI
+  if (openai) {
+    try {
+      console.log('[AI] Using OpenAI for content generation...')
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 4096,
+      })
+      const text = completion.choices[0]?.message?.content || ''
+      return parseResponse(text)
+    } catch (error: any) {
+      console.error('[AI] OpenAI error:', error.message)
+      throw new Error('AI service unavailable: ' + error.message)
+    }
+  }
+
+  throw new Error('No AI service available. Please configure GEMINI_API_KEY or OPENAI_API_KEY in your environment.')
 }
 
 function parseNonJsonResponse(text: string) {

@@ -53,6 +53,9 @@ export async function POST(request: NextRequest) {
       }, { status: 429 })
     }
 
+    // Check if we're in demo mode (no SerpAPI key)
+    const demoMode = !process.env.SERPAPI_KEY
+
     // Perform the search
     const threads = await findSEOThreads(keyword.trim(), user.id)
 
@@ -65,7 +68,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       keyword: keyword.trim(),
       threads: threadsWithTraffic,
-      searchesRemaining: 25 - searchesToday - 1
+      searchesRemaining: 25 - searchesToday - 1,
+      demoMode
     })
 
   } catch (error: any) {

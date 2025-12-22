@@ -292,9 +292,9 @@ export default function SpeedAlertsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">⚡ Speed Alerts</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Instant Alerts</h1>
             <p className="text-gray-400 mt-1 text-sm sm:text-base">
-              Get instant notifications when new posts appear
+              Get instant notifications when new posts appear in the subreddits of your choice
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -349,8 +349,8 @@ export default function SpeedAlertsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Panel - Monitored Subreddits */}
-          <div className="feature-card rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="feature-card rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-white mb-3">
               Monitored Subreddits
             </h2>
 
@@ -379,15 +379,15 @@ export default function SpeedAlertsPage() {
             )}
 
             {isLoading ? (
-              <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-reddit-orange"></div>
+              <div className="text-center py-4">
+                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-reddit-orange"></div>
               </div>
             ) : monitored.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-4 text-gray-400 text-sm">
                 No subreddits monitored yet. Add one above to get started.
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[120px] overflow-y-auto">
                 {monitored.map((sub) => (
                   <div
                     key={sub.id}
@@ -415,25 +415,20 @@ export default function SpeedAlertsPage() {
             )}
 
             {/* Instructions */}
-            <div className="mt-6 p-4 bg-blue-900/30 border border-blue-700 rounded-lg">
-              <h3 className="font-semibold text-blue-300 mb-2">
-                How Speed Alerts Work
+            <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+              <h3 className="font-medium text-blue-300 text-sm mb-1">
+                How It Works
               </h3>
-              <ol className="text-sm text-blue-200 space-y-1 list-decimal list-inside">
-                <li>Add subreddits you want to monitor above</li>
-                <li>Click "Start Monitoring" to begin watching for new posts</li>
-                <li>Keep this page open in your browser</li>
-                <li>When a new post appears, you'll hear a sound and see a popup</li>
-                <li>Choose from 3 AI-generated comments and click to copy</li>
-                <li>Reddit opens in a new tab - paste your comment and submit!</li>
-              </ol>
+              <p className="text-xs text-blue-200">
+                Add subreddits → Start monitoring → Get alerts with AI comments → Copy & post!
+              </p>
             </div>
           </div>
 
           {/* Right Panel - Recent Alerts */}
-          <div className="feature-card rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-white">
+          <div className="feature-card rounded-lg p-4">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-semibold text-[#00D9FF]">
                 Recent Alerts
               </h2>
               <div className="flex items-center gap-3">
@@ -455,12 +450,12 @@ export default function SpeedAlertsPage() {
             </div>
 
             {alerts.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-6 text-gray-400 text-sm">
                 No alerts yet. Start monitoring to receive alerts.
               </div>
             ) : (
-              <div className="space-y-4 max-h-[600px] overflow-y-auto">
-                {alerts.map((alert) => (
+              <div className="space-y-3">
+                {alerts.slice(0, 1).map((alert) => (
                   <div
                     key={alert.id}
                     className={`border rounded-lg p-4 ${
@@ -534,15 +529,26 @@ export default function SpeedAlertsPage() {
                     </div>
                   </div>
                 ))}
+                {alerts.length > 1 && (
+                  <div className="text-center text-sm text-gray-400 pt-2">
+                    +{alerts.length - 1} more alert{alerts.length > 2 ? 's' : ''}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        {/* Discover Subreddits Section */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Discover Subreddits</h2>
-          <DiscoverSection />
+        {/* Discover Subreddits & Keyword Alerts Side by Side */}
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div>
+            <h2 className="text-lg font-bold text-white mb-3">Discover Subreddits</h2>
+            <DiscoverSection />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white mb-3">Keyword Alerts</h2>
+            <KeywordAlertsSection />
+          </div>
         </div>
       </div>
     </div>
@@ -676,46 +682,24 @@ function DiscoverSection() {
         </div>
       )}
 
-      <div className="feature-card rounded-lg p-6 mb-6">
-        <form onSubmit={handleSearch} className="flex gap-3">
+      <div className="feature-card rounded-lg p-4 mb-3">
+        <form onSubmit={handleSearch} className="flex gap-2">
           <input
             type="text"
-            placeholder="Search for subreddits (e.g., technology, gaming, startups)"
+            placeholder="Search subreddits..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 px-4 py-3 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500"
+            className="flex-1 px-3 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-reddit-orange focus:border-transparent text-white placeholder-gray-500 text-sm"
             disabled={loading}
           />
           <button
             type="submit"
             disabled={loading}
-            className="bg-reddit-orange text-white px-8 py-3 rounded-lg hover:bg-orange-600 transition disabled:opacity-50 font-medium min-w-[120px]"
+            className="bg-reddit-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition disabled:opacity-50 font-medium text-sm"
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Searching
-              </span>
-            ) : 'Search'}
+            {loading ? '...' : 'Search'}
           </button>
         </form>
-
-        {/* Loading indicator with message */}
-        {loading && (
-          <div className="mt-4 flex items-center justify-center gap-3 p-4 bg-blue-900/30 border border-blue-700 rounded-lg">
-            <svg className="animate-spin h-6 w-6 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <div className="text-blue-300">
-              <p className="font-medium">Searching Reddit...</p>
-              <p className="text-sm text-blue-400">This may take up to 30 seconds</p>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="feature-card rounded-lg">
@@ -723,84 +707,63 @@ function DiscoverSection() {
           <nav className="flex -mb-px">
             <button
               onClick={() => setActiveTab('search')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-4 py-2 text-xs font-medium border-b-2 ${
                 activeTab === 'search'
                   ? 'border-reddit-orange text-reddit-orange'
-                  : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
+                  : 'border-transparent text-gray-400 hover:text-gray-300'
               }`}
             >
-              Search Results ({searchResults.length})
+              Results ({searchResults.length})
             </button>
             <button
               onClick={() => setActiveTab('saved')}
-              className={`px-6 py-4 text-sm font-medium border-b-2 ${
+              className={`px-4 py-2 text-xs font-medium border-b-2 ${
                 activeTab === 'saved'
                   ? 'border-reddit-orange text-reddit-orange'
-                  : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-600'
+                  : 'border-transparent text-gray-400 hover:text-gray-300'
               }`}
             >
-              Saved Subreddits ({savedSubreddits.length})
+              Saved ({savedSubreddits.length})
             </button>
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-3 max-h-[200px] overflow-y-auto">
           {activeTab === 'search' && (
             <div>
               {searchResults.length === 0 ? (
-                <div className="text-center py-12">
-                  <span className="text-4xl mb-3 block">🔍</span>
-                  <p className="text-gray-400">
-                    {searchQuery ? 'No results found' : 'Search for subreddits to get started'}
+                <div className="text-center py-6">
+                  <p className="text-gray-400 text-sm">
+                    {searchQuery ? 'No results found' : 'Search for subreddits'}
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {searchResults.map((subreddit) => (
+                <div className="space-y-2">
+                  {searchResults.slice(0, 5).map((subreddit) => (
                     <div
                       key={subreddit.name}
-                      className="border border-gray-700 bg-[#12121a] rounded-lg p-4 hover:border-[#00D9FF] transition"
+                      className="flex items-center justify-between p-2 border border-gray-700 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-[#00D9FF] text-lg">
-                            {subreddit.displayName}
-                          </h3>
-                          <p className="text-sm text-gray-400 mt-1">
-                            {formatNumber(subreddit.subscribers)} members
-                          </p>
-                          {subreddit.description && (
-                            <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-                              {subreddit.description}
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          onClick={() =>
-                            subreddit.saved
-                              ? removeSubreddit(subreddit.id!)
-                              : saveSubreddit(subreddit)
-                          }
-                          disabled={savingId === subreddit.name}
-                          className={`ml-4 px-4 py-2 rounded-lg text-sm font-medium transition min-w-[80px] ${
-                            subreddit.saved
-                              ? 'bg-green-900/50 text-green-400 hover:bg-green-900'
-                              : 'bg-reddit-orange text-white hover:bg-orange-600 disabled:opacity-50'
-                          }`}
-                        >
-                          {savingId === subreddit.name ? (
-                            <span className="flex items-center justify-center gap-1">
-                              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Saving
-                            </span>
-                          ) : subreddit.saved ? '✓ Saved' : 'Save'}
-                        </button>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-[#00D9FF] text-sm">{subreddit.displayName}</span>
+                        <span className="text-xs text-gray-400 ml-2">{formatNumber(subreddit.subscribers)}</span>
                       </div>
+                      <button
+                        onClick={() => subreddit.saved ? removeSubreddit(subreddit.id!) : saveSubreddit(subreddit)}
+                        disabled={savingId === subreddit.name}
+                        className={`px-3 py-1 rounded text-xs font-medium transition ${
+                          subreddit.saved
+                            ? 'bg-green-900/50 text-green-400'
+                            : 'bg-reddit-orange text-white hover:bg-orange-600'
+                        }`}
+                      >
+                        {savingId === subreddit.name ? '...' : subreddit.saved ? '✓' : 'Save'}
+                      </button>
                     </div>
                   ))}
+                  {searchResults.length > 5 && (
+                    <p className="text-center text-xs text-gray-500">+{searchResults.length - 5} more</p>
+                  )}
                 </div>
               )}
             </div>
@@ -809,47 +772,39 @@ function DiscoverSection() {
           {activeTab === 'saved' && (
             <div>
               {savedSubreddits.length === 0 ? (
-                <div className="text-center py-12">
-                  <span className="text-4xl mb-3 block">📋</span>
-                  <p className="text-gray-400 mb-4">No saved subreddits yet</p>
-                  <button
-                    onClick={() => setActiveTab('search')}
-                    className="text-reddit-orange hover:underline"
-                  >
-                    Search for subreddits to save
-                  </button>
+                <div className="text-center py-6">
+                  <p className="text-gray-400 text-sm">No saved subreddits</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {savedSubreddits.map((subreddit) => (
+                <div className="space-y-2">
+                  {savedSubreddits.slice(0, 5).map((subreddit) => (
                     <div
                       key={subreddit.id}
-                      className="border border-gray-700 bg-[#12121a] rounded-lg p-4 hover:border-[#00D9FF] transition"
+                      className="flex items-center justify-between p-2 border border-gray-700 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-[#00D9FF]">
-                            {subreddit.displayName}
-                          </h3>
-                          <p className="text-sm text-gray-400">
-                            {formatNumber(subreddit.subscribers)} members
-                          </p>
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-[#00D9FF] text-sm">{subreddit.displayName}</span>
+                        <span className="text-xs text-gray-400 ml-2">{formatNumber(subreddit.subscribers)}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/dashboard/new-post?subreddit=${subreddit.name}`}
+                          className="px-3 py-1 rounded text-xs font-medium bg-reddit-orange text-white hover:bg-orange-600 transition"
+                        >
+                          Post
+                        </Link>
                         <button
                           onClick={() => removeSubreddit(subreddit.id!)}
-                          className="text-red-400 hover:text-red-300 text-sm"
+                          className="text-red-400 hover:text-red-300 text-xs"
                         >
-                          Remove
+                          ✕
                         </button>
                       </div>
-                      <Link
-                        href={`/dashboard/new-post?subreddit=${subreddit.name}`}
-                        className="mt-3 block text-center text-sm bg-reddit-orange text-white px-4 py-2 rounded-lg hover:bg-orange-600 transition"
-                      >
-                        Create Post
-                      </Link>
                     </div>
                   ))}
+                  {savedSubreddits.length > 5 && (
+                    <p className="text-center text-xs text-gray-500">+{savedSubreddits.length - 5} more</p>
+                  )}
                 </div>
               )}
             </div>
@@ -868,4 +823,188 @@ interface Subreddit {
   description?: string
   saved?: boolean
   relevance?: number
+}
+
+// Keyword Alerts Section Component
+function KeywordAlertsSection() {
+  const [keywords, setKeywords] = useState<{ id: string; keyword: string; isActive: boolean; _count: { matches: number } }[]>([])
+  const [matches, setMatches] = useState<{ id: string; postTitle: string; postUrl: string; subreddit: string; matchedAt: string; keyword: { keyword: string } }[]>([])
+  const [newKeyword, setNewKeyword] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [scanning, setScanning] = useState(false)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  async function fetchData() {
+    try {
+      setLoading(true)
+      const [keywordsRes, matchesRes] = await Promise.all([
+        fetch('/api/keywords'),
+        fetch('/api/keywords/matches?unreadOnly=true'),
+      ])
+      const keywordsData = await keywordsRes.json()
+      const matchesData = await matchesRes.json()
+      setKeywords(keywordsData.keywords || [])
+      setMatches(matchesData.matches || [])
+    } catch (error) {
+      console.error('Failed to fetch keyword data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function addKeyword() {
+    if (!newKeyword.trim()) return
+    try {
+      const response = await fetch('/api/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add', keyword: newKeyword }),
+      })
+      if (response.ok) {
+        setNewKeyword('')
+        await fetchData()
+      }
+    } catch (error) {
+      console.error('Failed to add keyword:', error)
+    }
+  }
+
+  async function deleteKeyword(keywordId: string) {
+    try {
+      await fetch('/api/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', keywordId }),
+      })
+      await fetchData()
+    } catch (error) {
+      console.error('Failed to delete keyword:', error)
+    }
+  }
+
+  async function scanNow() {
+    try {
+      setScanning(true)
+      await fetch('/api/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'scan' }),
+      })
+      await fetchData()
+    } catch (error) {
+      console.error('Scan failed:', error)
+    } finally {
+      setScanning(false)
+    }
+  }
+
+  function formatTimeAgo(dateString: string) {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    if (diffMins < 60) return `${diffMins}m`
+    if (diffHours < 24) return `${diffHours}h`
+    return `${Math.floor(diffHours / 24)}d`
+  }
+
+  return (
+    <>
+      {/* Add Keyword Input */}
+      <div className="feature-card rounded-lg p-4 mb-3">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newKeyword}
+            onChange={(e) => setNewKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
+            placeholder="Add keyword..."
+            className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 text-sm"
+          />
+          <button
+            onClick={addKeyword}
+            disabled={!newKeyword.trim()}
+            className="px-4 py-2 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded-lg text-sm disabled:opacity-50"
+          >
+            Add
+          </button>
+          <button
+            onClick={scanNow}
+            disabled={scanning}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50"
+          >
+            {scanning ? '...' : 'Scan'}
+          </button>
+        </div>
+
+        {/* Keywords Pills */}
+        {keywords.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {keywords.map((kw) => (
+              <div
+                key={kw.id}
+                className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+                  kw.isActive
+                    ? 'bg-[#00D9FF]/10 border border-[#00D9FF]/50 text-[#00D9FF]'
+                    : 'bg-gray-800 border border-gray-600 text-gray-400'
+                }`}
+              >
+                <span>{kw.keyword}</span>
+                <span className="opacity-70">({kw._count.matches})</span>
+                <button
+                  onClick={() => deleteKeyword(kw.id)}
+                  className="text-red-400 hover:text-red-300 ml-1"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Matches */}
+      <div className="feature-card rounded-lg p-3 max-h-[200px] overflow-y-auto">
+        {loading ? (
+          <div className="text-center py-6">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00D9FF] mx-auto"></div>
+          </div>
+        ) : matches.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-gray-400 text-sm">
+              {keywords.length === 0 ? 'Add keywords to monitor' : 'No matches yet'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {matches.slice(0, 5).map((match) => (
+              <a
+                key={match.id}
+                href={match.postUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block p-2 border border-gray-700 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
+              >
+                <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
+                  <span className="text-[#00D9FF]">{match.keyword.keyword}</span>
+                  <span>•</span>
+                  <span className="text-blue-400">r/{match.subreddit}</span>
+                  <span>•</span>
+                  <span>{formatTimeAgo(match.matchedAt)}</span>
+                </div>
+                <p className="text-white text-sm line-clamp-1">{match.postTitle}</p>
+              </a>
+            ))}
+            {matches.length > 5 && (
+              <p className="text-center text-xs text-gray-500">+{matches.length - 5} more</p>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  )
 }
