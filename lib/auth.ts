@@ -1,6 +1,7 @@
 import { auth, currentUser } from '@clerk/nextjs/server'
 import { prisma } from './prisma'
 import { sendWelcomeDripEmail } from './email'
+import { createMauticContact } from './mautic'
 
 const FOUNDER_LIMIT = 20 // First 20 users get founder tier
 
@@ -47,8 +48,14 @@ export async function getOrCreateUser() {
 
       // Send welcome drip email to new user (async, don't block signup)
       const firstName = clerkUser.firstName || undefined
+      const lastName = clerkUser.lastName || undefined
       sendWelcomeDripEmail(email, firstName).catch((err) => {
         console.error('[Auth] Failed to send welcome drip email:', err)
+      })
+
+      // Add to Mautic CRM for drip campaign enrollment (async, don't block signup)
+      createMauticContact({ email, firstName, lastName }).catch((err) => {
+        console.error('[Auth] Failed to create Mautic contact:', err)
       })
     }
   }
