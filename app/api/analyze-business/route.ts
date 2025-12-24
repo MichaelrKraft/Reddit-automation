@@ -84,6 +84,8 @@ export async function GET(request: NextRequest) {
 
 // POST - Analyze a new business URL
 export async function POST(request: NextRequest) {
+  let requestUrl: string | undefined
+
   try {
     const user = await getOrCreateUser()
     if (!user) {
@@ -92,6 +94,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { url } = body
+    requestUrl = url
 
     if (!url) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 })
@@ -175,7 +178,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('[AnalyzeBusiness] POST error:', {
-      url: body?.url,
+      url: requestUrl,
       errorType: error.name,
       errorMessage: error.message,
       stack: error.stack?.split('\n').slice(0, 3).join('\n'),
