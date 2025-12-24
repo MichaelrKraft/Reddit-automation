@@ -27,6 +27,13 @@ export default function SignUpPage() {
             formFieldLabel: 'text-gray-300',
             formFieldInput: 'bg-gray-800 border-gray-600 text-white',
             footerActionLink: 'text-orange-400 hover:text-orange-300',
+            // OTP code input styling
+            otpCodeFieldInput: 'bg-gray-800 border-gray-600 text-white text-center text-xl',
+            otpCodeField: 'gap-2',
+            // Additional input styling
+            formFieldInputShowPasswordButton: 'text-gray-400 hover:text-white',
+            identityPreviewEditButton: 'text-orange-400 hover:text-orange-300',
+            formResendCodeLink: 'text-orange-400 hover:text-orange-300',
           }
         }} />
       </div>

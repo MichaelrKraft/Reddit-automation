@@ -7,19 +7,29 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPE
 
 // Generic AI completion with Gemini -> OpenAI fallback
 async function generateCompletion(prompt: string): Promise<string> {
+  // Log which services are available
+  const hasGemini = !!process.env.GEMINI_API_KEY
+  const hasOpenAI = !!process.env.OPENAI_API_KEY
+
   // Try Gemini first
-  if (process.env.GEMINI_API_KEY) {
+  if (hasGemini) {
     try {
       const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
       const result = await model.generateContent(prompt)
       const response = await result.response
       return response.text()
     } catch (error: any) {
+      console.error('[AI] Gemini error:', {
+        errorType: error.name,
+        errorMessage: error.message,
+        hasOpenAIFallback: hasOpenAI,
+      })
       // If rate limited (429), try OpenAI fallback
       if (error.message?.includes('429') || error.message?.includes('quota')) {
         console.log('[AI] Gemini rate limited, trying OpenAI fallback...')
-      } else {
-        throw error
+      } else if (!hasOpenAI) {
+        // No fallback available, throw with details
+        throw new Error(`Gemini API error: ${error.message}`)
       }
     }
   }
@@ -34,12 +44,16 @@ async function generateCompletion(prompt: string): Promise<string> {
       })
       return completion.choices[0]?.message?.content || ''
     } catch (error: any) {
-      console.error('[AI] OpenAI error:', error.message)
-      throw new Error(`AI service unavailable: ${error.message}`)
+      console.error('[AI] OpenAI error:', {
+        errorType: error.name,
+        errorMessage: error.message,
+      })
+      throw new Error(`AI service error: ${error.message}`)
     }
   }
 
-  throw new Error('No AI service available. Please configure GEMINI_API_KEY or OPENAI_API_KEY in your environment.')
+  console.error('[AI] No AI service available:', { hasGemini, hasOpenAI })
+  throw new Error('AI service not configured. Please contact support.')
 }
 
 export interface ContentGenerationOptions {
@@ -309,16 +323,37 @@ Be specific and actionable. Focus on subreddits that allow self-promotion or dis
 `
 
   try {
+    console.log('[AI] Starting business analysis for:', url)
     const text = await generateCompletion(prompt)
+    console.log('[AI] Received AI response, length:', text.length)
 
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
+      try {
+        const parsed = JSON.parse(jsonMatch[0])
+        console.log('[AI] Successfully parsed business analysis')
+        return parsed
+      } catch (parseError: any) {
+        console.error('[AI] JSON parse error:', {
+          error: parseError.message,
+          responsePreview: text.slice(0, 200),
+        })
+        throw new Error('Unable to parse analysis results. Please try again.')
+      }
     }
 
-    throw new Error('Failed to parse AI response')
+    console.error('[AI] No JSON found in response:', { responsePreview: text.slice(0, 200) })
+    throw new Error('Unable to analyze this website. Please try a different URL.')
   } catch (error: any) {
-    console.error('Business analysis failed:', error)
+    console.error('[AI] Business analysis failed:', {
+      url,
+      errorType: error.name,
+      errorMessage: error.message,
+    })
+    // Re-throw with user-friendly message if not already formatted
+    if (error.message.includes('AI service') || error.message.includes('Unable to')) {
+      throw error
+    }
     throw new Error('Failed to analyze business: ' + error.message)
   }
 }

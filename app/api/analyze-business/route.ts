@@ -174,7 +174,30 @@ export async function POST(request: NextRequest) {
       cached: false,
     })
   } catch (error: any) {
-    console.error('[AnalyzeBusiness] POST error:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error('[AnalyzeBusiness] POST error:', {
+      url: body?.url,
+      errorType: error.name,
+      errorMessage: error.message,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n'),
+    })
+
+    // Return user-friendly error messages based on error type
+    let userMessage = 'Failed to analyze business. Please try again.'
+
+    if (error.message.includes('AI service not configured') || error.message.includes('No AI service')) {
+      userMessage = 'Our AI service is temporarily unavailable. Please try again in a few minutes.'
+    } else if (error.message.includes('Unable to parse') || error.message.includes('parse')) {
+      userMessage = 'Unable to analyze this website. Please try again or use a different URL.'
+    } else if (error.message.includes('Unable to analyze')) {
+      userMessage = error.message
+    } else if (error.message.includes('fetch') || error.message.includes('Could not fetch')) {
+      userMessage = 'Could not access this website. Please check the URL and try again.'
+    } else if (error.message.includes('rate limit') || error.message.includes('429') || error.message.includes('quota')) {
+      userMessage = 'We\'re experiencing high demand. Please try again in a few minutes.'
+    } else if (error.message.includes('timeout') || error.message.includes('Timeout')) {
+      userMessage = 'The website took too long to respond. Please try again.'
+    }
+
+    return NextResponse.json({ error: userMessage }, { status: 500 })
   }
 }
