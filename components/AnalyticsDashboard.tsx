@@ -38,6 +38,15 @@ interface TimelineData {
   engagement: number
 }
 
+interface ScheduledPost {
+  id: string
+  title: string
+  subreddit: string
+  displayName: string
+  scheduledAt: string
+  postType: string
+}
+
 interface AnalyticsDashboardProps {
   middleContent?: React.ReactNode
 }
@@ -47,13 +56,25 @@ export default function AnalyticsDashboard({ middleContent }: AnalyticsDashboard
   const [topSubreddits, setTopSubreddits] = useState<SubredditStats[]>([])
   const [topPosts, setTopPosts] = useState<TopPost[]>([])
   const [timeline, setTimeline] = useState<TimelineData[]>([])
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [timeRange, setTimeRange] = useState('30')
 
   useEffect(() => {
     fetchAnalytics()
+    fetchScheduledPosts()
   }, [timeRange])
+
+  async function fetchScheduledPosts() {
+    try {
+      const response = await fetch('/api/posts/scheduled')
+      const data = await response.json()
+      setScheduledPosts(data.scheduledPosts || [])
+    } catch (error) {
+      console.error('Failed to fetch scheduled posts:', error)
+    }
+  }
 
   async function fetchAnalytics() {
     try {
@@ -169,6 +190,74 @@ export default function AnalyticsDashboard({ middleContent }: AnalyticsDashboard
               <div className="text-3xl font-bold text-white mt-2">{summary?.avgScore || 0}</div>
             </div>
           </div>
+
+          {/* Upcoming Scheduled Posts */}
+          {scheduledPosts.length > 0 && (
+            <div className="feature-card rounded-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-white">Upcoming Scheduled Posts</h3>
+                <a
+                  href="/dashboard/posts?tab=scheduled"
+                  className="text-sm text-[#00D9FF] hover:underline"
+                >
+                  View All →
+                </a>
+              </div>
+              <div className="space-y-3">
+                {scheduledPosts.map((post) => {
+                  const scheduledDate = new Date(post.scheduledAt)
+                  const now = new Date()
+                  const diffMs = scheduledDate.getTime() - now.getTime()
+                  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+                  const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60))
+
+                  let relativeTime = ''
+                  if (diffMs < 0) {
+                    relativeTime = 'Processing...'
+                  } else if (diffHours > 24) {
+                    const days = Math.floor(diffHours / 24)
+                    relativeTime = `in ${days} day${days > 1 ? 's' : ''}`
+                  } else if (diffHours > 0) {
+                    relativeTime = `in ${diffHours}h ${diffMins}m`
+                  } else {
+                    relativeTime = `in ${diffMins}m`
+                  }
+
+                  return (
+                    <div
+                      key={post.id}
+                      className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-[#1a1a24] rounded-lg border border-gray-700 hover:border-[#00D9FF] transition"
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-white line-clamp-1 text-sm">{post.title}</h4>
+                          <div className="flex gap-2 text-xs text-gray-400 mt-1">
+                            <span className="text-[#00D9FF]">r/{post.displayName}</span>
+                            <span>•</span>
+                            <span className="capitalize">{post.postType}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 pl-5 sm:pl-0">
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-yellow-400">{relativeTime}</div>
+                          <div className="text-xs text-gray-500">
+                            {scheduledDate.toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Middle Content Slot (e.g., Analyze Business Section) */}
           {middleContent}

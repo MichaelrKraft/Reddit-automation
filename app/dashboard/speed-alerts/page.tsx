@@ -454,8 +454,8 @@ export default function SpeedAlertsPage() {
                 No alerts yet. Start monitoring to receive alerts.
               </div>
             ) : (
-              <div className="space-y-3">
-                {alerts.slice(0, 1).map((alert) => (
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                {alerts.map((alert) => (
                   <div
                     key={alert.id}
                     className={`border rounded-lg p-4 ${
@@ -529,11 +529,6 @@ export default function SpeedAlertsPage() {
                     </div>
                   </div>
                 ))}
-                {alerts.length > 1 && (
-                  <div className="text-center text-sm text-gray-400 pt-2">
-                    +{alerts.length - 1} more alert{alerts.length > 2 ? 's' : ''}
-                  </div>
-                )}
               </div>
             )}
           </div>
