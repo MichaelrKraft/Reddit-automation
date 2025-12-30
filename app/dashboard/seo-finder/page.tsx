@@ -24,6 +24,11 @@ interface SearchHistory {
   threads: SEOThread[]
 }
 
+interface GeneratedComment {
+  style: 'helpful' | 'curious' | 'supportive'
+  text: string
+}
+
 export default function SEOFinderPage() {
   const [keyword, setKeyword] = useState('')
   const [threads, setThreads] = useState<SEOThread[]>([])
@@ -33,6 +38,9 @@ export default function SEOFinderPage() {
   const [searchesRemaining, setSearchesRemaining] = useState<number | null>(null)
   const [upgradeRequired, setUpgradeRequired] = useState(false)
   const [demoMode, setDemoMode] = useState(false)
+  const [generatingComments, setGeneratingComments] = useState<string | null>(null)
+  const [generatedComments, setGeneratedComments] = useState<Record<string, GeneratedComment[]>>({})
+  const [copiedComment, setCopiedComment] = useState<string | null>(null)
 
   // Load search history on mount
   useEffect(() => {
@@ -107,6 +115,49 @@ export default function SEOFinderPage() {
     if (!traffic) return 'N/A'
     if (traffic >= 1000) return `~${(traffic / 1000).toFixed(1)}k`
     return `~${traffic}`
+  }
+
+  async function generateComments(thread: SEOThread) {
+    const threadKey = thread.url
+    setGeneratingComments(threadKey)
+
+    try {
+      const res = await fetch('/api/seo-threads/generate-comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postTitle: thread.title,
+          postUrl: thread.url,
+          subreddit: thread.subreddit,
+          snippet: thread.snippet
+        })
+      })
+
+      const data = await res.json()
+
+      if (data.comments) {
+        setGeneratedComments(prev => ({
+          ...prev,
+          [threadKey]: data.comments
+        }))
+      }
+    } catch (err) {
+      console.error('Failed to generate comments:', err)
+    } finally {
+      setGeneratingComments(null)
+    }
+  }
+
+  function copyComment(text: string, commentId: string) {
+    navigator.clipboard.writeText(text)
+    setCopiedComment(commentId)
+    setTimeout(() => setCopiedComment(null), 2000)
+  }
+
+  const styleColors: Record<string, string> = {
+    helpful: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50',
+    curious: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
+    supportive: 'bg-green-500/10 text-green-400 border-green-500/50',
   }
 
   if (upgradeRequired) {
@@ -251,21 +302,60 @@ export default function SEOFinderPage() {
                       </span>
                     </div>
                     <div className="flex gap-3 mt-4 pt-4 border-t border-gray-700">
-                      <a
-                        href={thread.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => window.open(thread.url, '_blank', 'noopener,noreferrer')}
                         className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition"
                       >
                         Open Thread ↗
-                      </a>
-                      <a
-                        href={`/dashboard/new-post?subreddit=${thread.subreddit}&replyTo=${encodeURIComponent(thread.url)}`}
-                        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-sm font-medium transition"
+                      </button>
+                      <button
+                        onClick={() => generateComments(thread)}
+                        disabled={generatingComments === thread.url}
+                        className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-sm font-medium transition disabled:opacity-50"
                       >
-                        Generate Comment
-                      </a>
+                        {generatingComments === thread.url ? (
+                          <span className="flex items-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Generating...
+                          </span>
+                        ) : generatedComments[thread.url] ? (
+                          'Regenerate Comments'
+                        ) : (
+                          'Generate Comments'
+                        )}
+                      </button>
                     </div>
+
+                    {/* Generated Comments Section */}
+                    {generatedComments[thread.url] && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-xs text-gray-400 mb-2">Click a comment to copy & open thread:</p>
+                        {generatedComments[thread.url].map((comment) => (
+                          <div
+                            key={`${thread.url}-${comment.style}`}
+                            className={`p-3 rounded border ${styleColors[comment.style]} cursor-pointer hover:opacity-80 transition`}
+                            onClick={() => {
+                              copyComment(comment.text, `${thread.url}-${comment.style}`)
+                              window.open(thread.url, '_blank', 'noopener,noreferrer')
+                            }}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <span className="text-xs font-semibold uppercase">
+                                  {comment.style}
+                                </span>
+                                <p className="text-sm mt-1">{comment.text}</p>
+                              </div>
+                              <span className="text-xs ml-2 whitespace-nowrap">
+                                {copiedComment === `${thread.url}-${comment.style}`
+                                  ? '✓ Copied!'
+                                  : 'Click to copy'}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )
               })}
