@@ -212,7 +212,7 @@ export default function WarmupDashboard() {
     }
   }
 
-  async function handleAccountAction(accountId: string, action: 'pause' | 'resume' | 'stop') {
+  async function handleAccountAction(accountId: string, action: 'pause' | 'resume' | 'stop' | 'retry') {
     try {
       setActionLoading(true)
       setSelectedAccount(accountId)
@@ -1051,6 +1051,15 @@ export default function WarmupDashboard() {
                           Stop
                         </button>
                       </>
+                    )}
+                    {account.status === 'FAILED' && (
+                      <button
+                        onClick={() => handleAccountAction(account.id, 'retry')}
+                        disabled={actionLoading && selectedAccount === account.id}
+                        className="px-3 py-1 bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 rounded-lg hover:bg-[#00D9FF]/30 transition text-sm font-medium disabled:opacity-50"
+                      >
+                        🔄 Retry Warmup
+                      </button>
                     )}
                   </div>
                 </div>

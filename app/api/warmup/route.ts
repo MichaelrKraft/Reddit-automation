@@ -229,9 +229,37 @@ export async function PATCH(request: NextRequest) {
         await orchestrator.stopAccountWarmup(accountId)
         break
 
+      case 'retry':
+        // Reset a FAILED account back to Phase 1 to retry warmup
+        if (account.warmupStatus !== 'FAILED') {
+          return NextResponse.json(
+            { error: 'Only failed accounts can be retried' },
+            { status: 400 }
+          )
+        }
+
+        // Reset the account status and reconnect
+        await prisma.redditAccount.update({
+          where: { id: accountId },
+          data: {
+            warmupStatus: 'PHASE_1_UPVOTES',
+            connected: true,
+            warmupStartedAt: new Date(),
+            warmupProgress: {
+              daily: [],
+              posts: [],
+              failedAttempts: [],
+            },
+          },
+        })
+
+        // Re-enqueue the account in the warmup orchestrator
+        await orchestrator.startAccountWarmup(accountId)
+        break
+
       default:
         return NextResponse.json(
-          { error: 'Invalid action. Must be pause, resume, or stop' },
+          { error: 'Invalid action. Must be pause, resume, stop, or retry' },
           { status: 400 }
         )
     }
@@ -241,10 +269,18 @@ export async function PATCH(request: NextRequest) {
       where: { id: accountId },
     })
 
+    // Build appropriate message based on action
+    const actionMessages: Record<string, string> = {
+      pause: 'paused',
+      resume: 'resumed',
+      stop: 'stopped',
+      retry: 'restarted from Phase 1',
+    }
+
     return NextResponse.json({
       success: true,
       account: updatedAccount,
-      message: `Warmup ${action}${action.endsWith('e') ? 'd' : 'ped'} for ${account.username}`,
+      message: `Warmup ${actionMessages[action] || action} for ${account.username}`,
     })
   } catch (error) {
     console.error('Error updating warmup status:', error)

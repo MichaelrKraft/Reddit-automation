@@ -51,8 +51,12 @@ export default function SpeedAlertsPage() {
   const [copiedComment, setCopiedComment] = useState<string | null>(null)
   const [soundEnabled, setSoundEnabled] = useState(true)
   const eventSourceRef = useRef<EventSource | null>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
   const soundEnabledRef = useRef(true)
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const reconnectAttemptsRef = useRef(0)
+  const maxReconnectAttempts = 10
+  const baseReconnectDelay = 2000 // 2 seconds
 
   // Load initial data
   useEffect(() => {
@@ -60,9 +64,40 @@ export default function SpeedAlertsPage() {
     fetchAlerts()
   }, [])
 
-  // Initialize audio for notifications
-  useEffect(() => {
-    audioRef.current = new Audio('/notification.mp3')
+  // Play notification sound using Web Audio API (no file needed)
+  const playNotificationSound = useCallback(() => {
+    if (!soundEnabledRef.current) return
+
+    try {
+      // Create or resume AudioContext (needed for browsers that pause audio)
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      }
+
+      const ctx = audioContextRef.current
+      if (ctx.state === 'suspended') {
+        ctx.resume()
+      }
+
+      // Create a pleasant notification beep
+      const oscillator = ctx.createOscillator()
+      const gainNode = ctx.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(ctx.destination)
+
+      // Two-tone notification sound
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime) // A5
+      oscillator.frequency.setValueAtTime(1100, ctx.currentTime + 0.1) // Higher tone
+
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3)
+
+      oscillator.start(ctx.currentTime)
+      oscillator.stop(ctx.currentTime + 0.3)
+    } catch (err) {
+      console.error('[Speed Alerts] Could not play notification sound:', err)
+    }
   }, [])
 
   async function fetchMonitored() {
@@ -149,6 +184,7 @@ export default function SpeedAlertsPage() {
     eventSource.addEventListener('connected', (event) => {
       console.log('[Speed Alerts UI] Connected event received:', JSON.parse(event.data))
       setIsMonitoring(true)
+      reconnectAttemptsRef.current = 0 // Reset on successful connection
     })
 
     eventSource.addEventListener('new_post', (event) => {
@@ -156,10 +192,11 @@ export default function SpeedAlertsPage() {
       const data = JSON.parse(event.data)
       const alert = data.alert as StreamAlert
 
+      // Reset reconnect attempts on successful data
+      reconnectAttemptsRef.current = 0
+
       // Play notification sound if enabled
-      if (soundEnabledRef.current && audioRef.current) {
-        audioRef.current.play().catch(() => {})
-      }
+      playNotificationSound()
 
       // Add to alerts list
       setAlerts((prev) => [alert, ...prev])
@@ -175,6 +212,7 @@ export default function SpeedAlertsPage() {
 
     eventSource.addEventListener('heartbeat', (event) => {
       console.log('[Speed Alerts UI] Heartbeat:', JSON.parse(event.data))
+      reconnectAttemptsRef.current = 0 // Reset on successful heartbeat
     })
 
     eventSource.addEventListener('status', (event) => {
@@ -190,15 +228,35 @@ export default function SpeedAlertsPage() {
       console.error('[Speed Alerts UI] Connection error:', err)
       // Check if the connection is truly closed
       if (eventSource.readyState === EventSource.CLOSED) {
-        console.log('[Speed Alerts UI] Connection closed, stopping monitoring')
-        setIsMonitoring(false)
+        console.log('[Speed Alerts UI] Connection closed')
+
+        // Attempt to reconnect with exponential backoff
+        if (reconnectAttemptsRef.current < maxReconnectAttempts) {
+          const delay = baseReconnectDelay * Math.pow(2, reconnectAttemptsRef.current)
+          console.log(`[Speed Alerts UI] Attempting reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1}/${maxReconnectAttempts})`)
+
+          reconnectTimeoutRef.current = setTimeout(() => {
+            reconnectAttemptsRef.current++
+            startMonitoring()
+          }, delay)
+        } else {
+          console.log('[Speed Alerts UI] Max reconnect attempts reached, stopping monitoring')
+          setIsMonitoring(false)
+        }
       } else {
         console.log('[Speed Alerts UI] Connection error but may reconnect, readyState:', eventSource.readyState)
       }
     }
-  }, [])
+  }, [playNotificationSound])
 
   const stopMonitoring = useCallback(() => {
+    // Clear reconnect timeout if any
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current)
+      reconnectTimeoutRef.current = null
+    }
+    reconnectAttemptsRef.current = 0
+
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
       eventSourceRef.current = null
@@ -209,8 +267,14 @@ export default function SpeedAlertsPage() {
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
       if (eventSourceRef.current) {
         eventSourceRef.current.close()
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close()
       }
     }
   }, [])
