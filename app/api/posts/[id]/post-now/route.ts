@@ -60,14 +60,18 @@ export async function POST(
       url: (post.postType === 'link' || post.postType === 'image') ? post.content : undefined,
     })
 
+    // Fetch the submission to resolve lazy-loaded properties
+    // Snoowrap returns proxy objects - .fetch() resolves them to actual values
+    const fetchedSubmission = await submission.fetch()
+
     // Update the post in database
     const updatedPost = await prisma.post.update({
       where: { id },
       data: {
         status: 'posted',
         postedAt: new Date(),
-        redditId: submission.id,
-        url: `https://reddit.com${submission.permalink}`,
+        redditId: fetchedSubmission.id,
+        url: `https://reddit.com${fetchedSubmission.permalink}`,
       },
       include: {
         subreddit: true,
@@ -101,7 +105,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       post: updatedPost,
-      redditUrl: `https://reddit.com${submission.permalink}`,
+      redditUrl: `https://reddit.com${fetchedSubmission.permalink}`,
     })
   } catch (error: any) {
     console.error('Post now failed:', error)

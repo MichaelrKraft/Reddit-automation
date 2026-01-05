@@ -202,8 +202,6 @@ function parseNonJsonResponse(text: string) {
 }
 
 export async function analyzeSubreddit(subredditName: string) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
-
   const prompt = `
 Analyze the subreddit r/${subredditName} and provide insights for creating content.
 
@@ -218,15 +216,14 @@ Return as JSON with keys: postTypes, tone, dos, donts, bestPractices, styleGuide
 `
 
   try {
-    const result = await model.generateContent(prompt)
-    const response = await result.response
-    const text = response.text()
-    
+    // Use generateCompletion which has Gemini -> OpenAI fallback
+    const text = await generateCompletion(prompt)
+
     const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0])
     }
-    
+
     return {
       postTypes: ['Discussion', 'Question', 'Story'],
       tone: 'casual',
@@ -237,7 +234,7 @@ Return as JSON with keys: postTypes, tone, dos, donts, bestPractices, styleGuide
     }
   } catch (error) {
     console.error('Subreddit analysis failed:', error)
-    return null
+    throw error // Throw instead of returning null so frontend can handle it
   }
 }
 
