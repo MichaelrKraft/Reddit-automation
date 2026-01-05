@@ -30,6 +30,8 @@ interface GeneratedPost {
   content: string
   reasoning: string
   viralScore: number
+  viralTier?: 'ultra-viral' | 'highly-viral' | 'moderately-viral' | 'low-viral'
+  suggestions?: string[]
 }
 
 interface TopPostsAnalyzerProps {
@@ -55,6 +57,7 @@ export default function TopPostsAnalyzer({ subreddit, onSelectPost }: TopPostsAn
   const [userGoal, setUserGoal] = useState('')
   const [generatedPosts, setGeneratedPosts] = useState<GeneratedPost[]>([])
   const [showAnalysis, setShowAnalysis] = useState(false)
+  const [showScrollHint, setShowScrollHint] = useState(false)
 
   async function analyzeTopPosts() {
     if (!subreddit.trim()) return
@@ -253,11 +256,24 @@ export default function TopPostsAnalyzer({ subreddit, onSelectPost }: TopPostsAn
               type="button"
               onClick={generateFromPatterns}
               disabled={generating || !userGoal.trim()}
-              className="text-sm bg-[#00D9FF] text-black px-4 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:opacity-50 font-medium"
+              className="text-sm bg-[#00D9FF] text-black px-4 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:opacity-50 font-medium flex items-center gap-2"
             >
-              {generating ? 'Generating...' : 'Generate'}
+              {generating ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Generating...
+                </>
+              ) : 'Generate'}
             </button>
           </div>
+          {generating && (
+            <p className="text-sm text-purple-400 font-medium animate-pulse">
+              ✨ Analyzing patterns and generating viral posts... (~30 seconds)
+            </p>
+          )}
         </div>
       )}
 
@@ -270,20 +286,47 @@ export default function TopPostsAnalyzer({ subreddit, onSelectPost }: TopPostsAn
               <div key={i} className="p-3 bg-[#0a0a0f] rounded-lg border border-gray-800">
                 <div className="flex justify-between items-start gap-2">
                   <h6 className="font-medium text-white text-sm">{post.title}</h6>
-                  <span className={`text-xs px-2 py-0.5 rounded ${
-                    post.viralScore >= 80 ? 'bg-green-500/20 text-green-400' :
-                    post.viralScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-gray-500/20 text-gray-400'
-                  }`}>
-                    {post.viralScore}%
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {post.viralTier && (
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        post.viralTier === 'ultra-viral' ? 'bg-purple-500/20 text-purple-400' :
+                        post.viralTier === 'highly-viral' ? 'bg-green-500/20 text-green-400' :
+                        post.viralTier === 'moderately-viral' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-gray-500/20 text-gray-400'
+                      }`}>
+                        {post.viralTier.replace('-', ' ')}
+                      </span>
+                    )}
+                    <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                      post.viralScore >= 85 ? 'bg-purple-500/20 text-purple-400' :
+                      post.viralScore >= 70 ? 'bg-green-500/20 text-green-400' :
+                      post.viralScore >= 50 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-gray-500/20 text-gray-400'
+                    }`}>
+                      {post.viralScore}/100
+                    </span>
+                  </div>
                 </div>
                 <p className="text-gray-400 text-sm mt-2 line-clamp-3">{post.content}</p>
                 <p className="text-gray-500 text-xs mt-2 italic">{post.reasoning}</p>
+                {post.suggestions && post.suggestions.length > 0 && post.viralScore < 85 && (
+                  <div className="mt-2 p-2 bg-yellow-500/10 border border-yellow-500/30 rounded text-xs">
+                    <span className="text-yellow-400 font-medium">💡 Tips to improve:</span>
+                    <ul className="text-yellow-300/80 mt-1 space-y-0.5">
+                      {post.suggestions.slice(0, 2).map((s, idx) => (
+                        <li key={idx}>• {s}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {onSelectPost && (
                   <button
                     type="button"
-                    onClick={() => onSelectPost(post.title, post.content)}
+                    onClick={() => {
+                      onSelectPost(post.title, post.content)
+                      setShowScrollHint(true)
+                      setTimeout(() => setShowScrollHint(false), 5000)
+                    }}
                     className="mt-2 text-xs bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 px-3 py-1 rounded hover:bg-[#00D9FF]/30 transition"
                   >
                     Use This Post
@@ -291,6 +334,16 @@ export default function TopPostsAnalyzer({ subreddit, onSelectPost }: TopPostsAn
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Scroll Hint Notification */}
+      {showScrollHint && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+          <div className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+            <span>✅ Post populated!</span>
+            <span className="text-green-100">Scroll down to see your post ↓</span>
           </div>
         </div>
       )}

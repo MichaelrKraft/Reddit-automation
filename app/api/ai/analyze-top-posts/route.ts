@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { fetchTopPosts, TimeFilter } from '@/lib/reddit'
 import { analyzeTopPostsPatterns, generatePostFromPatterns, TopPostAnalysis } from '@/lib/ai'
+import { calculateViralScore } from '@/lib/viral-score'
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,7 +41,25 @@ export async function POST(request: NextRequest) {
     let generatedPosts = null
     if (generatePost && userGoal) {
       console.log(`[TopPostsAnalyzer] Generating posts for goal: ${userGoal}`)
-      generatedPosts = await generatePostFromPatterns(analysis, userGoal, subreddit, postType)
+      const rawPosts = await generatePostFromPatterns(analysis, userGoal, subreddit, postType)
+
+      // Calculate actual viral scores using the data-driven scoring system
+      const scoredPosts = rawPosts.map(post => {
+        const viralAnalysis = calculateViralScore(post.title, subreddit, postType)
+        return {
+          ...post,
+          viralScore: viralAnalysis.score,
+          viralTier: viralAnalysis.tier,
+          suggestions: viralAnalysis.suggestions // Include improvement tips
+        }
+      })
+
+      // Sort by viral score (highest first) and return top 3
+      generatedPosts = scoredPosts
+        .sort((a, b) => b.viralScore - a.viralScore)
+        .slice(0, 3)
+
+      console.log(`[TopPostsAnalyzer] Generated ${rawPosts.length} posts, returning top 3 with scores: ${generatedPosts.map(p => p.viralScore).join(', ')}`)
     }
 
     return NextResponse.json({

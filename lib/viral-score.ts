@@ -72,6 +72,24 @@ const DEFAULT_CONFIG = {
 }
 
 /**
+ * Get subreddit-specific viral optimization config
+ * Used by AI generation to optimize for specific communities
+ */
+export function getSubredditViralConfig(subredditName: string) {
+  const normalized = subredditName.toLowerCase().replace(/^r\//, '')
+  const config = SUBREDDIT_CONFIGS[normalized] || DEFAULT_CONFIG
+
+  return {
+    subreddit: normalized,
+    titleLength: config.optimalTitleLength,
+    useFirstPerson: config.firstPersonBonus > 0,
+    firstPersonBonus: config.firstPersonBonus,
+    useQuestions: config.questionPenalty < 0, // negative penalty means questions help
+    questionPenalty: config.questionPenalty,
+  }
+}
+
+/**
  * Count words in a title
  */
 function countWords(title: string): number {

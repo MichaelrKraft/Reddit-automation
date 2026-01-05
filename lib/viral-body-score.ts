@@ -68,7 +68,7 @@ const EMOTIONAL_REACTIONS = [
 const FIRST_PERSON_WORDS = ['i', 'my', 'me', 'mine', 'i\'m', 'i\'ve', 'i\'ll', 'i\'d', 'myself', 'we', 'our', 'us']
 
 // Subreddit-specific optimal word counts
-const SUBREDDIT_WORD_COUNTS: Record<string, { min: number; max: number; sweet: number }> = {
+export const SUBREDDIT_WORD_COUNTS: Record<string, { min: number; max: number; sweet: number }> = {
   tifu: { min: 300, max: 1200, sweet: 600 },
   amitheasshole: { min: 400, max: 1500, sweet: 800 },
   relationships: { min: 500, max: 2000, sweet: 1000 },
@@ -435,13 +435,11 @@ Choose ONE opening style:
 3. [BUILD-UP] - 2-3 paragraphs of rising tension
 4. [THE MOMENT] - The climax with dialogue
 5. [AFTERMATH] - Emotional reaction + consequences
-6. [TL;DR] - 1-2 sentence summary at end
 
 ### Paragraph Rules
 - 3-5 sentences per paragraph (50-100 words)
 - Break BEFORE dialogue
 - Break AFTER major revelations
-- Double line break before TL;DR
 
 ### Dialogue (78% of viral posts include this)
 Include realistic dialogue:
