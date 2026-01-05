@@ -112,6 +112,55 @@ export interface SubredditFlair {
   textColor: string
 }
 
+export type TimeFilter = 'all' | 'year' | 'month' | 'week' | 'day' | 'hour'
+
+export interface TopPost {
+  id: string
+  title: string
+  content: string | null
+  score: number
+  numComments: number
+  upvoteRatio: number
+  author: string
+  createdAt: Date
+  url: string
+  permalink: string
+  postType: 'text' | 'link' | 'image'
+}
+
+export async function fetchTopPosts(
+  subredditName: string,
+  limit: number = 25,
+  timeFilter: TimeFilter = 'all'
+): Promise<TopPost[]> {
+  const reddit = getRedditClient()
+  const subreddit = reddit.getSubreddit(subredditName)
+
+  try {
+    const posts = await subreddit.getTop({
+      limit,
+      time: timeFilter
+    })
+
+    return posts.map((post: any) => ({
+      id: post.id,
+      title: post.title,
+      content: post.selftext || null,
+      score: post.score,
+      numComments: post.num_comments,
+      upvoteRatio: post.upvote_ratio,
+      author: post.author?.name || '[deleted]',
+      createdAt: new Date(post.created_utc * 1000),
+      url: post.url,
+      permalink: `https://reddit.com${post.permalink}`,
+      postType: post.is_self ? 'text' : (post.url?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? 'image' : 'link')
+    }))
+  } catch (error: any) {
+    console.error(`[Reddit] Failed to fetch top posts for r/${subredditName}:`, error.message)
+    throw new Error(`Failed to fetch top posts: ${error.message}`)
+  }
+}
+
 export async function getSubredditFlairs(subredditName: string): Promise<SubredditFlair[]> {
   const reddit = getRedditClient()
   const subreddit = reddit.getSubreddit(subredditName)

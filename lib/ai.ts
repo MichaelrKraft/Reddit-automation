@@ -386,3 +386,131 @@ Return ONLY the reply text, no JSON or formatting.
     throw new Error('Failed to generate reply: ' + error.message)
   }
 }
+
+export interface TopPostAnalysis {
+  patterns: {
+    titlePatterns: string[]
+    contentPatterns: string[]
+    emotionalHooks: string[]
+    formatPatterns: string[]
+  }
+  insights: {
+    avgTitleLength: number
+    avgContentLength: number
+    commonOpenings: string[]
+    topicThemes: string[]
+  }
+  recommendations: string[]
+}
+
+export interface GeneratedPost {
+  title: string
+  content: string
+  reasoning: string
+  viralScore: number
+}
+
+export async function analyzeTopPostsPatterns(
+  posts: { title: string; content: string | null; score: number; numComments: number }[],
+  subredditName: string
+): Promise<TopPostAnalysis> {
+  const postsData = posts.slice(0, 15).map((p, i) =>
+    `Post ${i + 1} (Score: ${p.score}, Comments: ${p.numComments}):\nTitle: ${p.title}\nContent: ${p.content?.slice(0, 500) || '[No text content]'}`
+  ).join('\n\n---\n\n')
+
+  const prompt = `
+Analyze these top-performing posts from r/${subredditName} and identify what makes them successful.
+
+${postsData}
+
+Analyze and return JSON with this exact structure:
+{
+  "patterns": {
+    "titlePatterns": ["pattern 1", "pattern 2", "pattern 3"],
+    "contentPatterns": ["pattern 1", "pattern 2", "pattern 3"],
+    "emotionalHooks": ["hook type 1", "hook type 2"],
+    "formatPatterns": ["format pattern 1", "format pattern 2"]
+  },
+  "insights": {
+    "avgTitleLength": <number>,
+    "avgContentLength": <number>,
+    "commonOpenings": ["opening 1", "opening 2"],
+    "topicThemes": ["theme 1", "theme 2", "theme 3"]
+  },
+  "recommendations": ["specific recommendation 1", "specific recommendation 2", "specific recommendation 3"]
+}
+
+Focus on:
+- Title structures that get high engagement (questions, numbers, emotional triggers)
+- Content patterns (storytelling, formatting, length)
+- Emotional hooks that resonate with this community
+- Formatting patterns (paragraphs, TL;DR, bullet points)
+- What topics/themes perform best
+`
+
+  try {
+    const text = await generateCompletion(prompt)
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+    throw new Error('Failed to parse AI response')
+  } catch (error: any) {
+    console.error('Top posts analysis failed:', error)
+    throw error
+  }
+}
+
+export async function generatePostFromPatterns(
+  analysis: TopPostAnalysis,
+  userGoal: string,
+  subredditName: string,
+  postType: 'text' | 'link' = 'text'
+): Promise<GeneratedPost[]> {
+  const prompt = `
+You are an expert Reddit content creator. Based on the analysis of top-performing posts in r/${subredditName}, generate a new post that follows the winning patterns.
+
+WINNING PATTERNS IDENTIFIED:
+Title Patterns: ${analysis.patterns.titlePatterns.join(', ')}
+Content Patterns: ${analysis.patterns.contentPatterns.join(', ')}
+Emotional Hooks: ${analysis.patterns.emotionalHooks.join(', ')}
+Format Patterns: ${analysis.patterns.formatPatterns.join(', ')}
+Common Openings: ${analysis.insights.commonOpenings.join(', ')}
+Popular Themes: ${analysis.insights.topicThemes.join(', ')}
+
+RECOMMENDATIONS:
+${analysis.recommendations.join('\n')}
+
+USER'S GOAL: ${userGoal}
+POST TYPE: ${postType}
+
+Generate 3 different post variations that:
+1. Apply the winning patterns from top posts
+2. Achieve the user's goal
+3. Feel authentic and natural for this community
+4. Have high viral potential
+
+Return as JSON array:
+[
+  {
+    "title": "Engaging title following patterns",
+    "content": "Full post content with proper Reddit formatting",
+    "reasoning": "Brief explanation of which patterns this uses",
+    "viralScore": <1-100 based on pattern adherence>
+  },
+  ...
+]
+`
+
+  try {
+    const text = await generateCompletion(prompt)
+    const jsonMatch = text.match(/\[[\s\S]*\]/)
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0])
+    }
+    throw new Error('Failed to parse generated posts')
+  } catch (error: any) {
+    console.error('Post generation from patterns failed:', error)
+    throw error
+  }
+}

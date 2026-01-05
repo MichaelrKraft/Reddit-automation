@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AIContentGenerator from '@/components/AIContentGenerator'
 import SubredditAnalysis from '@/components/SubredditAnalysis'
+import TopPostsAnalyzer from '@/components/TopPostsAnalyzer'
 import OptimalTimingWidget from '@/components/OptimalTimingWidget'
 import ImageUpload from '@/components/ImageUpload'
 import DashboardNav from '@/components/DashboardNav'
@@ -429,6 +430,15 @@ export default function NewPost() {
 
             {formData.subredditName && (
               <SubredditAnalysis subreddit={formData.subredditName} />
+            )}
+
+            {formData.subredditName && (
+              <TopPostsAnalyzer
+                subreddit={formData.subredditName}
+                onSelectPost={(title, content) => {
+                  setFormData(prev => ({ ...prev, title, content }))
+                }}
+              />
             )}
 
             {formData.subredditName && (
