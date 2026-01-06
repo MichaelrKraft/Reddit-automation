@@ -213,18 +213,63 @@ Provide:
 4. Best practices for engagement
 5. Typical post length and style
 
-Return as JSON with keys: postTypes, tone, dos, donts, bestPractices, styleGuide
+Return as JSON with these exact keys and value types:
+{
+  "postTypes": ["string array of post types"],
+  "tone": "single string describing the tone",
+  "dos": ["string array of things to do"],
+  "donts": ["string array of things to avoid"],
+  "bestPractices": ["string array of best practices"],
+  "styleGuide": "single string with style recommendations"
+}
+
+IMPORTANT: All values must be either strings or arrays of strings. Do not use nested objects.
 `
 
   try {
     // Use generateCompletion which has Gemini -> OpenAI fallback
     const text = await generateCompletion(prompt)
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    // Clean up AI response - remove markdown code blocks and fix common issues
+    let cleanText = text
+      .replace(/```json\s*/gi, '')  // Remove ```json
+      .replace(/```\s*/g, '')       // Remove closing ```
+      .trim()
+
+    // Extract JSON object
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0])
+      let jsonStr = jsonMatch[0]
+
+      // Fix common JSON issues
+      jsonStr = jsonStr
+        .replace(/,\s*}/g, '}')     // Remove trailing commas before }
+        .replace(/,\s*]/g, ']')     // Remove trailing commas before ]
+        .replace(/[\x00-\x1F\x7F]/g, ' ')  // Remove control characters
+        .replace(/\n/g, '\\n')      // Escape newlines in strings
+        .replace(/\r/g, '')         // Remove carriage returns
+        .replace(/\t/g, '\\t')      // Escape tabs
+
+      try {
+        const parsed = JSON.parse(jsonStr)
+
+        // Validate and flatten any nested objects in styleGuide
+        if (parsed.styleGuide && typeof parsed.styleGuide === 'object') {
+          // Convert object to string if AI returned nested object
+          parsed.styleGuide = Object.entries(parsed.styleGuide)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('. ')
+        }
+
+        return parsed
+      } catch (parseError: any) {
+        console.error('JSON parse error in analyzeSubreddit:', parseError.message)
+        console.error('Attempted to parse:', jsonStr.substring(0, 500))
+      }
     }
 
+    // Fallback: return default structure if parsing fails
+    console.warn('Using fallback analysis structure for r/' + subredditName)
     return {
       postTypes: ['Discussion', 'Question', 'Story'],
       tone: 'casual',

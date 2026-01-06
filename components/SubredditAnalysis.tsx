@@ -6,6 +6,19 @@ interface SubredditAnalysisProps {
   subreddit: string
 }
 
+// Helper to safely render a value that might be an object
+function renderValue(value: any): string {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'object') {
+    // Convert object to readable string
+    return Object.entries(value)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join('. ')
+  }
+  return String(value)
+}
+
 export default function SubredditAnalysis({ subreddit }: SubredditAnalysisProps) {
   const [analysis, setAnalysis] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -75,7 +88,7 @@ export default function SubredditAnalysis({ subreddit }: SubredditAnalysisProps)
           {analysis.tone && (
             <div>
               <strong className="text-gray-300">Community Tone:</strong>
-              <p className="text-gray-400 mt-1">{analysis.tone}</p>
+              <p className="text-gray-400 mt-1">{renderValue(analysis.tone)}</p>
             </div>
           )}
 
@@ -83,8 +96,8 @@ export default function SubredditAnalysis({ subreddit }: SubredditAnalysisProps)
             <div>
               <strong className="text-green-400">✓ Do's:</strong>
               <ul className="list-disc list-inside text-gray-400 mt-1">
-                {analysis.dos.map((item: string, i: number) => (
-                  <li key={i}>{item}</li>
+                {analysis.dos.map((item: any, i: number) => (
+                  <li key={i}>{renderValue(item)}</li>
                 ))}
               </ul>
             </div>
@@ -94,8 +107,8 @@ export default function SubredditAnalysis({ subreddit }: SubredditAnalysisProps)
             <div>
               <strong className="text-red-400">✗ Don'ts:</strong>
               <ul className="list-disc list-inside text-gray-400 mt-1">
-                {analysis.donts.map((item: string, i: number) => (
-                  <li key={i}>{item}</li>
+                {analysis.donts.map((item: any, i: number) => (
+                  <li key={i}>{renderValue(item)}</li>
                 ))}
               </ul>
             </div>
@@ -104,7 +117,7 @@ export default function SubredditAnalysis({ subreddit }: SubredditAnalysisProps)
           {analysis.styleGuide && (
             <div>
               <strong className="text-gray-300">Style Guide:</strong>
-              <p className="text-gray-400 mt-1">{analysis.styleGuide}</p>
+              <p className="text-gray-400 mt-1">{renderValue(analysis.styleGuide)}</p>
             </div>
           )}
         </div>

@@ -623,6 +623,8 @@ function DiscoverSection() {
   const [savingId, setSavingId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [activeTab, setActiveTab] = useState<'search' | 'saved'>('search')
+  const [savedExpanded, setSavedExpanded] = useState(false)
+  const [searchExpanded, setSearchExpanded] = useState(false)
 
   useEffect(() => {
     fetchSavedSubreddits()
@@ -798,7 +800,7 @@ function DiscoverSection() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {searchResults.slice(0, 5).map((subreddit) => (
+                  {(searchExpanded ? searchResults : searchResults.slice(0, 5)).map((subreddit) => (
                     <div
                       key={subreddit.name}
                       className="flex items-center justify-between p-2 border border-gray-700 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
@@ -821,7 +823,12 @@ function DiscoverSection() {
                     </div>
                   ))}
                   {searchResults.length > 5 && (
-                    <p className="text-center text-xs text-gray-500">+{searchResults.length - 5} more</p>
+                    <button
+                      onClick={() => setSearchExpanded(!searchExpanded)}
+                      className="w-full text-center text-xs text-[#00D9FF] hover:text-[#00D9FF]/80 py-2 transition cursor-pointer"
+                    >
+                      {searchExpanded ? '▲ Show less' : `▼ +${searchResults.length - 5} more`}
+                    </button>
                   )}
                 </div>
               )}
@@ -836,7 +843,7 @@ function DiscoverSection() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {savedSubreddits.slice(0, 5).map((subreddit) => (
+                  {(savedExpanded ? savedSubreddits : savedSubreddits.slice(0, 5)).map((subreddit) => (
                     <div
                       key={subreddit.id}
                       className="flex items-center justify-between p-2 border border-gray-700 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
@@ -862,7 +869,12 @@ function DiscoverSection() {
                     </div>
                   ))}
                   {savedSubreddits.length > 5 && (
-                    <p className="text-center text-xs text-gray-500">+{savedSubreddits.length - 5} more</p>
+                    <button
+                      onClick={() => setSavedExpanded(!savedExpanded)}
+                      className="w-full text-center text-xs text-[#00D9FF] hover:text-[#00D9FF]/80 py-2 transition cursor-pointer"
+                    >
+                      {savedExpanded ? '▲ Show less' : `▼ +${savedSubreddits.length - 5} more`}
+                    </button>
                   )}
                 </div>
               )}
