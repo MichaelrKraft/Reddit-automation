@@ -65,22 +65,35 @@ export async function POST(request: NextRequest) {
         `https://www.reddit.com/r/${normalizedName}/about.json`,
         {
           headers: {
-            'User-Agent': 'RedRider/1.0 (Speed Alerts Feature)',
+            'User-Agent': 'ReddRide/1.0 (by /u/reddride_app)',
           },
         }
       )
 
+      console.log(`[Speed Alerts] Reddit API response for r/${normalizedName}: ${response.status}`)
+
       if (!response.ok) {
-        return NextResponse.json(
-          { error: `Subreddit r/${normalizedName} not found` },
-          { status: 404 }
-        )
+        // Provide more specific error messages based on status
+        if (response.status === 404) {
+          return NextResponse.json(
+            { error: `Subreddit r/${normalizedName} not found. Make sure the name is spelled correctly.` },
+            { status: 404 }
+          )
+        } else if (response.status === 403 || response.status === 429) {
+          // Reddit is rate limiting or blocking - but the subreddit likely exists
+          // Let the user add it anyway since we can still monitor it
+          console.log(`[Speed Alerts] Reddit rate limiting (${response.status}), allowing r/${normalizedName} to be added anyway`)
+        } else {
+          return NextResponse.json(
+            { error: `Reddit API error (${response.status}). Please try again in a moment.` },
+            { status: 500 }
+          )
+        }
       }
-    } catch {
-      return NextResponse.json(
-        { error: 'Failed to verify subreddit' },
-        { status: 500 }
-      )
+    } catch (err) {
+      console.error(`[Speed Alerts] Failed to verify subreddit r/${normalizedName}:`, err)
+      // On network error, still allow adding - the monitoring will fail if subreddit doesn't exist
+      console.log(`[Speed Alerts] Network error, allowing r/${normalizedName} to be added anyway`)
     }
 
     const monitored = await prisma.monitoredSubreddit.create({
