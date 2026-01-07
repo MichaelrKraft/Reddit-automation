@@ -589,7 +589,7 @@ export default function Home() {
                 Create Content That Actually Gets Upvoted
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Stop posting content that falls flat. Our AI studies what makes posts go viral in each subreddit and writes content that speaks their language—so you get upvotes, not downvotes.
+                Stop posting content that falls flat. Our AI studied almost 5,000 viral posts to understand what makes content go viral in each subreddit and writes posts that speak their language—so you get upvotes, not downvotes.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
