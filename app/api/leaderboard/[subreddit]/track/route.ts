@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
-import { fetchUserProfile, fetchAllUserPosts } from '@/lib/spy-mode/tracker'
+import { getRedditClient } from '@/lib/reddit'
 
 // POST - Add a user from the leaderboard to Spy Mode tracking
 export async function POST(
@@ -46,14 +46,25 @@ export async function POST(
       })
     }
 
-    // Fetch user profile from Reddit
-    const profile = await fetchUserProfile(cleanUsername)
-
-    if (!profile) {
+    // Fetch user profile from Reddit directly
+    let redditUser: any
+    try {
+      const reddit = getRedditClient()
+      redditUser = await reddit.getUser(cleanUsername).fetch()
+    } catch (redditError: any) {
+      console.error('[Track API] Reddit fetch error:', redditError.message)
       return NextResponse.json(
         { error: 'Reddit user not found or profile is private' },
         { status: 404 }
       )
+    }
+
+    const profile = {
+      username: redditUser.name,
+      displayName: redditUser.subreddit?.title || null,
+      avatarUrl: redditUser.icon_img?.split('?')[0] || redditUser.snoovatar_img || null,
+      totalKarma: (redditUser.link_karma || 0) + (redditUser.comment_karma || 0),
+      accountCreated: redditUser.created_utc ? new Date(redditUser.created_utc * 1000) : null,
     }
 
     // Create SpyAccount
@@ -69,42 +80,41 @@ export async function POST(
       },
     })
 
-    // Fetch and store user's posts in background
-    fetchAllUserPosts(cleanUsername)
-      .then(async (posts) => {
-        if (posts.length > 0) {
+    // Fetch and store user's posts in background (non-blocking)
+    ;(async () => {
+      try {
+        const reddit = getRedditClient()
+        const submissions = await reddit.getUser(cleanUsername).getSubmissions({ limit: 25, sort: 'new' })
+
+        if (submissions.length > 0) {
           await prisma.spyPost.createMany({
-            data: posts.map(post => ({
+            data: submissions.map((post: any) => ({
               accountId: spyAccount.id,
-              redditId: post.redditId,
+              redditId: post.name,
               title: post.title,
-              content: post.content,
-              url: post.url,
-              subreddit: post.subreddit,
-              postType: post.postType,
-              score: post.score,
-              upvoteRatio: post.upvoteRatio,
-              commentCount: post.commentCount,
-              awards: post.awards,
-              postedAt: post.postedAt,
+              content: post.selftext || null,
+              url: `https://reddit.com${post.permalink}`,
+              subreddit: post.subreddit?.display_name || '',
+              postType: post.is_video ? 'video' : post.is_self ? 'text' : 'link',
+              score: post.score || 0,
+              upvoteRatio: post.upvote_ratio || 0,
+              commentCount: post.num_comments || 0,
+              awards: post.total_awards_received || 0,
+              postedAt: new Date(post.created_utc * 1000),
             })),
             skipDuplicates: true,
           })
 
-          // Update lastPostId
-          const latestPost = posts.sort((a, b) =>
-            new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime()
-          )[0]
-
-          if (latestPost) {
-            await prisma.spyAccount.update({
-              where: { id: spyAccount.id },
-              data: { lastPostId: latestPost.redditId },
-            })
-          }
+          // Update lastPostId with the newest post
+          await prisma.spyAccount.update({
+            where: { id: spyAccount.id },
+            data: { lastPostId: submissions[0].name },
+          })
         }
-      })
-      .catch(err => console.error('Failed to fetch posts for new spy account:', err))
+      } catch (err) {
+        console.error('[Track API] Failed to fetch posts for new spy account:', err)
+      }
+    })()
 
     // Update the leaderboard entry to show as tracked
     await updateLeaderboardTrackedStatus(cleanSubreddit, cleanUsername, true)
