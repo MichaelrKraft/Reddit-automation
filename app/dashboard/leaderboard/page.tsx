@@ -261,7 +261,7 @@ export default function LeaderboardPage() {
               </div>
 
               {/* Scoring Info Panel */}
-              <div className="mt-4 p-4 bg-[#0a0a12] border border-[#00D9FF]/50 rounded-lg shadow-[0_0_15px_rgba(0,217,255,0.3)]">
+              <div className="mt-4 p-4 bg-[#0a0a12] border-2 border-[#00D9FF] rounded-lg shadow-[0_0_20px_rgba(0,217,255,0.5),0_0_40px_rgba(0,217,255,0.2)]">
                 <div className="flex items-start gap-3">
                   <span className="text-lg">ℹ️</span>
                   <div>
