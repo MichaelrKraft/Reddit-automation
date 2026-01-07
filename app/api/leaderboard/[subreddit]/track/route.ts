@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireUser } from '@/lib/auth'
 import { fetchUserProfile, fetchAllUserPosts } from '@/lib/spy-mode/tracker'
 
 // POST - Add a user from the leaderboard to Spy Mode tracking
@@ -8,7 +9,8 @@ export async function POST(
   { params }: { params: Promise<{ subreddit: string }> }
 ) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { subreddit } = await params
     const cleanSubreddit = subreddit.toLowerCase().replace(/^r\//, '')
     const { username } = await request.json()
@@ -113,7 +115,10 @@ export async function POST(
       message: `Now tracking u/${cleanUsername}`,
       alreadyTracked: false,
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error tracking user:', error)
     return NextResponse.json(
       { error: 'Failed to track user' },

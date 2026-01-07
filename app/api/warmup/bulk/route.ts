@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getWarmupOrchestrator } from '@/lib/warmup-orchestrator'
 import { batchCheckShadowban } from '@/lib/shadowban-detector'
+import { requireUser } from '@/lib/auth'
 
 // POST - Bulk operations on multiple accounts
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { operation, accountIds, filters } = await request.json()
 
     if (!operation) {
@@ -178,7 +180,10 @@ export async function POST(request: NextRequest) {
       ...results,
       message: `Bulk operation '${operation}' completed: ${results.successful} successful, ${results.failed} failed`,
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Bulk operation failed:', error)
     return NextResponse.json(
       { error: 'Bulk operation failed' },

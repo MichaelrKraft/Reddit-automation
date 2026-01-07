@@ -7,11 +7,13 @@ import {
   mapCategoryToEnum,
   RedditPostInput,
 } from '@/lib/opportunity-analyzer'
+import { requireUser } from '@/lib/auth'
 
 // POST - Scan a subreddit for product opportunities
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const body = await request.json()
     const { subreddit, limit = 50, timeFilter = 'week' } = body
 
@@ -134,7 +136,10 @@ export async function POST(request: NextRequest) {
       opportunitiesSaved: savedOpportunities.length,
       opportunities: savedOpportunities.map(formatOpportunityResponse),
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error scanning subreddit for opportunities:', error)
     return NextResponse.json(
       { error: 'Failed to scan subreddit' },

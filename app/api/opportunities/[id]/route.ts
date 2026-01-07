@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireUser } from '@/lib/auth'
 
 // GET - Get single opportunity details
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { id } = await params
 
     const opportunity = await prisma.opportunity.findUnique({
@@ -31,7 +33,10 @@ export async function GET(
     }
 
     return NextResponse.json({ opportunity: formatOpportunity(opportunity) })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error fetching opportunity:', error)
     return NextResponse.json(
       { error: 'Failed to fetch opportunity' },
@@ -46,7 +51,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { id } = await params
     const body = await request.json()
     const { action, status } = body
@@ -155,7 +161,10 @@ export async function PATCH(
       { error: 'No valid action or status provided' },
       { status: 400 }
     )
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error updating opportunity:', error)
     return NextResponse.json(
       { error: 'Failed to update opportunity' },
@@ -166,11 +175,12 @@ export async function PATCH(
 
 // DELETE - Delete an opportunity
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { id } = await params
 
     // Verify ownership
@@ -198,7 +208,10 @@ export async function DELETE(
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error deleting opportunity:', error)
     return NextResponse.json(
       { error: 'Failed to delete opportunity' },
