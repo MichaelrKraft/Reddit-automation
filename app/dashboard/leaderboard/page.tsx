@@ -259,6 +259,41 @@ export default function LeaderboardPage() {
                   </Link>
                 </div>
               </div>
+
+              {/* Scoring Info Panel */}
+              <div className="mt-4 p-4 bg-[#0a0a12] border border-gray-700/50 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-lg">ℹ️</span>
+                  <div>
+                    <h3 className="text-sm font-semibold text-white mb-2">How Influence Score is Calculated</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#00D9FF] font-bold">30%</span>
+                        <span>📊 Total Score</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#00D9FF] font-bold">25%</span>
+                        <span>📈 Avg Score</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#00D9FF] font-bold">20%</span>
+                        <span>📝 Post Count</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#00D9FF] font-bold">15%</span>
+                        <span>💬 Avg Comments</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[#00D9FF] font-bold">10%</span>
+                        <span>🎯 Success Rate</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Hover over any stat icon for detailed explanation. Success Rate = % of posts with 100+ upvotes.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Entries List */}
@@ -289,20 +324,20 @@ export default function LeaderboardPage() {
                           u/{entry.username}
                         </a>
                         <div className="flex flex-wrap gap-3 mt-1 text-sm text-gray-400">
-                          <span title="Influence Score" className="flex items-center gap-1">
+                          <span title="Influence Score (0-100) - Weighted composite: 30% Total Score + 25% Avg Score + 20% Post Count + 15% Avg Comments + 10% Success Rate" className="flex items-center gap-1 cursor-help">
                             <span className="text-[#00D9FF]">⭐</span>
                             {entry.influenceScore.toFixed(1)}
                           </span>
-                          <span title="Total Score">
+                          <span title="Total Score - Sum of all upvotes received on posts in this subreddit" className="cursor-help">
                             📊 {formatNumber(entry.totalScore)}
                           </span>
-                          <span title="Posts">
+                          <span title="Post Count - Total number of posts made in this subreddit during the selected time period" className="cursor-help">
                             📝 {entry.postCount} posts
                           </span>
-                          <span title="Avg Score">
+                          <span title="Average Score - Average upvotes per post (Total Score ÷ Post Count)" className="cursor-help">
                             📈 {formatNumber(Math.round(entry.avgScore))} avg
                           </span>
-                          <span title="Success Rate">
+                          <span title="Success Rate - Percentage of posts that reached 100+ upvotes" className="cursor-help">
                             🎯 {entry.successRate.toFixed(0)}% hit
                           </span>
                         </div>
