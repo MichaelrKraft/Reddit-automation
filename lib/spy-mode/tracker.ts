@@ -1,5 +1,7 @@
 // Spy Mode - Reddit API Tracker
-// Fetches public Reddit user data without authentication
+// Uses authenticated Snoowrap client for reliable API access
+
+import { getRedditClient } from '@/lib/reddit'
 
 export interface RedditUserProfile {
   username: string
@@ -23,56 +25,10 @@ export interface RedditPost {
   postedAt: Date
 }
 
-// Rate limiting: Reddit allows ~60 requests/minute for unauthenticated
-const RATE_LIMIT_DELAY = 1100 // 1.1 seconds between requests
-
-let lastRequestTime = 0
-
-async function rateLimitedFetch(url: string, timeoutMs: number = 5000): Promise<Response> {
-  const now = Date.now()
-  const timeSinceLastRequest = now - lastRequestTime
-
-  if (timeSinceLastRequest < RATE_LIMIT_DELAY) {
-    await new Promise(resolve => setTimeout(resolve, RATE_LIMIT_DELAY - timeSinceLastRequest))
-  }
-
-  lastRequestTime = Date.now()
-
-  // Add timeout to prevent hanging requests
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Redoit:v1.0 (Competitor Intelligence Tool)',
-      },
-      signal: controller.signal,
-    })
-    clearTimeout(timeoutId)
-    return response
-  } catch (error: any) {
-    clearTimeout(timeoutId)
-    if (error.name === 'AbortError') {
-      throw new Error(`Request timed out after ${timeoutMs}ms`)
-    }
-    throw error
-  }
-}
-
 export async function fetchUserProfile(username: string): Promise<RedditUserProfile | null> {
   try {
-    const response = await rateLimitedFetch(
-      `https://www.reddit.com/user/${username}/about.json`
-    )
-
-    if (!response.ok) {
-      console.error(`Failed to fetch profile for ${username}: ${response.status}`)
-      return null
-    }
-
-    const data = await response.json()
-    const user = data.data
+    const reddit = getRedditClient()
+    const user = await reddit.getUser(username).fetch()
 
     return {
       username: user.name,
@@ -81,8 +37,8 @@ export async function fetchUserProfile(username: string): Promise<RedditUserProf
       totalKarma: (user.link_karma || 0) + (user.comment_karma || 0),
       accountCreated: user.created_utc ? new Date(user.created_utc * 1000) : null,
     }
-  } catch (error) {
-    console.error(`Error fetching profile for ${username}:`, error)
+  } catch (error: any) {
+    console.error(`Error fetching profile for ${username}:`, error.message || error)
     return null
   }
 }
@@ -93,55 +49,51 @@ export async function fetchUserPosts(
   after?: string
 ): Promise<{ posts: RedditPost[]; after: string | null }> {
   try {
-    let url = `https://www.reddit.com/user/${username}/submitted.json?limit=${limit}&sort=new`
+    const reddit = getRedditClient()
+    const user = reddit.getUser(username)
+
+    const options: any = { limit, sort: 'new' }
     if (after) {
-      url += `&after=${after}`
+      options.after = after
     }
 
-    const response = await rateLimitedFetch(url)
+    const submissions = await user.getSubmissions(options)
 
-    if (!response.ok) {
-      console.error(`Failed to fetch posts for ${username}: ${response.status}`)
-      return { posts: [], after: null }
-    }
-
-    const data = await response.json()
-    const children = data.data?.children || []
-
-    const posts: RedditPost[] = children.map((child: { data: Record<string, unknown> }) => {
-      const post = child.data
-
+    const posts: RedditPost[] = submissions.map((post: any) => {
       // Determine post type
       let postType: 'text' | 'link' | 'image' | 'video' = 'text'
       if (post.is_video) {
         postType = 'video'
-      } else if (post.post_hint === 'image' || post.url?.toString().match(/\.(jpg|jpeg|png|gif)$/i)) {
+      } else if (post.post_hint === 'image' || post.url?.match(/\.(jpg|jpeg|png|gif)$/i)) {
         postType = 'image'
       } else if (!post.is_self) {
         postType = 'link'
       }
 
       return {
-        redditId: post.name as string,
-        title: post.title as string,
-        content: post.selftext as string || null,
+        redditId: post.name,
+        title: post.title,
+        content: post.selftext || null,
         url: `https://reddit.com${post.permalink}`,
-        subreddit: post.subreddit as string,
+        subreddit: post.subreddit?.display_name || post.subreddit_name_prefixed?.replace('r/', '') || '',
         postType,
-        score: post.score as number || 0,
-        upvoteRatio: post.upvote_ratio as number || 0,
-        commentCount: post.num_comments as number || 0,
-        awards: post.total_awards_received as number || 0,
-        postedAt: new Date((post.created_utc as number) * 1000),
+        score: post.score || 0,
+        upvoteRatio: post.upvote_ratio || 0,
+        commentCount: post.num_comments || 0,
+        awards: post.total_awards_received || 0,
+        postedAt: new Date(post.created_utc * 1000),
       }
     })
 
+    // Get the 'after' token for pagination from the listing
+    const afterToken = submissions.length > 0 ? submissions[submissions.length - 1]?.name : null
+
     return {
       posts,
-      after: data.data?.after || null,
+      after: submissions.length === limit ? afterToken : null,
     }
-  } catch (error) {
-    console.error(`Error fetching posts for ${username}:`, error)
+  } catch (error: any) {
+    console.error(`Error fetching posts for ${username}:`, error.message || error)
     return { posts: [], after: null }
   }
 }
