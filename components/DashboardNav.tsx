@@ -7,6 +7,7 @@ const navItems = [
   { href: '/dashboard/new-post', label: '+ New Post' },
   { href: '/warmup', label: 'Warmup' },
   { href: '/dashboard/spy-mode', label: 'Spy Mode' },
+  { href: '/dashboard/leaderboard', label: 'Leaderboard' },
   { href: '/dashboard/speed-alerts', label: 'AI Alerts' },
   { href: '/dashboard/posts', label: 'Posts' },
   { href: '/dashboard/calendar', label: 'Calendar' },
