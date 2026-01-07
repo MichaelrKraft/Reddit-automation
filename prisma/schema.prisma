@@ -473,6 +473,8 @@ enum OpportunityActionType {
   TRACKED
   EXPORTED
   ARCHIVED
+  BOOKMARK
+  ACTED_UPON
 }
 
 model AlphaFeedback {

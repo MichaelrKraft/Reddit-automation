@@ -7,7 +7,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '')
 const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null
 
 // Generic AI completion with Gemini -> OpenAI fallback
-async function generateCompletion(prompt: string): Promise<string> {
+export async function generateCompletion(prompt: string): Promise<string> {
   // Log which services are available
   const hasGemini = !!process.env.GEMINI_API_KEY
   const hasOpenAI = !!process.env.OPENAI_API_KEY

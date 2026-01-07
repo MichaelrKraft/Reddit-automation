@@ -8,11 +8,12 @@ const navItems = [
   { href: '/warmup', label: 'Warmup' },
   { href: '/dashboard/spy-mode', label: 'Spy Mode' },
   { href: '/dashboard/leaderboard', label: 'Leaderboard' },
+  { href: '/dashboard/opportunities', label: 'Opportunities' },
   { href: '/dashboard/speed-alerts', label: 'AI Alerts' },
+  { href: '/dashboard/seo-finder', label: 'SEO Finder' },
+  { href: '/dashboard/comments', label: 'Comments' },
   { href: '/dashboard/posts', label: 'Posts' },
   { href: '/dashboard/calendar', label: 'Calendar' },
-  { href: '/dashboard/comments', label: 'Comments' },
-  { href: '/dashboard/seo-finder', label: 'SEO Finder' },
 ]
 
 export default function DashboardNav() {
