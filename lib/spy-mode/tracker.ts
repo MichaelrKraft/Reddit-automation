@@ -27,8 +27,11 @@ export interface RedditPost {
 
 export async function fetchUserProfile(username: string): Promise<RedditUserProfile | null> {
   try {
+    console.log(`[Spy Mode] Fetching profile for ${username}...`)
     const reddit = getRedditClient()
+    console.log(`[Spy Mode] Reddit client initialized`)
     const user = await reddit.getUser(username).fetch()
+    console.log(`[Spy Mode] Fetched user: ${user.name}`)
 
     return {
       username: user.name,
@@ -38,7 +41,8 @@ export async function fetchUserProfile(username: string): Promise<RedditUserProf
       accountCreated: user.created_utc ? new Date(user.created_utc * 1000) : null,
     }
   } catch (error: any) {
-    console.error(`Error fetching profile for ${username}:`, error.message || error)
+    console.error(`[Spy Mode] Error fetching profile for ${username}:`, error.message || error)
+    console.error(`[Spy Mode] Full error:`, error)
     return null
   }
 }

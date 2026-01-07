@@ -119,9 +119,10 @@ export async function POST(
     if (error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    console.error('Error tracking user:', error)
+    console.error('[Track API] Error tracking user:', error.message || error)
+    console.error('[Track API] Full error:', JSON.stringify(error, Object.getOwnPropertyNames(error)))
     return NextResponse.json(
-      { error: 'Failed to track user' },
+      { error: `Failed to track user: ${error.message || 'Unknown error'}` },
       { status: 500 }
     )
   }
