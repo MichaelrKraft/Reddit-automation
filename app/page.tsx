@@ -617,6 +617,258 @@ export default function Home() {
               </Link>
             </div>
           </div>
+
+          {/* Speed Alerts Feature */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div>
+              <div className="reveal-up inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
+                SPEED ALERTS
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Never Miss a Viral Moment
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                Get instant notifications when posts in your target subreddits start gaining traction. Jump into conversations at the perfect moment to maximize your visibility.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Real-time trend detection</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Customizable alert thresholds</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Instant push notifications</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/speed-alerts" className="reveal-up text-orange-600 font-medium hover:text-orange-700">
+                Configure Alerts →
+              </Link>
+            </div>
+            <div className="reveal-up relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-red-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/instant-alerts.png"
+                  alt="Speed Alerts - Never miss a viral moment"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Viral AI Feature */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div className="reveal-up order-2 md:order-1 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/viral-screenshot.png"
+                  alt="AI Viral Content Generator"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+            <div className="order-1 md:order-2">
+              <div className="reveal-up inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
+                VIRAL AI
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                AI-Powered Content That Goes Viral
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                Let AI analyze viral patterns and generate content optimized for Reddit engagement. Create posts that resonate with each subreddit's unique culture.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Analyzes viral post patterns</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Subreddit-specific content optimization</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Multiple content variations</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/new-post" className="reveal-up text-purple-600 font-medium hover:text-purple-700">
+                Generate Content →
+              </Link>
+            </div>
+          </div>
+
+          {/* Optimal Timing Feature */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div>
+              <div className="reveal-up inline-block px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium mb-4">
+                TIMING
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Post at the Perfect Moment
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                Our AI analyzes historical data to find the best posting times for each subreddit. Maximize visibility by posting when your audience is most active.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">AI-powered timing analysis</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Subreddit-specific recommendations</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Historical engagement patterns</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/new-post" className="reveal-up text-teal-600 font-medium hover:text-teal-700">
+                View Optimal Times →
+              </Link>
+            </div>
+            <div className="reveal-up relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-400/20 to-cyan-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/timing-screenshot.png"
+                  alt="Optimal Timing - Post at the perfect moment"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Opportunity Finder Feature */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div className="reveal-up order-2 md:order-1 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/opportunities-screenshot.png"
+                  alt="Opportunity Finder - Discover hidden business ideas"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+            <div className="order-1 md:order-2">
+              <div className="reveal-up inline-block px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium mb-4">
+                OPPORTUNITIES
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Discover Hidden Business Ideas
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                AI scans Reddit discussions to find product opportunities hidden in user complaints, feature requests, and unmet needs. Validate your ideas with real market demand.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">AI-powered opportunity detection</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Category-based filtering</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Track and act on opportunities</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/opportunities" className="reveal-up text-cyan-600 font-medium hover:text-cyan-700">
+                Find Opportunities →
+              </Link>
+            </div>
+          </div>
+
+          {/* Leaderboard Feature */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div>
+              <div className="reveal-up inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
+                LEADERBOARD
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Learn From the Top Performers
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                Analyze the most successful Redditors in any subreddit. Study their posting patterns, engagement strategies, and replicate their success.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Top poster rankings by subreddit</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Strategy breakdown and insights</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Track competitor growth over time</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/leaderboard" className="reveal-up text-amber-600 font-medium hover:text-amber-700">
+                View Leaderboard →
+              </Link>
+            </div>
+            <div className="reveal-up relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-yellow-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/leaderboard-screenshot.png"
+                  alt="Leaderboard - Learn from top performers"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* DM Monitoring & Auto-Replies Feature */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div className="reveal-up order-2 md:order-1 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/dm-screenshot.png"
+                  alt="DM Monitoring - Never miss a comment"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+            <div className="order-1 md:order-2">
+              <div className="reveal-up inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">
+                MESSAGES
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Never Miss a Comment Again
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                Track direct messages and engage with your audience automatically. AI-powered contextual responses help you build relationships at scale.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Unified inbox for all conversations</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Context-aware AI responses</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Review queue before posting</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/comments" className="reveal-up text-green-600 font-medium hover:text-green-700">
+                View Messages →
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
