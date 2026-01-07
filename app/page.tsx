@@ -87,64 +87,10 @@ export default function Home() {
       color: 'from-green-500/10 to-emerald-500/10 border-green-500/20 hover:border-green-500/40'
     },
     {
-      title: 'Auto-Replies',
-      description: 'Engage with comments automatically using AI-powered contextual responses',
-      href: '/dashboard/comments',
-      color: 'from-orange-500/10 to-red-500/10 border-orange-500/20 hover:border-orange-500/40'
-    },
-    {
-      title: 'Analytics Dashboard',
-      description: 'Track performance metrics and engagement across all your Reddit campaigns',
-      href: '/dashboard/analytics',
-      color: 'from-indigo-500/10 to-blue-500/10 border-indigo-500/20 hover:border-indigo-500/40'
-    },
-    {
-      title: 'Optimal Timing',
-      description: 'Post at the best times for engagement based on subreddit activity patterns',
-      href: '/dashboard/timing',
-      color: 'from-yellow-500/10 to-orange-500/10 border-yellow-500/20 hover:border-yellow-500/40'
-    },
-    {
-      title: 'Spy Mode',
-      description: 'Monitor competitor Reddit activity in real-time and steal their winning strategies',
-      href: '/dashboard/spy-mode',
-      color: 'from-cyan-500/10 to-teal-500/10 border-cyan-500/20 hover:border-cyan-500/40'
-    },
-    {
-      title: 'Viral Optimizer',
-      description: 'AI analyzes viral patterns to optimize your content for maximum reach and engagement',
-      href: '/dashboard/viral',
-      color: 'from-pink-500/10 to-rose-500/10 border-pink-500/20 hover:border-pink-500/40'
-    },
-    {
-      title: 'Speed Alerts',
-      description: 'Get instant notifications when posts gain traction so you can engage at the right moment',
-      href: '/dashboard/speed-alerts',
-      color: 'from-amber-500/10 to-yellow-500/10 border-amber-500/20 hover:border-amber-500/40'
-    },
-    {
-      title: 'Opportunity Finder',
-      description: 'AI discovers product ideas hidden in Reddit discussions—pain points, feature requests, and unmet needs',
-      href: '/dashboard/opportunities',
-      color: 'from-cyan-500/10 to-blue-500/10 border-cyan-500/20 hover:border-cyan-500/40'
-    },
-    {
-      title: 'Leaderboard Analysis',
-      description: 'Analyze top performers in any subreddit to learn their strategies and track their success',
-      href: '/dashboard/leaderboard',
-      color: 'from-amber-500/10 to-orange-500/10 border-amber-500/20 hover:border-amber-500/40'
-    },
-    {
       title: 'SEO Finder',
       description: 'Find high-ranking Reddit threads for any keyword and generate contextual comments',
       href: '/dashboard/seo-finder',
       color: 'from-rose-500/10 to-pink-500/10 border-rose-500/20 hover:border-rose-500/40'
-    },
-    {
-      title: 'Keyword Alerts',
-      description: 'Monitor keywords across Reddit and get notified when your topics are discussed',
-      href: '/dashboard/keyword-alerts',
-      color: 'from-violet-500/10 to-purple-500/10 border-violet-500/20 hover:border-violet-500/40'
     },
     {
       title: 'Business Analyzer',
@@ -159,28 +105,10 @@ export default function Home() {
       color: 'from-teal-500/10 to-emerald-500/10 border-teal-500/20 hover:border-teal-500/40'
     },
     {
-      title: 'Draft Management',
-      description: 'Save and organize post drafts, edit them anytime, and schedule when ready',
-      href: '/dashboard/drafts',
-      color: 'from-slate-500/10 to-gray-500/10 border-slate-500/20 hover:border-slate-500/40'
-    },
-    {
       title: 'Comment Manager',
       description: 'Track all comments on your posts and manage responses in one place',
       href: '/dashboard/comments',
       color: 'from-lime-500/10 to-green-500/10 border-lime-500/20 hover:border-lime-500/40'
-    },
-    {
-      title: 'Competitor Comparison',
-      description: 'Side-by-side analysis of multiple Reddit accounts with radar charts and metrics',
-      href: '/dashboard/spy-mode/compare',
-      color: 'from-fuchsia-500/10 to-pink-500/10 border-fuchsia-500/20 hover:border-fuchsia-500/40'
-    },
-    {
-      title: 'DM Monitoring',
-      description: 'Track direct messages and private conversations from your Reddit activity',
-      href: '/dashboard/comments',
-      color: 'from-red-500/10 to-orange-500/10 border-red-500/20 hover:border-red-500/40'
     }
   ];
 
@@ -520,24 +448,24 @@ export default function Home() {
                 SPY MODE
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Track Competitors & Steal Their Secrets
+                Stay Ahead of Your Competition
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Monitor your competitors' Reddit activity in real-time. Get instant alerts when they post,
-                analyze their strategies, and stay one step ahead in your niche.
+                Know exactly what's working for your competitors—and use it to outperform them. Get instant
+                alerts when they post so you can respond faster and capture their audience.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Real-time competitor monitoring</span>
+                  <span className="text-slate-700">Beat competitors to trending conversations</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Instant sound alerts for new posts</span>
+                  <span className="text-slate-700">Discover winning strategies you can copy</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Performance analytics and insights</span>
+                  <span className="text-slate-700">Never be caught off guard again</span>
                 </li>
               </ul>
               <Link href="/dashboard/spy-mode" className="reveal-up text-blue-600 font-medium hover:text-blue-700">
@@ -592,24 +520,24 @@ export default function Home() {
                 ANALYTICS
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Track Performance & Optimize
+                Know Exactly What's Working
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Get detailed insights into your Reddit performance. Track upvotes, comments, engagement rates,
-                and identify your top-performing content across all subreddits.
+                Stop guessing and start scaling. See which posts drive the most traffic, which subreddits
+                love your content, and double down on what actually converts.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Real-time performance metrics</span>
+                  <span className="text-slate-700">Identify your highest-converting content</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Subreddit-specific analytics</span>
+                  <span className="text-slate-700">Find your most profitable subreddits</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Export data to CSV</span>
+                  <span className="text-slate-700">Optimize your strategy with data</span>
                 </li>
               </ul>
               <Link href="/dashboard/analytics" className="reveal-up text-purple-600 font-medium hover:text-purple-700">
@@ -625,23 +553,23 @@ export default function Home() {
                 SPEED ALERTS
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Never Miss a Viral Moment
+                Ride the Viral Wave
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Get instant notifications when posts in your target subreddits start gaining traction. Jump into conversations at the perfect moment to maximize your visibility.
+                Get notified the moment a post starts blowing up—so you can jump in early and capture thousands of eyeballs while the conversation is still hot.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Real-time trend detection</span>
+                  <span className="text-slate-700">Catch viral posts before they peak</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Customizable alert thresholds</span>
+                  <span className="text-slate-700">Get your brand in front of massive audiences</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Instant push notifications</span>
+                  <span className="text-slate-700">Turn trending topics into traffic</span>
                 </li>
               </ul>
               <Link href="/dashboard/speed-alerts" className="reveal-up text-orange-600 font-medium hover:text-orange-700">
@@ -677,23 +605,23 @@ export default function Home() {
                 VIRAL AI
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                AI-Powered Content That Goes Viral
+                Create Content That Actually Gets Upvoted
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Let AI analyze viral patterns and generate content optimized for Reddit engagement. Create posts that resonate with each subreddit's unique culture.
+                Stop posting content that falls flat. Our AI studies what makes posts go viral in each subreddit and writes content that speaks their language—so you get upvotes, not downvotes.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Analyzes viral post patterns</span>
+                  <span className="text-slate-700">Write posts that match each community's vibe</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Subreddit-specific content optimization</span>
+                  <span className="text-slate-700">Save hours of writing time every week</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Multiple content variations</span>
+                  <span className="text-slate-700">Get 10x more engagement on your posts</span>
                 </li>
               </ul>
               <Link href="/dashboard/new-post" className="reveal-up text-purple-600 font-medium hover:text-purple-700">
@@ -709,23 +637,23 @@ export default function Home() {
                 TIMING
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Post at the Perfect Moment
+                Stop Posting to Empty Rooms
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Our AI analyzes historical data to find the best posting times for each subreddit. Maximize visibility by posting when your audience is most active.
+                A great post at the wrong time gets buried. We show you exactly when each subreddit is most active—so your content lands when thousands of people are actually online.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">AI-powered timing analysis</span>
+                  <span className="text-slate-700">Get 3-5x more views on every post</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Subreddit-specific recommendations</span>
+                  <span className="text-slate-700">Reach users when they're ready to engage</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Historical engagement patterns</span>
+                  <span className="text-slate-700">No more wasted effort on dead hours</span>
                 </li>
               </ul>
               <Link href="/dashboard/new-post" className="reveal-up text-teal-600 font-medium hover:text-teal-700">
@@ -761,23 +689,23 @@ export default function Home() {
                 OPPORTUNITIES
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Discover Hidden Business Ideas
+                Find Your Next Million-Dollar Idea
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                AI scans Reddit discussions to find product opportunities hidden in user complaints, feature requests, and unmet needs. Validate your ideas with real market demand.
+                Reddit is a goldmine of product ideas—people constantly share what they want to buy. Our AI finds these hidden gems so you can build exactly what customers are already asking for.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">AI-powered opportunity detection</span>
+                  <span className="text-slate-700">Validate ideas with real market demand</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Category-based filtering</span>
+                  <span className="text-slate-700">Find problems people are desperate to solve</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Track and act on opportunities</span>
+                  <span className="text-slate-700">Build products that sell themselves</span>
                 </li>
               </ul>
               <Link href="/dashboard/opportunities" className="reveal-up text-cyan-600 font-medium hover:text-cyan-700">
@@ -793,23 +721,23 @@ export default function Home() {
                 LEADERBOARD
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Learn From the Top Performers
+                Copy What Already Works
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Analyze the most successful Redditors in any subreddit. Study their posting patterns, engagement strategies, and replicate their success.
+                Why reinvent the wheel? See exactly what top performers in your niche are doing, which posts get them thousands of upvotes, and copy their winning formula.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Top poster rankings by subreddit</span>
+                  <span className="text-slate-700">Steal proven strategies that get results</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Strategy breakdown and insights</span>
+                  <span className="text-slate-700">Skip years of trial and error</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Track competitor growth over time</span>
+                  <span className="text-slate-700">Outrank the competition faster</span>
                 </li>
               </ul>
               <Link href="/dashboard/leaderboard" className="reveal-up text-amber-600 font-medium hover:text-amber-700">
@@ -845,23 +773,23 @@ export default function Home() {
                 MESSAGES
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Never Miss a Comment Again
+                Turn Comments Into Customers
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Track direct messages and engage with your audience automatically. AI-powered contextual responses help you build relationships at scale.
+                Every comment is a sales opportunity. Our AI crafts perfect responses that build trust and guide interested users toward becoming paying customers—24/7.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Unified inbox for all conversations</span>
+                  <span className="text-slate-700">Convert more leads without lifting a finger</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Context-aware AI responses</span>
+                  <span className="text-slate-700">Build trust with thoughtful, timely replies</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Review queue before posting</span>
+                  <span className="text-slate-700">Scale your engagement without scaling your team</span>
                 </li>
               </ul>
               <Link href="/dashboard/comments" className="reveal-up text-green-600 font-medium hover:text-green-700">
