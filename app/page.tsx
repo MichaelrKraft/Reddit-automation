@@ -488,31 +488,12 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="reveal-up order-2 md:order-1 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 blur-3xl"></div>
-              <div className="relative bg-white rounded-xl shadow-2xl p-6 border border-slate-200">
-                <div className="text-slate-900 text-xl font-bold mb-4">Analytics Dashboard</div>
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  {[
-                    { label: 'Posts', value: '247' },
-                    { label: 'Upvotes', value: '12.4K' },
-                    { label: 'Engagement', value: '94%' }
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-slate-50 rounded-lg p-3 border border-slate-200">
-                      <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-                      <div className="text-xs text-slate-600">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-4 border border-slate-200">
-                  <div className="flex items-end justify-between h-32">
-                    {[40, 65, 45, 80, 60, 90, 75].map((height, i) => (
-                      <div
-                        key={i}
-                        className="bg-gradient-to-t from-blue-500 to-purple-500 rounded-t w-8"
-                        style={{ height: `${height}%` }}
-                      ></div>
-                    ))}
-                  </div>
-                </div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/analytics-screenshot.png"
+                  alt="Analytics Dashboard - Track your Reddit performance"
+                  className="w-full h-auto"
+                />
               </div>
             </div>
             <div className="order-1 md:order-2">
