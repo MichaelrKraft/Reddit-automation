@@ -598,15 +598,15 @@ export default function SpeedAlertsPage() {
           </div>
         </div>
 
-        {/* Discover Subreddits & Keyword Alerts Side by Side */}
+        {/* Keyword Alerts & Discover Subreddits Side by Side */}
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <h2 className="text-lg font-bold text-white mb-3">Discover Subreddits</h2>
-            <DiscoverSection />
-          </div>
           <div>
             <h2 className="text-lg font-bold text-white mb-3">Keyword Alerts</h2>
             <KeywordAlertsSection />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white mb-3">Discover Subreddits</h2>
+            <DiscoverSection />
           </div>
         </div>
       </div>
