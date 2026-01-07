@@ -344,22 +344,36 @@ export default function LeaderboardPage() {
                       </div>
                     </div>
 
-                    {/* Track Button */}
-                    <button
-                      onClick={() => trackUser(entry.username)}
-                      disabled={entry.isTracked || trackingId === entry.username}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                        entry.isTracked
-                          ? 'bg-green-900/50 text-green-400 cursor-default'
-                          : 'bg-purple-600/20 text-purple-400 border border-purple-500/50 hover:bg-purple-600/30'
-                      }`}
-                    >
-                      {trackingId === entry.username
-                        ? '...'
-                        : entry.isTracked
-                        ? '✓ Tracked'
-                        : '+ Track'}
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      {/* Chat/DM Button */}
+                      <a
+                        href={`https://www.reddit.com/message/compose/?to=${entry.username}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 rounded-lg text-sm font-medium transition bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 hover:bg-[#00D9FF]/30"
+                        title="Send direct message on Reddit"
+                      >
+                        💬 Chat
+                      </a>
+
+                      {/* Track Button */}
+                      <button
+                        onClick={() => trackUser(entry.username)}
+                        disabled={entry.isTracked || trackingId === entry.username}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                          entry.isTracked
+                            ? 'bg-green-900/50 text-green-400 cursor-default'
+                            : 'bg-purple-600/20 text-purple-400 border border-purple-500/50 hover:bg-purple-600/30'
+                        }`}
+                      >
+                        {trackingId === entry.username
+                          ? '...'
+                          : entry.isTracked
+                          ? '✓ Tracked'
+                          : '+ Track'}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Top Posts Preview */}
