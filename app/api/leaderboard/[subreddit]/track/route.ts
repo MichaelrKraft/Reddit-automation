@@ -47,24 +47,31 @@ export async function POST(
     }
 
     // Fetch user profile from Reddit directly
-    let redditUser: any
+    let profile: {
+      username: string
+      displayName: string | null
+      avatarUrl: string | null
+      totalKarma: number
+      accountCreated: Date | null
+    }
     try {
       const reddit = getRedditClient()
-      redditUser = await reddit.getUser(cleanUsername).fetch()
+      const redditUser = await reddit.getUser(cleanUsername).fetch()
+
+      // Access scalar properties directly (Snoowrap resolves them on fetch)
+      profile = {
+        username: String(redditUser.name || cleanUsername),
+        displayName: null, // Skip subreddit.title as it's a nested object
+        avatarUrl: redditUser.icon_img ? String(redditUser.icon_img).split('?')[0] : null,
+        totalKarma: Number(redditUser.link_karma || 0) + Number(redditUser.comment_karma || 0),
+        accountCreated: redditUser.created_utc ? new Date(Number(redditUser.created_utc) * 1000) : null,
+      }
     } catch (redditError: any) {
       console.error('[Track API] Reddit fetch error:', redditError.message)
       return NextResponse.json(
         { error: 'Reddit user not found or profile is private' },
         { status: 404 }
       )
-    }
-
-    const profile = {
-      username: redditUser.name,
-      displayName: redditUser.subreddit?.title || null,
-      avatarUrl: redditUser.icon_img?.split('?')[0] || redditUser.snoovatar_img || null,
-      totalKarma: (redditUser.link_karma || 0) + (redditUser.comment_karma || 0),
-      accountCreated: redditUser.created_utc ? new Date(redditUser.created_utc * 1000) : null,
     }
 
     // Create SpyAccount
