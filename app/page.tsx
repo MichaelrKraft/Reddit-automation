@@ -119,8 +119,68 @@ export default function Home() {
     {
       title: 'Speed Alerts',
       description: 'Get instant notifications when posts gain traction so you can engage at the right moment',
-      href: '/dashboard/alerts',
+      href: '/dashboard/speed-alerts',
       color: 'from-amber-500/10 to-yellow-500/10 border-amber-500/20 hover:border-amber-500/40'
+    },
+    {
+      title: 'Opportunity Finder',
+      description: 'AI discovers product ideas hidden in Reddit discussions—pain points, feature requests, and unmet needs',
+      href: '/dashboard/opportunities',
+      color: 'from-cyan-500/10 to-blue-500/10 border-cyan-500/20 hover:border-cyan-500/40'
+    },
+    {
+      title: 'Leaderboard Analysis',
+      description: 'Analyze top performers in any subreddit to learn their strategies and track their success',
+      href: '/dashboard/leaderboard',
+      color: 'from-amber-500/10 to-orange-500/10 border-amber-500/20 hover:border-amber-500/40'
+    },
+    {
+      title: 'SEO Finder',
+      description: 'Find high-ranking Reddit threads for any keyword and generate contextual comments',
+      href: '/dashboard/seo-finder',
+      color: 'from-rose-500/10 to-pink-500/10 border-rose-500/20 hover:border-rose-500/40'
+    },
+    {
+      title: 'Keyword Alerts',
+      description: 'Monitor keywords across Reddit and get notified when your topics are discussed',
+      href: '/dashboard/keyword-alerts',
+      color: 'from-violet-500/10 to-purple-500/10 border-violet-500/20 hover:border-violet-500/40'
+    },
+    {
+      title: 'Business Analyzer',
+      description: 'AI analyzes any website to identify target audience, pain points, and Reddit marketing strategy',
+      href: '/dashboard/analyze',
+      color: 'from-sky-500/10 to-blue-500/10 border-sky-500/20 hover:border-sky-500/40'
+    },
+    {
+      title: 'Post Calendar',
+      description: 'Visual calendar view of all your scheduled posts with drag-and-drop rescheduling',
+      href: '/dashboard/calendar',
+      color: 'from-teal-500/10 to-emerald-500/10 border-teal-500/20 hover:border-teal-500/40'
+    },
+    {
+      title: 'Draft Management',
+      description: 'Save and organize post drafts, edit them anytime, and schedule when ready',
+      href: '/dashboard/drafts',
+      color: 'from-slate-500/10 to-gray-500/10 border-slate-500/20 hover:border-slate-500/40'
+    },
+    {
+      title: 'Comment Manager',
+      description: 'Track all comments on your posts and manage responses in one place',
+      href: '/dashboard/comments',
+      color: 'from-lime-500/10 to-green-500/10 border-lime-500/20 hover:border-lime-500/40'
+    },
+    {
+      title: 'Competitor Comparison',
+      description: 'Side-by-side analysis of multiple Reddit accounts with radar charts and metrics',
+      href: '/dashboard/spy-mode/compare',
+      color: 'from-fuchsia-500/10 to-pink-500/10 border-fuchsia-500/20 hover:border-fuchsia-500/40'
+    },
+    {
+      title: 'DM Monitoring',
+      description: 'Track direct messages and private conversations from your Reddit activity',
+      href: '/dashboard/comments',
+      color: 'from-red-500/10 to-orange-500/10 border-red-500/20 hover:border-red-500/40'
     }
   ];
 
@@ -345,7 +405,7 @@ export default function Home() {
           {/* Stats */}
           <div className="mt-12 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-slate-900">10+</div>
+              <div className="text-2xl sm:text-3xl font-bold text-slate-900">20+</div>
               <div className="text-xs sm:text-sm text-slate-600 mt-1">Features</div>
             </div>
             <div>
@@ -390,57 +450,21 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Dashboard Content */}
-              <div className="p-8 bg-gradient-to-br from-slate-900 to-slate-950">
-                <div className="flex items-center justify-between mb-8">
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-1">Dashboard</h3>
-                    <p className="text-slate-400">Manage your Reddit posts</p>
-                  </div>
-                  <button className="px-4 py-2 bg-orange-500 text-white rounded-lg font-medium">
-                    + New Post
-                  </button>
+              {/* Demo Video */}
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto"
+                poster="/demo-poster.jpg"
+              >
+                <source src="/demo-video.mp4" type="video/mp4" />
+                <div className="p-8 bg-gradient-to-br from-slate-900 to-slate-950 text-center">
+                  <div className="text-4xl mb-3">🎬</div>
+                  <p className="text-slate-400">Demo video coming soon</p>
                 </div>
-
-                {/* Feature Tabs */}
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-                  {['Spy Mode', 'Speed Alerts', 'Viral Optimizer', 'Optimal Times', 'Analytics', 'Comments'].map((tab, i) => (
-                    <div
-                      key={i}
-                      className={`px-4 py-2 rounded-lg whitespace-nowrap text-sm font-medium ${
-                        i === 0 ? 'bg-cyan-500 text-white' : 'bg-slate-800 text-slate-300'
-                      }`}
-                    >
-                      {tab}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  {[
-                    { label: 'Total Posts', value: '247' },
-                    { label: 'Total Upvotes', value: '12.4K' },
-                    { label: 'Comments', value: '3.2K' },
-                    { label: 'Engagement', value: '94%' }
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
-                      <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
-                      <div className="text-xs text-slate-400">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Content Area */}
-                <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-6 min-h-[200px]">
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <div className="text-4xl mb-3">📊</div>
-                      <p className="text-slate-400">Your posts and analytics appear here</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              </video>
             </div>
           </div>
         </div>
@@ -827,6 +851,10 @@ export default function Home() {
               { feature: 'Spy Mode (Competitor Monitoring)', redride: true, scaloom: false, highlight: true },
               { feature: 'Viral Optimizer', redride: true, scaloom: false, highlight: true },
               { feature: 'Speed Alerts', redride: true, scaloom: false, highlight: true },
+              { feature: 'Opportunity Finder (AI)', redride: true, scaloom: false, highlight: true },
+              { feature: 'Leaderboard Analysis', redride: true, scaloom: false, highlight: true },
+              { feature: 'SEO Finder', redride: true, scaloom: false, highlight: true },
+              { feature: 'Keyword Alerts', redride: true, scaloom: false, highlight: true },
               { feature: 'Real-time Analytics Dashboard', redride: true, scaloom: 'partial' },
               { feature: 'Account Warmup', redride: true, scaloom: true },
               { feature: 'Multi-Subreddit Posting', redride: true, scaloom: true },
