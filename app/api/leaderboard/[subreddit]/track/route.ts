@@ -90,36 +90,49 @@ export async function POST(
     // Fetch and store user's posts in background (non-blocking)
     ;(async () => {
       try {
+        console.log(`[Track API] Fetching posts for ${cleanUsername}...`)
         const reddit = getRedditClient()
         const submissions = await reddit.getUser(cleanUsername).getSubmissions({ limit: 25, sort: 'new' })
+        console.log(`[Track API] Got ${submissions.length} submissions for ${cleanUsername}`)
 
         if (submissions.length > 0) {
-          await prisma.spyPost.createMany({
-            data: submissions.map((post: any) => ({
+          // Properly serialize Snoowrap properties (they use lazy-loading)
+          const postsData = submissions.map((post: any) => {
+            // Get subreddit name from plain string property (not nested object)
+            const subredditName = String(post.subreddit_name_prefixed || '').replace(/^r\//, '') ||
+                                  String(post.subreddit?.display_name || '')
+
+            return {
               accountId: spyAccount.id,
-              redditId: post.name,
-              title: post.title,
-              content: post.selftext || null,
-              url: `https://reddit.com${post.permalink}`,
-              subreddit: post.subreddit?.display_name || '',
+              redditId: String(post.name || ''),
+              title: String(post.title || ''),
+              content: post.selftext ? String(post.selftext) : null,
+              url: `https://reddit.com${String(post.permalink || '')}`,
+              subreddit: subredditName,
               postType: post.is_video ? 'video' : post.is_self ? 'text' : 'link',
-              score: post.score || 0,
-              upvoteRatio: post.upvote_ratio || 0,
-              commentCount: post.num_comments || 0,
-              awards: post.total_awards_received || 0,
-              postedAt: new Date(post.created_utc * 1000),
-            })),
+              score: Number(post.score || 0),
+              upvoteRatio: Number(post.upvote_ratio || 0),
+              commentCount: Number(post.num_comments || 0),
+              awards: Number(post.total_awards_received || 0),
+              postedAt: new Date(Number(post.created_utc || 0) * 1000),
+            }
+          })
+
+          await prisma.spyPost.createMany({
+            data: postsData,
             skipDuplicates: true,
           })
+          console.log(`[Track API] Stored ${postsData.length} posts for ${cleanUsername}`)
 
           // Update lastPostId with the newest post
           await prisma.spyAccount.update({
             where: { id: spyAccount.id },
-            data: { lastPostId: submissions[0].name },
+            data: { lastPostId: String(submissions[0].name) },
           })
         }
-      } catch (err) {
-        console.error('[Track API] Failed to fetch posts for new spy account:', err)
+      } catch (err: any) {
+        console.error('[Track API] Failed to fetch posts for new spy account:', err.message || err)
+        console.error('[Track API] Full post fetch error:', JSON.stringify(err, Object.getOwnPropertyNames(err)))
       }
     })()
 

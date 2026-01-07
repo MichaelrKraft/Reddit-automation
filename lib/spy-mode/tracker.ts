@@ -68,29 +68,33 @@ export async function fetchUserPosts(
       let postType: 'text' | 'link' | 'image' | 'video' = 'text'
       if (post.is_video) {
         postType = 'video'
-      } else if (post.post_hint === 'image' || post.url?.match(/\.(jpg|jpeg|png|gif)$/i)) {
+      } else if (post.post_hint === 'image' || String(post.url || '').match(/\.(jpg|jpeg|png|gif)$/i)) {
         postType = 'image'
       } else if (!post.is_self) {
         postType = 'link'
       }
 
+      // Get subreddit name from plain string property (Snoowrap lazy-loading workaround)
+      const subredditName = String(post.subreddit_name_prefixed || '').replace(/^r\//, '') ||
+                            String(post.subreddit?.display_name || '')
+
       return {
-        redditId: post.name,
-        title: post.title,
-        content: post.selftext || null,
-        url: `https://reddit.com${post.permalink}`,
-        subreddit: post.subreddit?.display_name || post.subreddit_name_prefixed?.replace('r/', '') || '',
+        redditId: String(post.name || ''),
+        title: String(post.title || ''),
+        content: post.selftext ? String(post.selftext) : null,
+        url: `https://reddit.com${String(post.permalink || '')}`,
+        subreddit: subredditName,
         postType,
-        score: post.score || 0,
-        upvoteRatio: post.upvote_ratio || 0,
-        commentCount: post.num_comments || 0,
-        awards: post.total_awards_received || 0,
-        postedAt: new Date(post.created_utc * 1000),
+        score: Number(post.score || 0),
+        upvoteRatio: Number(post.upvote_ratio || 0),
+        commentCount: Number(post.num_comments || 0),
+        awards: Number(post.total_awards_received || 0),
+        postedAt: new Date(Number(post.created_utc || 0) * 1000),
       }
     })
 
     // Get the 'after' token for pagination from the listing
-    const afterToken = submissions.length > 0 ? submissions[submissions.length - 1]?.name : null
+    const afterToken = submissions.length > 0 ? String(submissions[submissions.length - 1]?.name || '') : null
 
     return {
       posts,
