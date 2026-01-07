@@ -95,6 +95,81 @@ interface QueueStatus {
   nextJob: { accountId: string; scheduledFor: string } | null
 }
 
+// Error code humanization - transforms raw Reddit errors into user-friendly messages
+function getHumanReadableError(errorCode: string): { message: string; action: string; severity: 'normal' | 'warning' | 'concern' } {
+  const code = errorCode.toUpperCase()
+
+  // Banned/restricted errors
+  if (code.includes('SUBREDDIT_NOTALLOWED') || code.includes('BANNED_FROM_SUBREDDIT') || code.includes('SUBREDDIT_BANNED')) {
+    return {
+      message: 'Banned from this subreddit',
+      action: 'This is normal - we\'ll automatically skip it and try safer subreddits.',
+      severity: 'normal'
+    }
+  }
+
+  // Rate limiting
+  if (code.includes('RATELIMIT') || code.includes('RATE_LIMIT') || code.includes('429') || code.includes('TOO_MANY')) {
+    return {
+      message: 'Reddit rate limit hit',
+      action: 'Slowing down to protect your account. Will retry in 1 hour.',
+      severity: 'normal'
+    }
+  }
+
+  // Access denied
+  if (code.includes('403') || code.includes('FORBIDDEN') || code.includes('ACCESS_DENIED')) {
+    return {
+      message: 'Access denied by Reddit',
+      action: 'Reddit blocked this action. Waiting before retrying.',
+      severity: 'warning'
+    }
+  }
+
+  // Not found / deleted content
+  if (code.includes('404') || code.includes('NOT_FOUND') || code.includes('DELETED')) {
+    return {
+      message: 'Content no longer available',
+      action: 'The post or comment was deleted. Trying another.',
+      severity: 'normal'
+    }
+  }
+
+  // Account restrictions
+  if (code.includes('SUSPENDED') || code.includes('SHADOWBAN')) {
+    return {
+      message: 'Account may be restricted',
+      action: 'Check your Reddit account status manually.',
+      severity: 'concern'
+    }
+  }
+
+  // Network/server errors
+  if (code.includes('500') || code.includes('502') || code.includes('503') || code.includes('TIMEOUT') || code.includes('NETWORK')) {
+    return {
+      message: 'Reddit server issue',
+      action: 'Temporary Reddit problem. Will auto-retry shortly.',
+      severity: 'normal'
+    }
+  }
+
+  // Karma too low
+  if (code.includes('KARMA') || code.includes('TOO_NEW') || code.includes('ACCOUNT_AGE')) {
+    return {
+      message: 'Account too new for this subreddit',
+      action: 'Some subreddits require more karma. This is expected.',
+      severity: 'normal'
+    }
+  }
+
+  // Generic fallback
+  return {
+    message: 'Action blocked',
+    action: 'Retrying with different content.',
+    severity: 'normal'
+  }
+}
+
 // Phase targets (from warmup-worker.ts)
 const WARMUP_PHASE_TARGETS = {
   PHASE_1_UPVOTES: { days: 3, upvotes: 5, comments: 0, posts: 0 },
@@ -594,29 +669,102 @@ export default function WarmupDashboard() {
       return null // Don't show section if no failures
     }
 
+    // Count severity levels
+    const severityCounts = account.failedAttempts.reduce((acc, attempt) => {
+      const { severity } = getHumanReadableError(attempt.error)
+      acc[severity] = (acc[severity] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+
+    const hasConcerns = (severityCounts['concern'] || 0) > 0
+    const consecutiveFailures = account.failedAttempts.slice(-10).length >= 10
+
     return (
-      <div className="space-y-2">
-        <div className="text-xs text-red-400 mb-2">
-          Recent failures ({account.failedAttempts.length}):
+      <div className="space-y-3">
+        {/* Failed Attempts List */}
+        <div className="space-y-2">
+          <div className="text-xs text-gray-400 mb-2">
+            Recent failures ({account.failedAttempts.length}):
+          </div>
+          {account.failedAttempts.slice(-5).reverse().map((attempt, idx) => {
+            const humanized = getHumanReadableError(attempt.error)
+            return (
+              <div
+                key={idx}
+                className={`p-3 rounded text-xs border ${
+                  humanized.severity === 'concern'
+                    ? 'bg-red-900/30 border-red-600/50'
+                    : humanized.severity === 'warning'
+                    ? 'bg-yellow-900/20 border-yellow-700/50'
+                    : 'bg-gray-800/50 border-gray-700/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className={humanized.severity === 'concern' ? 'text-red-300' : 'text-gray-300'}>
+                    {attempt.action === 'upvote' && '⬆️'}
+                    {attempt.action === 'comment' && '💬'}
+                    {attempt.action === 'post' && '📝'}
+                    {' '}{humanized.message}
+                  </span>
+                  <span className="text-gray-500">
+                    {new Date(attempt.timestamp).toLocaleString()}
+                  </span>
+                </div>
+                <div className="text-gray-400 mt-1">
+                  💡 {humanized.action}
+                </div>
+                {/* Show raw error on hover for debugging */}
+                <div className="text-gray-600 mt-1 text-[10px] truncate cursor-help" title={`Raw error: ${attempt.error}`}>
+                  Code: {attempt.error}
+                </div>
+              </div>
+            )
+          })}
         </div>
-        {account.failedAttempts.slice(-5).reverse().map((attempt, idx) => (
-          <div key={idx} className="p-2 bg-red-900/20 border border-red-700/50 rounded text-xs">
-            <div className="flex items-center justify-between">
-              <span className="text-red-300">
-                {attempt.action === 'upvote' && '⬆️'}
-                {attempt.action === 'comment' && '💬'}
-                {attempt.action === 'post' && '📝'}
-                {' '}{attempt.action} failed
-              </span>
-              <span className="text-gray-500">
-                {new Date(attempt.timestamp).toLocaleString()}
-              </span>
-            </div>
-            <div className="text-red-400/70 mt-1 truncate" title={attempt.error}>
-              {attempt.error}
+
+        {/* Guidance Box */}
+        <div className={`p-4 rounded-lg border-2 ${
+          hasConcerns || consecutiveFailures
+            ? 'bg-red-900/20 border-red-500/50'
+            : 'bg-[#0a0a12] border-[#00D9FF] shadow-[0_0_15px_rgba(0,217,255,0.3)]'
+        }`}>
+          <div className="flex items-start gap-3">
+            <span className="text-lg">{hasConcerns || consecutiveFailures ? '⚠️' : '💡'}</span>
+            <div>
+              <h4 className={`text-sm font-semibold mb-2 ${hasConcerns || consecutiveFailures ? 'text-red-300' : 'text-white'}`}>
+                About Failed Attempts
+              </h4>
+              <div className="text-xs text-gray-400 space-y-2">
+                <p>Failed attempts are <span className="text-green-400 font-medium">NORMAL</span> during warmup. Reddit limits new accounts.</p>
+
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <div>
+                    <p className="text-green-400 font-medium mb-1">✅ What we do automatically:</p>
+                    <ul className="list-disc list-inside text-gray-500 space-y-0.5">
+                      <li>Skip banned subreddits</li>
+                      <li>Slow down after errors</li>
+                      <li>Wait before retrying</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-red-400 font-medium mb-1">❌ When to worry:</p>
+                    <ul className="list-disc list-inside text-gray-500 space-y-0.5">
+                      <li>10+ consecutive failures</li>
+                      <li>Account marked FAILED</li>
+                      <li>"Account restricted" messages</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {(hasConcerns || consecutiveFailures) && (
+                  <p className="mt-2 text-yellow-400">
+                    💡 Tip: Try pausing warmup for 24 hours, then resume.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        ))}
+        </div>
       </div>
     )
   }
@@ -872,6 +1020,61 @@ export default function WarmupDashboard() {
         </div>
       </div>
 
+      {/* Understanding Warmup Phases - Info Panel */}
+      <div className="p-4 bg-[#0a0a12] border-2 border-[#00D9FF] rounded-lg shadow-[0_0_20px_rgba(0,217,255,0.5),0_0_40px_rgba(0,217,255,0.2)]">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">ℹ️</span>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-white mb-3">Understanding Warmup Phases</h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
+              <div className="p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                <div className="flex items-center gap-1 text-blue-400 font-medium mb-1">
+                  <span>⬆️</span> Phase 1
+                </div>
+                <div className="text-gray-400">Days 1-3</div>
+                <div className="text-gray-500">Upvotes only</div>
+                <div className="text-gray-600 text-[10px] mt-1">Build initial trust</div>
+              </div>
+              <div className="p-2 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                <div className="flex items-center gap-1 text-purple-400 font-medium mb-1">
+                  <span>💬</span> Phase 2
+                </div>
+                <div className="text-gray-400">Days 4-7</div>
+                <div className="text-gray-500">+ Comments</div>
+                <div className="text-gray-600 text-[10px] mt-1">Start engaging</div>
+              </div>
+              <div className="p-2 bg-indigo-500/10 border border-indigo-500/30 rounded-lg">
+                <div className="flex items-center gap-1 text-indigo-400 font-medium mb-1">
+                  <span>📝</span> Phase 3
+                </div>
+                <div className="text-gray-400">Days 8-14</div>
+                <div className="text-gray-500">+ Posts</div>
+                <div className="text-gray-600 text-[10px] mt-1">Create content</div>
+              </div>
+              <div className="p-2 bg-pink-500/10 border border-pink-500/30 rounded-lg">
+                <div className="flex items-center gap-1 text-pink-400 font-medium mb-1">
+                  <span>🚀</span> Phase 4
+                </div>
+                <div className="text-gray-400">Days 15-30</div>
+                <div className="text-gray-500">Full activity</div>
+                <div className="text-gray-600 text-[10px] mt-1">Mix all actions</div>
+              </div>
+              <div className="p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                <div className="flex items-center gap-1 text-green-400 font-medium mb-1">
+                  <span>✅</span> Ready!
+                </div>
+                <div className="text-gray-400">100+ karma</div>
+                <div className="text-gray-500">30+ days</div>
+                <div className="text-gray-600 text-[10px] mt-1">Ready to promote</div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-3">
+              <span className="text-yellow-400">Why warmup?</span> New Reddit accounts are flagged for spam if they post too quickly. Our AI gradually builds your account's trust to avoid shadowbans.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Add Account Form */}
       {showAddAccount && (
         <div className="feature-card rounded-lg p-6 mb-6 border-2 border-[#00D9FF]/50">
@@ -1078,22 +1281,44 @@ export default function WarmupDashboard() {
                   </div>
                 </div>
 
-                {/* Stats Grid */}
+                {/* Stats Grid with Tooltips */}
                 <div className="grid grid-cols-4 gap-3 text-center text-sm">
-                  <div>
-                    <div className="text-gray-400 text-xs">Karma</div>
+                  <div
+                    className="cursor-help"
+                    title="Your account's reputation score. Goal: 100+ karma to be 'Ready' for marketing posts."
+                  >
+                    <div className="text-gray-400 text-xs flex items-center justify-center gap-1">
+                      <span>⭐</span> Karma
+                    </div>
                     <div className="font-semibold text-green-400">{account.karma}</div>
                   </div>
-                  <div>
-                    <div className="text-gray-400 text-xs">Days</div>
+                  <div
+                    className="cursor-help"
+                    title="Days since warmup started. Full warmup takes ~30 days to complete safely."
+                  >
+                    <div className="text-gray-400 text-xs flex items-center justify-center gap-1">
+                      <span>📅</span> Days
+                    </div>
                     <div className="font-semibold text-blue-400">{account.daysInWarmup}</div>
                   </div>
-                  <div>
-                    <div className="text-gray-400 text-xs">Actions</div>
+                  <div
+                    className="cursor-help"
+                    title="Total upvotes, comments, and posts performed during warmup."
+                  >
+                    <div className="text-gray-400 text-xs flex items-center justify-center gap-1">
+                      <span>⚡</span> Actions
+                    </div>
                     <div className="font-semibold text-purple-400">{account.totalActions}</div>
                   </div>
-                  <div>
-                    <div className="text-gray-400 text-xs">Status</div>
+                  <div
+                    className="cursor-help"
+                    title={account.isActive
+                      ? "Active: Warmup is running and performing actions automatically."
+                      : "Inactive: Warmup is paused or stopped. Resume to continue building trust."}
+                  >
+                    <div className="text-gray-400 text-xs flex items-center justify-center gap-1">
+                      <span>{account.isActive ? '🟢' : '🔴'}</span> Status
+                    </div>
                     <div className={`font-semibold ${account.isActive ? 'text-green-400' : 'text-red-400'}`}>
                       {account.isActive ? 'Active' : 'Inactive'}
                     </div>
