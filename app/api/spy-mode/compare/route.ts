@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireUser } from '@/lib/auth'
 import { calculateAnalytics } from '@/lib/spy-mode/tracker'
 
 // GET - Compare multiple accounts
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { searchParams } = new URL(request.url)
     const accountIds = searchParams.get('ids')?.split(',') || []
 
@@ -133,7 +135,10 @@ export async function GET(request: NextRequest) {
       accounts: comparison,
       tableData,
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error comparing accounts:', error)
     return NextResponse.json(
       { error: 'Failed to compare accounts' },

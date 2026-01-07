@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireUser } from '@/lib/auth'
 import { fetchUserProfile, fetchAllUserPosts, calculateAnalytics } from '@/lib/spy-mode/tracker'
 
 // GET - List all tracked accounts for user
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // For now, use a demo user ID (replace with auth later)
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
 
     const accounts = await prisma.spyAccount.findMany({
       where: { userId },
@@ -50,7 +51,10 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json({ accounts: accountsWithAnalytics })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error fetching spy accounts:', error)
     return NextResponse.json(
       { error: 'Failed to fetch accounts' },
@@ -62,7 +66,8 @@ export async function GET(request: NextRequest) {
 // POST - Add new account to track
 export async function POST(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { username } = await request.json()
 
     if (!username) {
@@ -102,18 +107,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Ensure demo user exists
-    await prisma.user.upsert({
-      where: { id: userId },
-      update: {},
-      create: {
-        id: userId,
-        clerkId: `clerk_${userId}`,
-        email: `${userId}@demo.local`,
-        plan: 'free',
-      },
-    })
-
     // Create spy account
     const spyAccount = await prisma.spyAccount.create({
       data: {
@@ -133,7 +126,10 @@ export async function POST(request: NextRequest) {
       account: spyAccount,
       message: 'Account added. Posts will be fetched shortly.',
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error adding spy account:', error)
     return NextResponse.json(
       { error: 'Failed to add account' },
@@ -184,7 +180,8 @@ async function fetchAndStorePosts(accountId: string, username: string) {
 // DELETE - Remove tracked account
 export async function DELETE(request: NextRequest) {
   try {
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const user = await requireUser()
+    const userId = user.id
     const { searchParams } = new URL(request.url)
     const accountId = searchParams.get('id')
 
@@ -213,7 +210,10 @@ export async function DELETE(request: NextRequest) {
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error deleting spy account:', error)
     return NextResponse.json(
       { error: 'Failed to delete account' },

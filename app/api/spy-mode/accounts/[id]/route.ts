@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireUser } from '@/lib/auth'
 import { calculateAnalytics } from '@/lib/spy-mode/tracker'
 
 // GET - Get single account with full data
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await requireUser()
     const { id } = await params
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const userId = user.id
 
     const account = await prisma.spyAccount.findFirst({
       where: { id, userId },
@@ -83,7 +85,10 @@ export async function GET(
       })),
       totalPosts: account.posts.length,
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error fetching spy account:', error)
     return NextResponse.json(
       { error: 'Failed to fetch account' },
@@ -98,8 +103,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await requireUser()
     const { id } = await params
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const userId = user.id
     const { notes, isActive } = await request.json()
 
     // Verify ownership
@@ -123,7 +129,10 @@ export async function PATCH(
     })
 
     return NextResponse.json({ account })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error updating spy account:', error)
     return NextResponse.json(
       { error: 'Failed to update account' },

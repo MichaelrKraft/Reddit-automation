@@ -1,5 +1,6 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireUser } from '@/lib/auth'
 import { checkForNewPosts } from '@/lib/spy-mode/tracker'
 
 export const runtime = 'nodejs'
@@ -7,7 +8,17 @@ export const dynamic = 'force-dynamic'
 
 // SSE Stream for real-time competitor activity
 export async function GET(request: NextRequest) {
-  const userId = request.headers.get('x-user-id') || 'demo-user'
+  // Authenticate before creating stream
+  let userId: string
+  try {
+    const user = await requireUser()
+    userId = user.id
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({ error: 'Authentication failed' }, { status: 500 })
+  }
 
   const encoder = new TextEncoder()
   let isActive = true

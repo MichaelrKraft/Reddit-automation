@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireUser } from '@/lib/auth'
 import { calculateAnalytics } from '@/lib/spy-mode/tracker'
 import { generateInsights } from '@/lib/spy-mode/insights'
 
 // POST - Generate AI insights on-demand
 export async function POST(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await requireUser()
     const { id } = await params
-    const userId = request.headers.get('x-user-id') || 'demo-user'
+    const userId = user.id
 
     // Get account with posts
     const account = await prisma.spyAccount.findFirst({
@@ -80,7 +82,10 @@ export async function POST(
       insights,
       generatedAt: new Date().toISOString(),
     })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
     console.error('Error generating insights:', error)
     return NextResponse.json(
       { error: 'Failed to generate insights' },
