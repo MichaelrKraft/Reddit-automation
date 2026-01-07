@@ -39,6 +39,7 @@ export default function LeaderboardPage() {
   const [isStale, setIsStale] = useState(false)
   const [trackingId, setTrackingId] = useState<string | null>(null)
   const [timeFilter, setTimeFilter] = useState<string>('month')
+  const [generatingDm, setGeneratingDm] = useState<string | null>(null)
 
   async function fetchLeaderboard(sub: string) {
     setIsLoading(true)
@@ -124,6 +125,44 @@ export default function LeaderboardPage() {
       setError('Failed to track user')
     } finally {
       setTrackingId(null)
+    }
+  }
+
+  async function handleChatClick(entry: LeaderboardEntry) {
+    setGeneratingDm(entry.username)
+
+    try {
+      // Get the user's best post for context
+      const topPost = entry.topPosts?.[0]
+
+      const response = await fetch('/api/leaderboard/generate-dm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: entry.username,
+          postTitle: topPost?.title || null,
+          postUrl: topPost?.url || null,
+          subreddit: leaderboard?.subreddit || null,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.message) {
+        // Open Reddit DM with pre-filled message
+        const dmUrl = `https://www.reddit.com/message/compose/?to=${entry.username}&message=${encodeURIComponent(data.message)}`
+        window.open(dmUrl, '_blank')
+      } else {
+        // Fallback to empty DM on error
+        console.error('[Chat] Failed to generate message:', data.error)
+        window.open(`https://www.reddit.com/message/compose/?to=${entry.username}`, '_blank')
+      }
+    } catch (err) {
+      console.error('[Chat] Error:', err)
+      // Fallback to empty DM on error
+      window.open(`https://www.reddit.com/message/compose/?to=${entry.username}`, '_blank')
+    } finally {
+      setGeneratingDm(null)
     }
   }
 
@@ -347,15 +386,14 @@ export default function LeaderboardPage() {
                     {/* Action Buttons */}
                     <div className="flex gap-2">
                       {/* Chat/DM Button */}
-                      <a
-                        href={`https://www.reddit.com/message/compose/?to=${entry.username}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 rounded-lg text-sm font-medium transition bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 hover:bg-[#00D9FF]/30"
-                        title="Send direct message on Reddit"
+                      <button
+                        onClick={() => handleChatClick(entry)}
+                        disabled={generatingDm === entry.username}
+                        className="px-4 py-2 rounded-lg text-sm font-medium transition bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50 hover:bg-[#00D9FF]/30 disabled:opacity-50"
+                        title="Generate AI message and open Reddit DM"
                       >
-                        💬 Chat
-                      </a>
+                        {generatingDm === entry.username ? '⏳ Writing...' : '💬 Chat'}
+                      </button>
 
                       {/* Track Button */}
                       <button
