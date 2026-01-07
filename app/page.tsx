@@ -387,10 +387,11 @@ export default function Home() {
                 className="w-full h-auto"
                 poster="/demo-poster.jpg"
               >
+                <source src="/demo-video.mov" type="video/quicktime" />
                 <source src="/demo-video.mp4" type="video/mp4" />
                 <div className="p-8 bg-gradient-to-br from-slate-900 to-slate-950 text-center">
                   <div className="text-4xl mb-3">🎬</div>
-                  <p className="text-slate-400">Demo video coming soon</p>
+                  <p className="text-slate-400">Your browser doesn't support this video format</p>
                 </div>
               </video>
             </div>
