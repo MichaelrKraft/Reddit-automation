@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import DashboardNav from '@/components/DashboardNav'
+// DashboardNav removed - layout provides sidebar
 
 interface UserKeyword {
   id: string
@@ -28,6 +28,16 @@ interface KeywordMatch {
   keyword: { keyword: string }
 }
 
+type SortOption = 'newest' | 'oldest' | 'upvotes' | 'comments' | 'keyword'
+
+const sortOptions: { value: SortOption; label: string }[] = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'upvotes', label: 'Most Upvotes' },
+  { value: 'comments', label: 'Most Comments' },
+  { value: 'keyword', label: 'Keyword (A-Z)' },
+]
+
 export default function KeywordAlertsPage() {
   const [keywords, setKeywords] = useState<UserKeyword[]>([])
   const [matches, setMatches] = useState<KeywordMatch[]>([])
@@ -36,11 +46,65 @@ export default function KeywordAlertsPage() {
   const [newKeyword, setNewKeyword] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
   const [showUnreadOnly, setShowUnreadOnly] = useState(true)
+  const [sortBy, setSortBy] = useState<SortOption>('newest')
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [addingPending, setAddingPending] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
     fetchData()
   }, [showUnreadOnly])
+
+  // Check for pending keywords from analysis and auto-add them
+  useEffect(() => {
+    async function addPendingKeywords() {
+      const stored = localStorage.getItem('pendingKeywords')
+      if (!stored) return
+
+      try {
+        const pendingKeywords: string[] = JSON.parse(stored)
+        if (pendingKeywords.length === 0) return
+
+        setAddingPending(true)
+        setPendingCount(pendingKeywords.length)
+
+        // Add each keyword
+        let addedCount = 0
+        for (const keyword of pendingKeywords) {
+          try {
+            const response = await fetch('/api/keywords', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'add', keyword }),
+            })
+            if (response.ok) {
+              addedCount++
+            }
+          } catch (err) {
+            console.error(`Failed to add keyword: ${keyword}`, err)
+          }
+        }
+
+        // Clear the pending keywords
+        localStorage.removeItem('pendingKeywords')
+
+        // Refresh the data
+        await fetchData()
+
+        setAddingPending(false)
+        if (addedCount > 0) {
+          alert(`Added ${addedCount} keywords from your business analysis!`)
+        }
+      } catch (err) {
+        console.error('Failed to process pending keywords:', err)
+        localStorage.removeItem('pendingKeywords')
+        setAddingPending(false)
+      }
+    }
+
+    addPendingKeywords()
+  }, []) // Run only once on mount
 
   async function fetchData() {
     try {
@@ -177,6 +241,24 @@ export default function KeywordAlertsPage() {
     return `${diffDays}d ago`
   }
 
+  // Sort matches based on selected option
+  const sortedMatches = [...matches].sort((a, b) => {
+    switch (sortBy) {
+      case 'newest':
+        return new Date(b.matchedAt).getTime() - new Date(a.matchedAt).getTime()
+      case 'oldest':
+        return new Date(a.matchedAt).getTime() - new Date(b.matchedAt).getTime()
+      case 'upvotes':
+        return b.upvotes - a.upvotes
+      case 'comments':
+        return b.commentCount - a.commentCount
+      case 'keyword':
+        return a.keyword.keyword.localeCompare(b.keyword.keyword)
+      default:
+        return 0
+    }
+  })
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
       <div className="dot-grid-background">
@@ -187,15 +269,13 @@ export default function KeywordAlertsPage() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <DashboardNav />
-
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
               🔑 Keyword Alerts
               {unreadCount > 0 && (
-                <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm">
+                <span className="px-3 py-1 bg-[#00D9FF]/20 text-[#00D9FF] rounded-full text-sm">
                   {unreadCount} new
                 </span>
               )}
@@ -206,7 +286,7 @@ export default function KeywordAlertsPage() {
             <button
               onClick={scanNow}
               disabled={scanning}
-              className="glass-button px-4 py-2 rounded-lg text-white hover:bg-white/10 transition disabled:opacity-50"
+              className="px-4 py-2 bg-[#00D9FF] text-black font-medium rounded-lg hover:bg-[#00D9FF]/80 transition disabled:opacity-50"
             >
               {scanning ? '🔄 Scanning...' : '🔍 Scan Now'}
             </button>
@@ -228,12 +308,12 @@ export default function KeywordAlertsPage() {
               onChange={(e) => setNewKeyword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
               placeholder="Enter a keyword (e.g., 'project management tool')"
-              className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500"
+              className="flex-1 bg-[#12121a] border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:border-[#00D9FF] focus:ring-1 focus:ring-[#00D9FF]/50"
             />
             <button
               onClick={addKeyword}
               disabled={!newKeyword.trim()}
-              className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition disabled:opacity-50"
+              className="px-6 py-2 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded-lg transition disabled:opacity-50"
             >
               + Add Keyword
             </button>
@@ -247,7 +327,7 @@ export default function KeywordAlertsPage() {
                   key={kw.id}
                   className={`flex items-center gap-2 px-3 py-1 rounded-full border ${
                     kw.isActive
-                      ? 'bg-green-900/30 border-green-500/50 text-green-400'
+                      ? 'bg-[#00D9FF]/10 border-[#00D9FF]/50 text-[#00D9FF]'
                       : 'bg-gray-800 border-gray-600 text-gray-400'
                   }`}
                 >
@@ -272,13 +352,13 @@ export default function KeywordAlertsPage() {
           )}
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Filter Tabs and Sort */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div className="flex gap-2">
             <button
               onClick={() => setShowUnreadOnly(true)}
               className={`px-4 py-2 rounded-lg transition ${
-                showUnreadOnly ? 'bg-green-500 text-white' : 'glass-button text-gray-400'
+                showUnreadOnly ? 'bg-[#00D9FF] text-black font-medium' : 'glass-button text-gray-400'
               }`}
             >
               Unread ({unreadCount})
@@ -286,29 +366,76 @@ export default function KeywordAlertsPage() {
             <button
               onClick={() => setShowUnreadOnly(false)}
               className={`px-4 py-2 rounded-lg transition ${
-                !showUnreadOnly ? 'bg-blue-500 text-white' : 'glass-button text-gray-400'
+                !showUnreadOnly ? 'bg-[#00D9FF] text-black font-medium' : 'glass-button text-gray-400'
               }`}
             >
               All Matches
             </button>
           </div>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllRead}
-              className="text-sm text-gray-400 hover:text-white"
-            >
-              Mark all as read
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 relative">
+              <span className="text-sm text-gray-400">Sort by:</span>
+              <div className="relative">
+                <button
+                  onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-2 bg-[#12121a] border border-gray-600 text-white rounded-lg hover:border-[#00D9FF] focus:border-[#00D9FF] focus:ring-1 focus:ring-[#00D9FF]/50 text-sm min-w-[140px] justify-between"
+                >
+                  <span>{sortOptions.find(o => o.value === sortBy)?.label}</span>
+                  <svg
+                    className={`w-4 h-4 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {sortDropdownOpen && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setSortDropdownOpen(false)}
+                    />
+                    <div className="absolute right-0 mt-1 w-full min-w-[160px] bg-[#1a1a24] border border-gray-600 rounded-lg shadow-xl z-20 overflow-hidden">
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => {
+                            setSortBy(option.value)
+                            setSortDropdownOpen(false)
+                          }}
+                          className={`w-full px-3 py-2 text-left text-sm hover:bg-[#00D9FF]/20 transition ${
+                            sortBy === option.value
+                              ? 'bg-[#00D9FF]/10 text-[#00D9FF]'
+                              : 'text-gray-300 hover:text-white'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllRead}
+                className="text-sm text-gray-400 hover:text-white"
+              >
+                Mark all as read
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Matches List */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00D9FF] mx-auto mb-4"></div>
             <p className="text-gray-400">Loading matches...</p>
           </div>
-        ) : matches.length === 0 ? (
+        ) : sortedMatches.length === 0 ? (
           <div className="feature-card rounded-lg p-12 text-center">
             <p className="text-6xl mb-4">🔍</p>
             <p className="text-gray-400 text-lg">
@@ -321,21 +448,21 @@ export default function KeywordAlertsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {matches.map((match) => {
+            {sortedMatches.map((match) => {
               const suggestions = match.aiSuggestions ? JSON.parse(match.aiSuggestions) : []
 
               return (
                 <div
                   key={match.id}
                   className={`feature-card rounded-lg p-5 ${
-                    !match.isRead ? 'border-l-4 border-green-500' : ''
+                    !match.isRead ? 'border-l-4 border-[#00D9FF]' : ''
                   }`}
                 >
                   {/* Match Header */}
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
                       <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
-                        <span className="text-green-400 font-medium">{match.keyword.keyword}</span>
+                        <span className="text-[#00D9FF] font-medium">{match.keyword.keyword}</span>
                         <span>•</span>
                         <span className="text-blue-400">r/{match.subreddit}</span>
                         <span>•</span>
@@ -353,7 +480,7 @@ export default function KeywordAlertsPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => markAsRead(match.id)}
-                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm whitespace-nowrap"
+                        className="px-4 py-2 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded-lg text-sm whitespace-nowrap"
                       >
                         Open Thread →
                       </a>

@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import SpyCard from '@/components/spy-mode/SpyCard'
-import DashboardNav from '@/components/DashboardNav'
 
 interface SpyAccount {
   id: string
@@ -172,30 +171,10 @@ export default function SpyModePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
-      {/* Dot Grid Background */}
-      <div className="dot-grid-background">
-        <div className="dot-grid-container">
-          <div className="dot-grid"></div>
-          <div className="dot-grid-overlay"></div>
-        </div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation */}
-        <DashboardNav />
-
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                Spy Mode
-              </h1>
-              <p className="text-gray-400 mt-1 text-sm sm:text-base">
-                Track competitors & steal their secrets
-              </p>
-            </div>
+    <>
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+          <div></div>
 
             <div className="flex flex-wrap gap-2 sm:gap-3">
               {isMonitoring ? (
@@ -352,17 +331,22 @@ export default function SpyModePage() {
           </div>
         )}
 
-        {/* Compare Button */}
-        {accounts.length >= 2 && (
-          <div className="mt-8 text-center">
-            <Link
-              href={`/dashboard/spy-mode/compare?ids=${accounts.slice(0, 2).map(a => a.id).join(',')}`}
-              className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-8 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition"
-            >
-              Compare Accounts
-            </Link>
-          </div>
-        )}
+      {/* Compare Button */}
+      {accounts.length >= 2 && (
+        <div className="mt-8 text-center">
+          <Link
+            href={`/dashboard/spy-mode/compare?ids=${accounts.slice(0, 2).map(a => a.id).join(',')}`}
+            className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-8 py-3 rounded-lg hover:bg-[#00D9FF]/30 transition"
+          >
+            Compare Accounts
+          </Link>
+        </div>
+      )}
+
+      <div className="text-center mt-8">
+        <Link href="/" className="text-gray-400 hover:text-white transition">
+          ← Back to Home
+        </Link>
       </div>
 
       <style jsx>{`
@@ -378,6 +362,6 @@ export default function SpyModePage() {
           transform: translateY(-4px);
         }
       `}</style>
-    </div>
+    </>
   )
 }

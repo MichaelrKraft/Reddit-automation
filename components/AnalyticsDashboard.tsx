@@ -302,32 +302,33 @@ export default function AnalyticsDashboard({ middleContent }: AnalyticsDashboard
             ) : (
               <div className="space-y-3">
                 {topPosts.map((post, index) => (
-                  <div key={post.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-[#1a1a24] rounded-lg border border-gray-700 hover:border-[#00D9FF] transition">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="text-xl sm:text-2xl font-bold text-gray-500 w-8">#{index + 1}</div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-white line-clamp-1 text-sm sm:text-base">{post.title}</h4>
-                        <div className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400 mt-1">
-                          <span className="text-[#00D9FF]">{post.subreddit}</span>
-                          <span>•</span>
-                          <span>{post.postedAt && new Date(post.postedAt).toLocaleDateString()}</span>
-                        </div>
+                  <div key={post.id} className="flex items-center gap-4 p-3 sm:p-4 bg-[#1a1a24] rounded-lg border border-gray-700 hover:border-[#00D9FF] transition">
+                    {/* Rank Number */}
+                    <div className="text-xl sm:text-2xl font-bold text-gray-500 w-8 flex-shrink-0">#{index + 1}</div>
+
+                    {/* Title and Subreddit - takes up remaining space */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-white line-clamp-1 text-sm sm:text-base">{post.title}</h4>
+                      <div className="flex gap-2 sm:gap-3 text-xs sm:text-sm text-gray-400 mt-1">
+                        <span className="text-[#00D9FF]">{post.subreddit}</span>
+                        <span>•</span>
+                        <span>{post.postedAt && new Date(post.postedAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 pl-11 sm:pl-0">
-                      <div className="flex gap-3 sm:gap-4 text-sm">
-                        <div className="text-center">
-                          <div className="font-semibold text-green-400 text-xs sm:text-sm">↑ {formatNumber(post.upvotes)}</div>
-                          <div className="text-xs text-gray-500 hidden sm:block">upvotes</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="font-semibold text-blue-400 text-xs sm:text-sm">💬 {formatNumber(post.comments)}</div>
-                          <div className="text-xs text-gray-500 hidden sm:block">comments</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="font-semibold text-purple-400 text-xs sm:text-sm">{post.score}</div>
-                          <div className="text-xs text-gray-500 hidden sm:block">score</div>
-                        </div>
+
+                    {/* Stats - pushed to the right */}
+                    <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
+                      <div className="text-center">
+                        <div className="font-semibold text-green-400 text-xs sm:text-sm">↑ {formatNumber(post.upvotes)}</div>
+                        <div className="text-xs text-gray-500 hidden sm:block">upvotes</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-semibold text-blue-400 text-xs sm:text-sm">💬 {formatNumber(post.comments)}</div>
+                        <div className="text-xs text-gray-500 hidden sm:block">comments</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-semibold text-purple-400 text-xs sm:text-sm">{post.score}</div>
+                        <div className="text-xs text-gray-500 hidden sm:block">score</div>
                       </div>
                       {post.url && (
                         <a

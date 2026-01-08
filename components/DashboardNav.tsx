@@ -1,49 +1,101 @@
 'use client'
 
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import Link from 'next/link'
+import {
+  IconPlus,
+  IconFlame,
+  IconEye,
+  IconTrophy,
+  IconBulb,
+  IconBell,
+  IconSearch,
+  IconMessageCircle,
+  IconFileText,
+  IconCalendar,
+  IconLayoutDashboard,
+} from '@tabler/icons-react'
+import { Sidebar, SidebarBody, SidebarLink, useSidebar } from '@/components/ui/sidebar'
 
+// Logo component that shows/hides based on sidebar state
+function SidebarLogo() {
+  const { open } = useSidebar()
+  return (
+    <Link href="/" className="flex items-center justify-center mb-4">
+      <img
+        src="/reddride-logo-dark.png"
+        alt="ReddRide"
+        className={`object-contain transition-all duration-300 ${open ? 'h-[72px] w-auto' : 'h-12 w-12 object-cover'}`}
+      />
+    </Link>
+  )
+}
+
+// Dashboard item at top (separate)
+const dashboardItem = { href: '/dashboard', label: 'Dashboard', icon: <IconLayoutDashboard className="h-5 w-5 flex-shrink-0" /> }
+
+// Other nav items (will be spaced down)
 const navItems = [
-  { href: '/dashboard/new-post', label: '+ New Post' },
-  { href: '/warmup', label: 'Warmup' },
-  { href: '/dashboard/spy-mode', label: 'Spy Mode' },
-  { href: '/dashboard/leaderboard', label: 'Leaderboard' },
-  { href: '/dashboard/opportunities', label: 'Opportunities' },
-  { href: '/dashboard/speed-alerts', label: 'AI Alerts' },
-  { href: '/dashboard/seo-finder', label: 'SEO Finder' },
-  { href: '/dashboard/comments', label: 'Comments' },
-  { href: '/dashboard/posts', label: 'Posts' },
-  { href: '/dashboard/calendar', label: 'Calendar' },
+  { href: '/dashboard/new-post', label: 'New Post', icon: <IconPlus className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/warmup', label: 'Warmup', icon: <IconFlame className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/spy-mode', label: 'Spy Mode', icon: <IconEye className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: <IconTrophy className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/opportunities', label: 'Opportunities', icon: <IconBulb className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/speed-alerts', label: 'AI Alerts', icon: <IconBell className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/seo-finder', label: 'SEO Finder', icon: <IconSearch className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/comments', label: 'Comments', icon: <IconMessageCircle className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/posts', label: 'Posts', icon: <IconFileText className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/calendar', label: 'Calendar', icon: <IconCalendar className="h-5 w-5 flex-shrink-0" /> },
 ]
 
 export default function DashboardNav() {
   const pathname = usePathname()
+  const [open, setOpen] = useState(false)
+
+  const dashboardLink = {
+    label: dashboardItem.label,
+    href: dashboardItem.href,
+    icon: dashboardItem.icon,
+  }
+
+  const links = navItems.map((item) => ({
+    label: item.label,
+    href: item.href,
+    icon: item.icon,
+  }))
 
   return (
-    <nav className="flex flex-wrap gap-2 sm:gap-3 mt-6 sm:mt-8 mb-6 sm:mb-8">
-      {navItems.map((item) => {
-        const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
-        const isHighlight = 'highlight' in item && item.highlight
-        const isPremium = 'premium' in item && item.premium
+    <Sidebar open={open} setOpen={setOpen}>
+      <SidebarBody className="justify-between gap-10">
+        <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          {/* Logo at top */}
+          <SidebarLogo />
 
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg transition font-semibold text-sm sm:text-base ${
-              isHighlight
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:from-purple-600 hover:to-blue-600 border-0'
-                : isPremium
-                  ? 'bg-gradient-to-r from-yellow-500/20 to-amber-600/20 text-yellow-400 border border-yellow-500/50 hover:bg-yellow-500/30'
-                  : `bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 hover:bg-[#00D9FF]/30 ${
-                      isActive ? 'bg-[#00D9FF]/40' : ''
-                    }`
-            }`}
-          >
-            {item.label}
-          </Link>
-        )
-      })}
-    </nav>
+          {/* Dashboard below logo */}
+          <div className="mt-2">
+            <SidebarLink
+              link={dashboardLink}
+              isActive={pathname === dashboardLink.href}
+            />
+          </div>
+
+          {/* Other items with significant spacing below Dashboard */}
+          <div className="mt-12 flex flex-col gap-2">
+            {links.map((link) => {
+              const isActive = pathname === link.href ||
+                pathname?.startsWith(link.href + '/')
+              return (
+                <SidebarLink
+                  key={link.href}
+                  link={link}
+                  isActive={isActive}
+                />
+              )
+            })}
+          </div>
+        </div>
+      </SidebarBody>
+    </Sidebar>
   )
 }

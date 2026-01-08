@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import DashboardNav from '@/components/DashboardNav'
 
 interface MonitoredSubreddit {
   id: string
@@ -50,6 +49,8 @@ export default function SpeedAlertsPage() {
   const [error, setError] = useState<string | null>(null)
   const [copiedComment, setCopiedComment] = useState<string | null>(null)
   const [soundEnabled, setSoundEnabled] = useState(true)
+  const [addingPending, setAddingPending] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
   const eventSourceRef = useRef<EventSource | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const soundEnabledRef = useRef(true)
@@ -63,6 +64,56 @@ export default function SpeedAlertsPage() {
     fetchMonitored()
     fetchAlerts()
   }, [])
+
+  // Check for pending subreddits from analysis and auto-add them
+  useEffect(() => {
+    async function addPendingSubreddits() {
+      const stored = localStorage.getItem('pendingSubreddits')
+      if (!stored) return
+
+      try {
+        const pendingSubreddits: string[] = JSON.parse(stored)
+        if (pendingSubreddits.length === 0) return
+
+        setAddingPending(true)
+        setPendingCount(pendingSubreddits.length)
+
+        // Add each subreddit
+        let addedCount = 0
+        for (const subreddit of pendingSubreddits) {
+          try {
+            const response = await fetch('/api/speed-alerts/monitored', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ subreddit }),
+            })
+            if (response.ok) {
+              addedCount++
+            }
+          } catch (err) {
+            console.error(`Failed to add subreddit: ${subreddit}`, err)
+          }
+        }
+
+        // Clear the pending subreddits
+        localStorage.removeItem('pendingSubreddits')
+
+        // Refresh the data
+        await fetchMonitored()
+
+        setAddingPending(false)
+        if (addedCount > 0) {
+          alert(`Added ${addedCount} subreddits from your business analysis!`)
+        }
+      } catch (err) {
+        console.error('Failed to process pending subreddits:', err)
+        localStorage.removeItem('pendingSubreddits')
+        setAddingPending(false)
+      }
+    }
+
+    addPendingSubreddits()
+  }, []) // Run only once on mount
 
   // Play notification sound using Web Audio API (no file needed)
   const playNotificationSound = useCallback(() => {
@@ -340,76 +391,50 @@ export default function SpeedAlertsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
-      {/* Dot Grid Background */}
-      <div className="dot-grid-background">
-        <div className="dot-grid-container">
-          <div className="dot-grid"></div>
-          <div className="dot-grid-overlay"></div>
-        </div>
+    <>
+      {/* Controls */}
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
+        {isMonitoring ? (
+          <button
+            onClick={stopMonitoring}
+            className="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm sm:text-base"
+          >
+            <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
+            Stop Monitoring
+          </button>
+        ) : (
+          <button
+            onClick={startMonitoring}
+            disabled={monitored.length === 0}
+            className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
+          >
+            Start Monitoring
+          </button>
+        )}
+        <button
+          onClick={() => {
+            setSoundEnabled(!soundEnabled)
+            soundEnabledRef.current = !soundEnabled
+          }}
+          className={`p-2 rounded-lg transition ${
+            soundEnabled
+              ? 'bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50'
+              : 'bg-gray-700 text-gray-400 border border-gray-600'
+          }`}
+          title={soundEnabled ? 'Sound alerts ON - Click to mute' : 'Sound alerts OFF - Click to enable'}
+        >
+          {soundEnabled ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4 3a1 1 0 011.414-.414l14 14a1 1 0 01-1.414 1.414l-1.445-1.445A1 1 0 0116 16H4a1 1 0 01-.707-1.707L4 13.586V8a6 6 0 015.659-5.986L4.414 2.414A1 1 0 014 3zm2 5v.586l8.293 8.293A.996.996 0 0116 16H4.414L6 14.414V8zM10 2a6 6 0 016 6v.586l-2-2V8a4 4 0 00-4-4z" clipRule="evenodd" />
+              <path d="M10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+            </svg>
+          )}
+        </button>
       </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation */}
-        <DashboardNav />
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white">Instant Alerts</h1>
-            <p className="text-gray-400 mt-1 text-sm sm:text-base">
-              Get instant notifications when new posts appear in the subreddits of your choice
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 sm:gap-3">
-            {isMonitoring ? (
-              <button
-                onClick={stopMonitoring}
-                className="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm sm:text-base"
-              >
-                <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
-                Stop Monitoring
-              </button>
-            ) : (
-              <button
-                onClick={startMonitoring}
-                disabled={monitored.length === 0}
-                className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
-              >
-                Start Monitoring
-              </button>
-            )}
-            <button
-              onClick={() => {
-                setSoundEnabled(!soundEnabled)
-                soundEnabledRef.current = !soundEnabled
-              }}
-              className={`p-2 rounded-lg transition ${
-                soundEnabled
-                  ? 'bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50'
-                  : 'bg-gray-700 text-gray-400 border border-gray-600'
-              }`}
-              title={soundEnabled ? 'Sound alerts ON - Click to mute' : 'Sound alerts OFF - Click to enable'}
-            >
-              {soundEnabled ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4 3a1 1 0 011.414-.414l14 14a1 1 0 01-1.414 1.414l-1.445-1.445A1 1 0 0116 16H4a1 1 0 01-.707-1.707L4 13.586V8a6 6 0 015.659-5.986L4.414 2.414A1 1 0 014 3zm2 5v.586l8.293 8.293A.996.996 0 0116 16H4.414L6 14.414V8zM10 2a6 6 0 016 6v.586l-2-2V8a4 4 0 00-4-4z" clipRule="evenodd" />
-                  <path d="M10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                </svg>
-              )}
-            </button>
-            <Link
-              href="/dashboard"
-              className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
-            >
-              ← Back
-            </Link>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Panel - Monitored Subreddits */}
@@ -598,19 +623,24 @@ export default function SpeedAlertsPage() {
           </div>
         </div>
 
-        {/* Keyword Alerts & Discover Subreddits Side by Side */}
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <h2 className="text-lg font-bold text-white mb-3">Keyword Alerts</h2>
-            <KeywordAlertsSection />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-white mb-3">Discover Subreddits</h2>
-            <DiscoverSection />
-          </div>
+      {/* Keyword Alerts & Discover Subreddits Side by Side */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <h2 className="text-lg font-bold text-white mb-3">Keyword Alerts</h2>
+          <KeywordAlertsSection />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-white mb-3">Discover Subreddits</h2>
+          <DiscoverSection />
         </div>
       </div>
-    </div>
+
+      <div className="text-center mt-8">
+        <Link href="/" className="text-gray-400 hover:text-white transition">
+          ← Back to Home
+        </Link>
+      </div>
+    </>
   )
 }
 

@@ -299,7 +299,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
         <div>
           <h2 className="text-2xl font-bold text-white flex items-center gap-3">
             Comments
-            {scanning && <span className="text-sm text-purple-400 animate-pulse">🔄 Scanning...</span>}
+            {scanning && <span className="text-sm text-[#00D9FF] animate-pulse">🔄 Scanning...</span>}
           </h2>
           <p className="text-gray-400 text-sm mt-1">
             {pendingComments.length} pending replies • {repliedComments.length} replied
@@ -319,7 +319,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
         <button
           onClick={() => setStatusFilter('pending')}
           className={`px-4 py-2 rounded-lg transition ${
-            statusFilter === 'pending' ? 'bg-purple-500 text-white' : 'glass-button text-gray-400 hover:text-white'
+            statusFilter === 'pending' ? 'bg-[#00D9FF] text-black font-medium' : 'glass-button text-gray-400 hover:text-white'
           }`}
         >
           Pending ({pendingComments.length + unrepliedNoQueue.length})
@@ -327,7 +327,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
         <button
           onClick={() => setStatusFilter('replied')}
           className={`px-4 py-2 rounded-lg transition ${
-            statusFilter === 'replied' ? 'bg-green-500 text-white' : 'glass-button text-gray-400 hover:text-white'
+            statusFilter === 'replied' ? 'bg-[#00D9FF] text-black font-medium' : 'glass-button text-gray-400 hover:text-white'
           }`}
         >
           Replied ({repliedComments.length})
@@ -335,7 +335,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
         <button
           onClick={() => setStatusFilter('all')}
           className={`px-4 py-2 rounded-lg transition ${
-            statusFilter === 'all' ? 'bg-blue-500 text-white' : 'glass-button text-gray-400 hover:text-white'
+            statusFilter === 'all' ? 'bg-[#00D9FF] text-black font-medium' : 'glass-button text-gray-400 hover:text-white'
           }`}
         >
           All ({comments.length})
@@ -344,20 +344,20 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
 
       {/* Batch Actions */}
       {statusFilter === 'pending' && pendingQueueIds.length > 0 && (
-        <div className="flex items-center justify-between p-4 bg-purple-900/20 border border-purple-500/30 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-[#00D9FF]/10 border border-[#00D9FF]/30 rounded-lg">
           <label className="flex items-center gap-2 text-gray-300 cursor-pointer">
             <input
               type="checkbox"
               checked={selectedIds.size === pendingQueueIds.length && pendingQueueIds.length > 0}
               onChange={selectAll}
-              className="w-5 h-5 rounded border-gray-600 bg-gray-800 text-purple-500"
+              className="w-5 h-5 rounded border-gray-600 bg-gray-800 accent-[#00D9FF]"
             />
             <span>Select All ({selectedIds.size} selected)</span>
           </label>
           <button
             onClick={approveSelected}
             disabled={selectedIds.size === 0 || approving}
-            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition disabled:opacity-50"
+            className="px-4 py-2 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded-lg transition disabled:opacity-50"
           >
             {approving ? '⏳ Posting...' : `✓ Approve & Post (${selectedIds.size})`}
           </button>
@@ -367,7 +367,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
       {/* Comments List */}
       {loading && comments.length === 0 ? (
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D9FF]"></div>
           <p className="text-gray-400 mt-2">Loading comments...</p>
         </div>
       ) : filteredComments.length === 0 ? (
@@ -386,7 +386,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
               <div
                 key={comment.id}
                 className={`bg-[#12121a] rounded-lg border p-4 ${
-                  comment.replied ? 'border-green-700/50' : pendingReply ? 'border-purple-500/50' : 'border-gray-700'
+                  comment.replied ? 'border-green-700/50' : pendingReply ? 'border-[#00D9FF]/50' : 'border-gray-700'
                 }`}
               >
                 {/* Comment Header */}
@@ -396,7 +396,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                       type="checkbox"
                       checked={selectedIds.has(pendingReply.id)}
                       onChange={() => toggleSelection(pendingReply.id)}
-                      className="w-5 h-5 mt-1 rounded border-gray-600 bg-gray-800 text-purple-500"
+                      className="w-5 h-5 mt-1 rounded border-gray-600 bg-gray-800 accent-[#00D9FF]"
                     />
                   )}
                   <div className="flex-1">
@@ -412,9 +412,9 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                   {comment.replied ? (
                     <span className="text-xs px-2 py-1 rounded-full bg-green-900/50 text-green-400">✓ Replied</span>
                   ) : pendingReply ? (
-                    <span className="text-xs px-2 py-1 rounded-full bg-purple-900/50 text-purple-400">AI Ready</span>
+                    <span className="text-xs px-2 py-1 rounded-full bg-[#00D9FF]/20 text-[#00D9FF]">AI Ready</span>
                   ) : (
-                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-900/50 text-yellow-400">No Reply</span>
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-700/50 text-gray-400">No Reply</span>
                   )}
                 </div>
 
@@ -425,8 +425,8 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
 
                 {/* AI Generated Reply (Pending) */}
                 {pendingReply && (
-                  <div className="bg-purple-900/20 rounded-lg p-3 mt-3 border-l-4 border-purple-500">
-                    <p className="text-purple-400 text-xs mb-2">✨ AI-Generated Reply:</p>
+                  <div className="bg-[#00D9FF]/10 rounded-lg p-3 mt-3 border-l-4 border-[#00D9FF]">
+                    <p className="text-[#00D9FF] text-xs mb-2">✨ AI-Generated Reply:</p>
                     {editingId === pendingReply.id ? (
                       <div>
                         <textarea
@@ -436,7 +436,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                           rows={3}
                         />
                         <div className="flex gap-2 mt-2">
-                          <button onClick={() => saveEdit(pendingReply.id)} className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm">Save</button>
+                          <button onClick={() => saveEdit(pendingReply.id)} className="px-3 py-1 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded text-sm">Save</button>
                           <button onClick={() => { setEditingId(null); setEditText(''); }} className="px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded text-sm">Cancel</button>
                         </div>
                       </div>
@@ -448,7 +448,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                       <div className="flex gap-2 mt-3">
                         <button
                           onClick={() => approveOne(pendingReply.id)}
-                          className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
+                          className="px-3 py-1 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded text-sm"
                         >
                           ✓ Approve & Post
                         </button>
@@ -466,7 +466,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                         </button>
                         <button
                           onClick={() => dismissReply(pendingReply.id)}
-                          className="px-3 py-1 text-sm text-red-400 hover:text-red-300 transition"
+                          className="px-3 py-1 text-sm text-gray-400 hover:text-gray-300 transition"
                         >
                           ✗ Dismiss
                         </button>
@@ -489,7 +489,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                     <button
                       onClick={() => sendImmediateReply(comment)}
                       disabled={generatingReply}
-                      className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-blue-600 transition disabled:opacity-50 text-sm font-medium"
+                      className="flex-1 bg-gradient-to-r from-[#00D9FF] to-cyan-600 text-black px-4 py-2 rounded-lg hover:opacity-90 transition disabled:opacity-50 text-sm font-medium"
                     >
                       {generatingReply && selectedComment?.id === comment.id ? 'Generating...' : '✨ Generate & Post Now'}
                     </button>
@@ -516,7 +516,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                       <button
                         onClick={() => sendCustomReply(comment, customReply)}
                         disabled={generatingReply || !customReply.trim()}
-                        className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition disabled:opacity-50 text-sm"
+                        className="flex-1 bg-[#00D9FF] text-black font-medium px-4 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:opacity-50 text-sm"
                       >
                         Send Reply
                       </button>
@@ -537,9 +537,9 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
 
       {/* DM Alerts Section - at bottom */}
       {dms.length > 0 && (
-        <div className="bg-orange-900/20 border border-orange-500/50 rounded-lg p-4 mt-6">
+        <div className="bg-[#00D9FF]/10 border border-[#00D9FF]/30 rounded-lg p-4 mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-orange-400 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-[#00D9FF] flex items-center gap-2">
               ✉️ New DMs ({dms.length})
             </h3>
             <button
@@ -552,7 +552,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
           {showDms && (
             <div className="space-y-3">
               {dms.map((dm) => (
-                <div key={dm.id} className="bg-gray-900/50 rounded-lg p-3 border border-orange-500/30">
+                <div key={dm.id} className="bg-gray-900/50 rounded-lg p-3 border border-gray-700">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
@@ -560,7 +560,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                         <span className="text-gray-500">•</span>
                         <span className="text-sm text-gray-500">{new Date(dm.created).toLocaleString()}</span>
                       </div>
-                      <p className="text-sm text-orange-300 font-medium mb-1">{dm.subject}</p>
+                      <p className="text-sm text-[#00D9FF] font-medium mb-1">[direct chat room]</p>
                       <p className="text-gray-300 text-sm line-clamp-2">{dm.body}</p>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
@@ -568,7 +568,7 @@ export default function CommentsPanel({ postId }: CommentsPanelProps) {
                         href={dm.redditUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-3 py-1 bg-orange-500 hover:bg-orange-600 text-white rounded text-sm whitespace-nowrap"
+                        className="px-3 py-1 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded text-sm whitespace-nowrap"
                       >
                         Reply on Reddit →
                       </a>

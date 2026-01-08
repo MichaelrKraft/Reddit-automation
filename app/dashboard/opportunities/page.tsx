@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import DashboardNav from '@/components/DashboardNav'
 
 interface OpportunityEvidence {
   id: string
@@ -196,6 +195,31 @@ export default function OpportunitiesPage() {
     }
   }
 
+  async function removeSubreddit(subredditName: string) {
+    if (!confirm(`Remove all opportunities from r/${subredditName}?`)) return
+
+    try {
+      const response = await fetch(`/api/opportunities/subreddit/${encodeURIComponent(subredditName)}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        // Clear selection if this subreddit was selected
+        if (selectedSubreddit === subredditName) {
+          setSelectedSubreddit('')
+        }
+        // Refresh the list
+        setPage(1)
+        await fetchOpportunities()
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Failed to remove subreddit')
+      }
+    } catch (err: any) {
+      setError(err.message)
+    }
+  }
+
   function formatTimeAgo(dateStr: string): string {
     const date = new Date(dateStr)
     const now = new Date()
@@ -222,187 +246,213 @@ export default function OpportunitiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
-      {/* Dot Grid Background */}
-      <div className="dot-grid-background">
-        <div className="dot-grid-container">
-          <div className="dot-grid"></div>
-          <div className="dot-grid-overlay"></div>
-        </div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <DashboardNav />
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+    <>
+      {/* Info Panel */}
+      <div className="mb-6 p-4 bg-[#0a0a12] border-2 border-[#00D9FF] rounded-lg shadow-[0_0_20px_rgba(0,217,255,0.5),0_0_40px_rgba(0,217,255,0.2)]">
+        <div className="flex items-start gap-3">
+          <span className="text-lg">🔍</span>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-              <span className="text-3xl">💡</span>
-              Product Opportunities
-            </h1>
-            <p className="text-gray-400 mt-1 text-sm sm:text-base">
-              Discover business opportunities hidden in Reddit posts
+            <h3 className="text-sm font-semibold text-white mb-1">How It Works</h3>
+            <p className="text-xs text-gray-400">
+              AI scans Reddit posts for product opportunities - users asking for recommendations, expressing frustrations, or describing unmet needs.
+              Each post is analyzed and transformed into actionable business insights.
             </p>
           </div>
-          <Link
-            href="/dashboard"
-            className="glass-button text-gray-300 px-4 sm:px-6 py-2 rounded-lg transition text-sm sm:text-base"
-          >
-            ← Back
-          </Link>
         </div>
+      </div>
 
-        {/* Info Panel */}
-        <div className="mb-6 p-4 bg-[#0a0a12] border-2 border-[#00D9FF] rounded-lg shadow-[0_0_20px_rgba(0,217,255,0.5),0_0_40px_rgba(0,217,255,0.2)]">
-          <div className="flex items-start gap-3">
-            <span className="text-lg">🔍</span>
-            <div>
-              <h3 className="text-sm font-semibold text-white mb-1">How It Works</h3>
-              <p className="text-xs text-gray-400">
-                AI scans Reddit posts for product opportunities - users asking for recommendations, expressing frustrations, or describing unmet needs.
-                Each post is analyzed and transformed into actionable business insights.
-              </p>
-            </div>
+      {/* Scan Subreddit Input */}
+      <div className="feature-card rounded-lg p-4 sm:p-6 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1 flex gap-2">
+            <span className="text-gray-400 self-center">r/</span>
+            <input
+              type="text"
+              placeholder="Enter subreddit to scan (e.g., startups, SaaS, entrepreneur)"
+              value={subredditInput}
+              onChange={(e) => setSubredditInput(e.target.value.replace(/^r\//, ''))}
+              onKeyDown={(e) => e.key === 'Enter' && scanSubreddit()}
+              className="flex-1 px-4 py-3 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
+            />
           </div>
+          <button
+            onClick={scanSubreddit}
+            disabled={isScanning || !subredditInput.trim()}
+            className="bg-gradient-to-r from-[#00D9FF] to-cyan-600 text-white px-6 sm:px-8 py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50 font-medium"
+          >
+            {isScanning ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin">⏳</span>
+                Scanning...
+              </span>
+            ) : (
+              'Scan for Opportunities'
+            )}
+          </button>
         </div>
 
-        {/* Scan Subreddit Input */}
-        <div className="feature-card rounded-lg p-4 sm:p-6 mb-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 flex gap-2">
-              <span className="text-gray-400 self-center">r/</span>
-              <input
-                type="text"
-                placeholder="Enter subreddit to scan (e.g., startups, SaaS, entrepreneur)"
-                value={subredditInput}
-                onChange={(e) => setSubredditInput(e.target.value.replace(/^r\//, ''))}
-                onKeyDown={(e) => e.key === 'Enter' && scanSubreddit()}
-                className="flex-1 px-4 py-3 border border-gray-600 bg-[#12121a] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
-              />
-            </div>
-            <button
-              onClick={scanSubreddit}
-              disabled={isScanning || !subredditInput.trim()}
-              className="bg-gradient-to-r from-[#00D9FF] to-cyan-600 text-white px-6 sm:px-8 py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50 font-medium"
-            >
-              {isScanning ? (
-                <span className="flex items-center gap-2">
-                  <span className="animate-spin">⏳</span>
-                  Scanning...
-                </span>
-              ) : (
-                'Scan for Opportunities'
+        {/* Active Subreddits Display */}
+        {subredditFilters.length > 0 && (
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-gray-400 font-medium">Active subreddits:</span>
+              {subredditFilters.map((sub) => (
+                <div
+                  key={sub.name}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition ${
+                    selectedSubreddit === sub.name
+                      ? 'bg-[#00D9FF] text-black'
+                      : 'bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50'
+                  }`}
+                >
+                  <button
+                    onClick={() => {
+                      setSelectedSubreddit(selectedSubreddit === sub.name ? '' : sub.name)
+                      setPage(1)
+                    }}
+                    className="hover:opacity-80"
+                  >
+                    r/{sub.name} ({sub.count})
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removeSubreddit(sub.name)
+                    }}
+                    className={`ml-1 hover:opacity-60 ${
+                      selectedSubreddit === sub.name ? 'text-black' : 'text-[#00D9FF]'
+                    }`}
+                    title={`Remove r/${sub.name} opportunities`}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {selectedSubreddit && (
+                <button
+                  onClick={() => { setSelectedSubreddit(''); setPage(1) }}
+                  className="px-2 py-1 text-xs text-gray-400 hover:text-white transition"
+                >
+                  Clear filter
+                </button>
               )}
-            </button>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          {/* Category Filter */}
-          <select
-            value={selectedCategory}
-            onChange={(e) => { setSelectedCategory(e.target.value); setPage(1) }}
-            className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white text-sm"
-          >
-            <option value="all">All Categories ({total})</option>
-            {categoryFilters.map(cat => (
-              <option key={cat.name} value={cat.name}>
-                {cat.name} ({cat.count})
-              </option>
-            ))}
-          </select>
-
-          {/* Sort By */}
-          <select
-            value={sortBy}
-            onChange={(e) => { setSortBy(e.target.value); setPage(1) }}
-            className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white text-sm"
-          >
-            <option value="newest">Newest First</option>
-            <option value="confidence">Highest Confidence</option>
-            <option value="evidence">Most Evidence</option>
-            <option value="oldest">Oldest First</option>
-          </select>
-
-          {/* Stats */}
-          <div className="ml-auto text-sm text-gray-400 self-center">
-            {total} opportunities found
-          </div>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400">
-            {error}
-          </div>
-        )}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00D9FF] mx-auto mb-4"></div>
-            <p className="text-gray-400">Loading opportunities...</p>
-          </div>
-        )}
-
-        {/* Opportunities Grid */}
-        {!isLoading && opportunities.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2">
-            {opportunities.map((opp) => (
-              <OpportunityCard
-                key={opp.id}
-                opportunity={opp}
-                onAction={handleAction}
-                formatTimeAgo={formatTimeAgo}
-                formatNumber={formatNumber}
-                getCategoryStyle={getCategoryStyle}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!isLoading && opportunities.length === 0 && !error && (
-          <div className="text-center py-12">
-            <span className="text-6xl mb-4 block">💡</span>
-            <h3 className="text-xl font-semibold text-white mb-2">
-              No Opportunities Yet
-            </h3>
-            <p className="text-gray-400 max-w-md mx-auto">
-              Enter a subreddit above and click &quot;Scan for Opportunities&quot; to discover product ideas hidden in Reddit posts.
-            </p>
-            <p className="text-gray-500 text-sm mt-4">
-              Try: r/startups, r/SaaS, r/entrepreneur, r/smallbusiness
-            </p>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-8">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2 text-gray-400">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white disabled:opacity-50"
-            >
-              Next
-            </button>
+            </div>
           </div>
         )}
       </div>
-    </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        {/* Category Filter */}
+        <select
+          value={selectedCategory}
+          onChange={(e) => { setSelectedCategory(e.target.value); setPage(1) }}
+          className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white text-sm"
+        >
+          <option value="all">All Categories ({total})</option>
+          {categoryFilters.map(cat => (
+            <option key={cat.name} value={cat.name}>
+              {cat.name} ({cat.count})
+            </option>
+          ))}
+        </select>
+
+        {/* Sort By */}
+        <select
+          value={sortBy}
+          onChange={(e) => { setSortBy(e.target.value); setPage(1) }}
+          className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white text-sm"
+        >
+          <option value="newest">Newest First</option>
+          <option value="confidence">Highest Confidence</option>
+          <option value="upvotes">Highest Upvotes</option>
+          <option value="comments">Highest Comments</option>
+          <option value="evidence">Most Evidence</option>
+          <option value="oldest">Oldest First</option>
+        </select>
+
+        {/* Stats */}
+        <div className="ml-auto text-sm text-gray-400 self-center">
+          {total} opportunities found
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-400">
+          {error}
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00D9FF] mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading opportunities...</p>
+        </div>
+      )}
+
+      {/* Opportunities Grid */}
+      {!isLoading && opportunities.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {opportunities.map((opp) => (
+            <OpportunityCard
+              key={opp.id}
+              opportunity={opp}
+              onAction={handleAction}
+              formatTimeAgo={formatTimeAgo}
+              formatNumber={formatNumber}
+              getCategoryStyle={getCategoryStyle}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && opportunities.length === 0 && !error && (
+        <div className="text-center py-12">
+          <span className="text-6xl mb-4 block">💡</span>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            No Opportunities Yet
+          </h3>
+          <p className="text-gray-400 max-w-md mx-auto">
+            Enter a subreddit above and click &quot;Scan for Opportunities&quot; to discover product ideas hidden in Reddit posts.
+          </p>
+          <p className="text-gray-500 text-sm mt-4">
+            Try: r/startups, r/SaaS, r/entrepreneur, r/smallbusiness
+          </p>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-8">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2 text-gray-400">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg text-white disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      <div className="text-center mt-8">
+        <Link href="/" className="text-gray-400 hover:text-white transition">
+          ← Back to Home
+        </Link>
+      </div>
+    </>
   )
 }
 

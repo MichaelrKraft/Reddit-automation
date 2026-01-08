@@ -16,28 +16,32 @@ export async function GET(request: NextRequest) {
     // Simple where clause
     const where: any = { userId }
 
-    // Build orderBy
+    // Build orderBy - for upvotes/comments, we'll sort after fetching
     let orderBy: any = { firstSeenAt: 'desc' }
-    switch (sortBy) {
-      case 'newest':
-        orderBy = { firstSeenAt: 'desc' }
-        break
-      case 'oldest':
-        orderBy = { firstSeenAt: 'asc' }
-        break
-      case 'confidence':
-        orderBy = { score: 'desc' }
-        break
-      case 'evidence':
-        orderBy = { evidenceCount: 'desc' }
-        break
+    const needsPostFetchSort = sortBy === 'upvotes' || sortBy === 'comments'
+
+    if (!needsPostFetchSort) {
+      switch (sortBy) {
+        case 'newest':
+          orderBy = { firstSeenAt: 'desc' }
+          break
+        case 'oldest':
+          orderBy = { firstSeenAt: 'asc' }
+          break
+        case 'confidence':
+          orderBy = { score: 'desc' }
+          break
+        case 'evidence':
+          orderBy = { evidenceCount: 'desc' }
+          break
+      }
     }
 
     // Get total count
     const total = await prisma.opportunity.count({ where })
 
-    // Get opportunities
-    const opportunities = await prisma.opportunity.findMany({
+    // Get opportunities - fetch more if we need to sort post-fetch
+    let opportunities = await prisma.opportunity.findMany({
       where,
       include: {
         evidence: {
@@ -50,9 +54,64 @@ export async function GET(request: NextRequest) {
         },
       },
       orderBy,
-      skip: (page - 1) * limit,
-      take: limit,
+      skip: needsPostFetchSort ? 0 : (page - 1) * limit,
+      take: needsPostFetchSort ? total : limit,
     })
+
+    // Post-fetch sorting for upvotes/comments (based on top evidence)
+    if (needsPostFetchSort) {
+      opportunities = opportunities.sort((a, b) => {
+        const aEvidence = a.evidence[0]
+        const bEvidence = b.evidence[0]
+
+        if (sortBy === 'upvotes') {
+          return (bEvidence?.upvotes || 0) - (aEvidence?.upvotes || 0)
+        } else {
+          return (bEvidence?.commentCount || 0) - (aEvidence?.commentCount || 0)
+        }
+      })
+
+      // Apply pagination after sorting
+      opportunities = opportunities.slice((page - 1) * limit, page * limit)
+    }
+
+    // Get unique subreddits for the filter display
+    const subredditCounts = await prisma.opportunitySubreddit.groupBy({
+      by: ['subreddit'],
+      where: {
+        opportunity: { userId },
+      },
+      _count: { subreddit: true },
+      orderBy: { _count: { subreddit: 'desc' } },
+      take: 20,
+    })
+
+    const subredditFilters = subredditCounts.map(s => ({
+      name: s.subreddit,
+      count: s._count.subreddit,
+    }))
+
+    // Get category counts from opportunities
+    const categoryCounts = await prisma.opportunity.groupBy({
+      by: ['category'],
+      where: { userId },
+      _count: { category: true },
+      orderBy: { _count: { category: 'desc' } },
+    })
+
+    // Map enum values to display names
+    const categoryDisplayMap: Record<string, string> = {
+      'PAIN_POINT': 'Productivity',
+      'FEATURE_REQUEST': 'Business Tools & SaaS',
+      'CONTENT_OPPORTUNITY': 'Education & Self Improvement',
+      'COMPETITOR_GAP': 'Developer Tools',
+      'TRENDING_TOPIC': 'Media & Entertainment',
+    }
+
+    const categoryFilters = categoryCounts.map(c => ({
+      name: categoryDisplayMap[c.category] || c.category,
+      count: c._count.category,
+    }))
 
     return NextResponse.json({
       opportunities: opportunities.map(formatOpportunity),
@@ -63,8 +122,8 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
       filters: {
-        categories: [],
-        subreddits: [],
+        categories: categoryFilters,
+        subreddits: subredditFilters,
       },
     })
   } catch (error: any) {

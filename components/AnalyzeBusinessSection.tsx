@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface Analysis {
   id: string
@@ -17,10 +18,27 @@ interface Analysis {
 }
 
 export default function AnalyzeBusinessSection() {
+  const router = useRouter()
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [error, setError] = useState('')
+
+  // Navigate to keyword alerts with suggested keywords
+  function goToKeywordAlerts() {
+    if (analysis?.keywords) {
+      localStorage.setItem('pendingKeywords', JSON.stringify(analysis.keywords))
+    }
+    router.push('/dashboard/keyword-alerts')
+  }
+
+  // Navigate to speed alerts with suggested subreddits
+  function goToSpeedAlerts() {
+    if (analysis?.subreddits) {
+      localStorage.setItem('pendingSubreddits', JSON.stringify(analysis.subreddits.map(s => s.name)))
+    }
+    router.push('/dashboard/speed-alerts')
+  }
 
   async function analyzeUrl() {
     if (!url.trim()) return
@@ -84,7 +102,7 @@ export default function AnalyzeBusinessSection() {
 
       {/* URL Input */}
       <div className="max-w-2xl mx-auto mb-6">
-        <div className="feature-card rounded-xl p-4">
+        <div className="feature-card rounded-xl p-4 border border-[#00D9FF]/30">
           <div className="flex gap-3">
             <input
               type="text"
@@ -92,20 +110,20 @@ export default function AnalyzeBusinessSection() {
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !loading && analyzeUrl()}
               placeholder="Enter your website URL (e.g., myproduct.com)"
-              className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-500"
+              className="flex-1 bg-gray-800/80 border border-[#00D9FF]/40 rounded-lg px-4 py-2.5 text-white placeholder-gray-400 focus:border-[#00D9FF] focus:ring-1 focus:ring-[#00D9FF]/50 transition"
               disabled={loading}
             />
             <button
               onClick={analyzeUrl}
               disabled={loading || !url.trim()}
-              className="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg transition disabled:opacity-50 font-semibold whitespace-nowrap"
+              className="px-6 py-2.5 bg-[#00D9FF] text-[#0a0a0f] font-semibold rounded-lg shadow-lg hover:bg-cyan-400 transition-all disabled:opacity-50 whitespace-nowrap"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="animate-spin">⏳</span> Analyzing...
                 </span>
               ) : (
-                '🔍 Analyze'
+                'Analyze'
               )}
             </button>
           </div>
@@ -118,7 +136,7 @@ export default function AnalyzeBusinessSection() {
       {/* Loading State */}
       {loading && (
         <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-purple-500 mb-3"></div>
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-[#00D9FF] mb-3"></div>
           <p className="text-gray-400">Analyzing your business...</p>
           <p className="text-gray-500 text-sm mt-1">This usually takes 15-30 seconds</p>
         </div>
@@ -248,21 +266,21 @@ export default function AnalyzeBusinessSection() {
 
           {/* Actions */}
           <div className="flex flex-wrap gap-3 justify-center pt-2">
-            <Link
-              href="/dashboard/keyword-alerts"
-              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition font-medium text-sm"
+            <button
+              onClick={goToKeywordAlerts}
+              className="spy-button-primary px-5 py-2.5 rounded-lg text-sm"
             >
-              → Set Up Keyword Alerts
-            </Link>
-            <Link
-              href="/dashboard/speed-alerts"
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition font-medium text-sm"
+              → Set Up Keyword Alerts ({analysis.keywords.length})
+            </button>
+            <button
+              onClick={goToSpeedAlerts}
+              className="spy-button-primary px-5 py-2.5 rounded-lg text-sm"
             >
-              → Monitor Subreddits
-            </Link>
+              → Monitor Subreddits ({analysis.subreddits.length})
+            </button>
             <button
               onClick={() => { setAnalysis(null); setUrl(''); }}
-              className="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition text-sm"
+              className="glass-button px-5 py-2.5 rounded-lg text-gray-300 text-sm"
             >
               Analyze Another
             </button>

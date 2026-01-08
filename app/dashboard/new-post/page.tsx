@@ -8,7 +8,6 @@ import SubredditAnalysis from '@/components/SubredditAnalysis'
 import TopPostsAnalyzer from '@/components/TopPostsAnalyzer'
 import OptimalTimingWidget from '@/components/OptimalTimingWidget'
 import ImageUpload from '@/components/ImageUpload'
-import DashboardNav from '@/components/DashboardNav'
 
 export default function NewPost() {
   const router = useRouter()
@@ -287,43 +286,8 @@ export default function NewPost() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
-      {/* Dot Grid Background */}
-      <div className="dot-grid-background">
-        <div className="dot-grid-container">
-          <div className="dot-grid"></div>
-          <div className="dot-grid-overlay"></div>
-        </div>
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <DashboardNav />
-
-        {/* Page Header */}
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-6 sm:mb-8 flex justify-between items-start">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white">Create New Post</h1>
-              <p className="text-gray-400 mt-1 text-sm sm:text-base">Schedule a post to Reddit</p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={handleSaveDraft}
-                disabled={savingDraft || loading || !formData.title || !formData.content || !formData.subredditName}
-                className="bg-gradient-to-r from-[#00D9FF]/20 to-cyan-600/20 text-[#00D9FF] border border-[#00D9FF]/50 px-4 py-2 rounded-lg hover:bg-[#00D9FF]/30 transition disabled:opacity-50 font-semibold text-sm"
-              >
-                {savingDraft ? 'Saving...' : 'Save Draft'}
-              </button>
-              <Link
-                href="/dashboard"
-                className="glass-button text-gray-300 px-4 py-2 rounded-lg transition text-sm"
-              >
-                ← Back
-              </Link>
-            </div>
-          </div>
-
+    <>
+      <div className="max-w-3xl mx-auto">
         <div className="feature-card rounded-lg p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Subreddit input first - AI Content Generator needs it */}
@@ -892,8 +856,13 @@ export default function NewPost() {
             </div>
           </form>
         </div>
-        </div>
       </div>
-    </div>
+
+      <div className="text-center mt-8">
+        <Link href="/" className="text-gray-400 hover:text-white transition">
+          ← Back to Home
+        </Link>
+      </div>
+    </>
   )
 }

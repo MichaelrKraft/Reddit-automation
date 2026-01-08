@@ -29,6 +29,7 @@ body {
 .dot-grid-container {
   position: absolute;
   inset: 0;
+  pointer-events: none;
 }
 
 .dot-grid {
@@ -37,12 +38,14 @@ body {
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.15) 1px, transparent 1px);
   background-size: 24px 24px;
   opacity: 0.5;
+  pointer-events: none;
 }
 
 .dot-grid-overlay {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at center, transparent 0%, var(--bg-primary) 70%);
+  pointer-events: none;
 }
 
 /* Shimmer Text Animation */

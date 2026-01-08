@@ -1,14 +1,10 @@
-'use client'
-
+import WarmupDashboard from '@/components/WarmupDashboard'
 import Link from 'next/link'
-import CommentsPanel from '@/components/CommentsPanel'
 
-export default function CommentsPage() {
+export default function WarmupPage() {
   return (
     <>
-      <div className="feature-card rounded-lg p-4 sm:p-6">
-        <CommentsPanel />
-      </div>
+      <WarmupDashboard />
 
       <div className="text-center mt-8">
         <Link href="/" className="text-gray-400 hover:text-white transition">
