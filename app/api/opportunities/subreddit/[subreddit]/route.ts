@@ -5,12 +5,12 @@ import { requireUser } from '@/lib/auth'
 // DELETE - Remove all opportunities for a subreddit
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { subreddit: string } }
+  { params }: { params: Promise<{ subreddit: string }> }
 ) {
   try {
     const user = await requireUser()
     const userId = user.id
-    const subredditName = params.subreddit
+    const { subreddit: subredditName } = await params
 
     if (!subredditName) {
       return NextResponse.json({ error: 'Subreddit name required' }, { status: 400 })
