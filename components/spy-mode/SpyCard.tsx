@@ -109,6 +109,16 @@ export default function SpyCard({ account, onRemove }: SpyCardProps) {
         </div>
       </div>
 
+      {/* No Posts Notice */}
+      {analytics.totalPosts === 0 && (
+        <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+          <p className="text-yellow-400 text-xs flex items-center gap-2">
+            <span>⚠️</span>
+            <span>No posts found. This user may have hidden their post history or only has comment activity.</span>
+          </p>
+        </div>
+      )}
+
       {/* Trend Indicator */}
       <div className="flex items-center gap-2 mb-4">
         <span className={`text-sm font-semibold ${trend >= 0 ? 'text-green-400' : 'text-red-400'}`}>

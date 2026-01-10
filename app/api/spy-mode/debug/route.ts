@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchUserProfile, fetchAllUserPosts } from '@/lib/spy-mode/tracker'
+import { getRedditClient } from '@/lib/reddit'
 
-// Debug endpoint to test Reddit API directly
+// Debug endpoint to test Reddit API fetch
 // GET /api/spy-mode/debug?username=SomeUser
 export async function GET(request: NextRequest) {
   try {
@@ -9,60 +9,34 @@ export async function GET(request: NextRequest) {
     const username = searchParams.get('username')
 
     if (!username) {
-      return NextResponse.json({ error: 'Username required. Use ?username=SomeUser' }, { status: 400 })
+      return NextResponse.json({
+        error: 'Username required. Use ?username=SomeUser'
+      }, { status: 400 })
     }
 
     const cleanUsername = username.replace(/^u\//, '').trim()
+    const reddit = getRedditClient()
 
-    console.log(`[Debug] Testing Reddit fetch for: ${cleanUsername}`)
-
-    // Fetch profile
-    const profile = await fetchUserProfile(cleanUsername)
-    console.log(`[Debug] Profile result:`, profile)
-
-    if (!profile) {
-      return NextResponse.json({
-        success: false,
-        username: cleanUsername,
-        error: 'Could not fetch profile - user may not exist or is private',
-        profile: null,
-        posts: [],
-      })
-    }
-
-    // Fetch posts
-    const posts = await fetchAllUserPosts(cleanUsername, 10) // Just get 10 for testing
-    console.log(`[Debug] Posts fetched: ${posts.length}`)
-
-    if (posts.length > 0) {
-      console.log(`[Debug] Sample post:`, {
-        title: posts[0].title.substring(0, 50),
-        subreddit: posts[0].subreddit,
-        score: posts[0].score,
-        redditId: posts[0].redditId,
-      })
-    }
+    // Fetch user data
+    const user = await reddit.getUser(cleanUsername).fetch()
+    const submissions = await reddit.getUser(cleanUsername).getSubmissions({ limit: 5 })
 
     return NextResponse.json({
-      success: true,
       username: cleanUsername,
-      profile,
-      postsFound: posts.length,
-      posts: posts.map(p => ({
-        title: p.title.substring(0, 100),
-        subreddit: p.subreddit,
-        score: p.score,
-        commentCount: p.commentCount,
-        postedAt: p.postedAt,
-        redditId: p.redditId,
-      })),
+      karma: {
+        link: user.link_karma,
+        comment: user.comment_karma,
+        total: user.total_karma,
+      },
+      postsFound: submissions.length,
+      hasHiddenPosts: user.link_karma > 100 && submissions.length === 0,
+      message: submissions.length === 0 && user.link_karma > 0
+        ? 'User has karma but no visible posts. They may have hidden their post history.'
+        : null,
     })
   } catch (error: any) {
-    console.error('[Debug] Error:', error)
     return NextResponse.json({
-      success: false,
       error: error.message || 'Unknown error',
-      stack: error.stack?.split('\n').slice(0, 5),
     }, { status: 500 })
   }
 }
