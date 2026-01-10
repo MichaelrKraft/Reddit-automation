@@ -131,8 +131,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     console.error('Error adding spy account:', error)
+
+    // Return descriptive error message
+    let errorMessage = 'Failed to add account'
+
+    if (error.message?.includes('Missing Reddit API credentials')) {
+      errorMessage = 'Reddit API is not configured. Please check your Reddit credentials.'
+    } else if (error.message?.includes('rate limit') || error.statusCode === 429) {
+      errorMessage = 'Reddit rate limit reached. Please try again in a few minutes.'
+    } else if (error.code === 'P2002') {
+      errorMessage = 'This account is already being tracked'
+    } else if (error.message) {
+      // Include the actual error message for debugging
+      errorMessage = `Failed to add account: ${error.message}`
+    }
+
     return NextResponse.json(
-      { error: 'Failed to add account' },
+      { error: errorMessage },
       { status: 500 }
     )
   }
