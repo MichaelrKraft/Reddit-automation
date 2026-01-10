@@ -202,6 +202,94 @@ async function fetchAndStorePosts(accountId: string, username: string) {
   }
 }
 
+// PATCH - Manually refresh posts for an account (returns debug info)
+export async function PATCH(request: NextRequest) {
+  try {
+    const user = await requireUser()
+    const userId = user.id
+    const { searchParams } = new URL(request.url)
+    const accountId = searchParams.get('id')
+
+    if (!accountId) {
+      return NextResponse.json({ error: 'Account ID is required' }, { status: 400 })
+    }
+
+    // Verify ownership
+    const account = await prisma.spyAccount.findFirst({
+      where: { id: accountId, userId },
+    })
+
+    if (!account) {
+      return NextResponse.json({ error: 'Account not found' }, { status: 404 })
+    }
+
+    console.log(`[Spy Mode] Manual refresh for ${account.username}`)
+
+    // Fetch posts synchronously (not in background) so we can return results
+    const posts = await fetchAllUserPosts(account.username, 100)
+
+    console.log(`[Spy Mode] Manual refresh fetched ${posts.length} posts for ${account.username}`)
+
+    if (posts.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: `No posts found for u/${account.username}. This user may have no posts or their posts may be hidden.`,
+        postsFound: 0,
+        postsStored: 0,
+      })
+    }
+
+    // Store posts
+    const result = await prisma.spyPost.createMany({
+      data: posts.map(p => ({
+        accountId,
+        redditId: p.redditId,
+        title: p.title,
+        content: p.content,
+        url: p.url,
+        subreddit: p.subreddit,
+        postType: p.postType,
+        score: p.score,
+        upvoteRatio: p.upvoteRatio,
+        commentCount: p.commentCount,
+        awards: p.awards,
+        postedAt: p.postedAt,
+      })),
+      skipDuplicates: true,
+    })
+
+    // Update lastPostId
+    await prisma.spyAccount.update({
+      where: { id: accountId },
+      data: {
+        lastPostId: posts[0].redditId,
+        lastChecked: new Date(),
+      },
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: `Refreshed posts for u/${account.username}`,
+      postsFound: posts.length,
+      postsStored: result.count,
+      samplePost: posts[0] ? {
+        title: posts[0].title.substring(0, 50),
+        subreddit: posts[0].subreddit,
+        score: posts[0].score,
+      } : null,
+    })
+  } catch (error: any) {
+    if (error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    console.error('Error refreshing spy account:', error)
+    return NextResponse.json(
+      { error: `Failed to refresh: ${error.message || 'Unknown error'}` },
+      { status: 500 }
+    )
+  }
+}
+
 // DELETE - Remove tracked account
 export async function DELETE(request: NextRequest) {
   try {
