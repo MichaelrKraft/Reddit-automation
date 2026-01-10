@@ -33,12 +33,21 @@ export async function fetchUserProfile(username: string): Promise<RedditUserProf
     const user = await reddit.getUser(username).fetch()
     console.log(`[Spy Mode] Fetched user: ${user.name}`)
 
+    // Safely extract values - Snoowrap uses lazy loading and may return functions
+    const displayName = typeof user.subreddit?.title === 'string'
+      ? user.subreddit.title
+      : (user.subreddit?.title ? String(user.subreddit.title) : null)
+
+    const avatarUrl = typeof user.icon_img === 'string'
+      ? user.icon_img.split('?')[0]
+      : (typeof user.snoovatar_img === 'string' ? user.snoovatar_img : null)
+
     return {
-      username: user.name,
-      displayName: user.subreddit?.title || null,
-      avatarUrl: user.icon_img?.split('?')[0] || user.snoovatar_img || null,
-      totalKarma: (user.link_karma || 0) + (user.comment_karma || 0),
-      accountCreated: user.created_utc ? new Date(user.created_utc * 1000) : null,
+      username: String(user.name || ''),
+      displayName: displayName && displayName !== '[object Function]' ? displayName : null,
+      avatarUrl: avatarUrl && avatarUrl !== '[object Function]' ? avatarUrl : null,
+      totalKarma: Number(user.link_karma || 0) + Number(user.comment_karma || 0),
+      accountCreated: user.created_utc ? new Date(Number(user.created_utc) * 1000) : null,
     }
   } catch (error: any) {
     console.error(`[Spy Mode] Error fetching profile for ${username}:`, error.message || error)
