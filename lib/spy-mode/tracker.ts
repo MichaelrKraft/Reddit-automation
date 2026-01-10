@@ -72,6 +72,8 @@ export async function fetchUserPosts(
 
     const submissions = await user.getSubmissions(options)
 
+    console.log(`[Spy Mode] Processing ${submissions.length} submissions for ${username}`)
+
     const posts: RedditPost[] = submissions.map((post: any) => {
       // Determine post type
       let postType: 'text' | 'link' | 'image' | 'video' = 'text'
@@ -83,12 +85,23 @@ export async function fetchUserPosts(
         postType = 'link'
       }
 
-      // Get subreddit name from plain string property (Snoowrap lazy-loading workaround)
-      const subredditName = String(post.subreddit_name_prefixed || '').replace(/^r\//, '') ||
-                            String(post.subreddit?.display_name || '')
+      // Get subreddit name - handle Snoowrap lazy-loading
+      // Try multiple properties as Snoowrap can return functions for nested objects
+      let subredditName = ''
+      if (typeof post.subreddit_name_prefixed === 'string') {
+        subredditName = post.subreddit_name_prefixed.replace(/^r\//, '')
+      } else if (typeof post.subreddit === 'string') {
+        subredditName = post.subreddit
+      } else if (post.subreddit && typeof post.subreddit.display_name === 'string') {
+        subredditName = post.subreddit.display_name
+      }
+      // Fallback: ensure we don't save "[object Function]" or "[object Object]"
+      if (!subredditName || subredditName.includes('[object')) {
+        subredditName = 'unknown'
+      }
 
       return {
-        redditId: String(post.name || ''),
+        redditId: String(post.name || post.id || ''),
         title: String(post.title || ''),
         content: post.selftext ? String(post.selftext) : null,
         url: `https://reddit.com${String(post.permalink || '')}`,
@@ -101,6 +114,8 @@ export async function fetchUserPosts(
         postedAt: new Date(Number(post.created_utc || 0) * 1000),
       }
     })
+
+    console.log(`[Spy Mode] Processed ${posts.length} posts for ${username}`)
 
     // Get the 'after' token for pagination from the listing
     const afterToken = submissions.length > 0 ? String(submissions[submissions.length - 1]?.name || '') : null

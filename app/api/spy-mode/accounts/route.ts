@@ -156,12 +156,18 @@ export async function POST(request: NextRequest) {
 // Background function to fetch and store posts
 async function fetchAndStorePosts(accountId: string, username: string) {
   try {
+    console.log(`[Spy Mode] Fetching posts for ${username} (accountId: ${accountId})`)
     const posts = await fetchAllUserPosts(username, 100)
 
-    if (posts.length === 0) return
+    console.log(`[Spy Mode] Fetched ${posts.length} posts for ${username}`)
+
+    if (posts.length === 0) {
+      console.log(`[Spy Mode] No posts found for ${username}`)
+      return
+    }
 
     // Store posts
-    await prisma.spyPost.createMany({
+    const result = await prisma.spyPost.createMany({
       data: posts.map(p => ({
         accountId,
         redditId: p.redditId,
@@ -179,6 +185,8 @@ async function fetchAndStorePosts(accountId: string, username: string) {
       skipDuplicates: true,
     })
 
+    console.log(`[Spy Mode] Stored ${result.count} posts for ${username}`)
+
     // Update lastPostId
     await prisma.spyAccount.update({
       where: { id: accountId },
@@ -187,6 +195,8 @@ async function fetchAndStorePosts(accountId: string, username: string) {
         lastChecked: new Date(),
       },
     })
+
+    console.log(`[Spy Mode] Updated lastPostId for ${username}`)
   } catch (error) {
     console.error(`Error fetching posts for ${username}:`, error)
   }
