@@ -30,7 +30,7 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
     subtitle: 'Top performing posts and accounts'
   },
   '/dashboard/opportunities': {
-    title: 'Opportunities',
+    title: 'Opportunity Miner',
     subtitle: 'Discover high-potential posting opportunities'
   },
   '/dashboard/speed-alerts': {
@@ -38,8 +38,8 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
     subtitle: 'Real-time notifications for trending content'
   },
   '/dashboard/seo-finder': {
-    title: 'SEO Finder',
-    subtitle: 'Find SEO opportunities on Reddit'
+    title: 'SEO Traffic Finder',
+    subtitle: 'Find high-ranking Google Reddit threads and inject your brand'
   },
   '/dashboard/comments': {
     title: 'Comments',

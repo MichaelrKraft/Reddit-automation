@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils"
 import Link, { LinkProps } from "next/link"
 import React, { useState, createContext, useContext } from "react"
-import { IconMenu2, IconX } from "@tabler/icons-react"
+import { IconMenu2, IconX, IconChevronLeft, IconChevronRight } from "@tabler/icons-react"
 
 interface Links {
   label: string
@@ -86,15 +86,25 @@ export const DesktopSidebar = ({
   return (
     <div
       className={cn(
-        "h-full px-4 py-4 hidden md:flex md:flex-col bg-[#12121a]/80 backdrop-blur-sm border-r border-gray-800 flex-shrink-0 transition-all duration-300 ease-in-out",
+        "h-full px-4 py-4 hidden md:flex md:flex-col bg-[#12121a]/80 backdrop-blur-sm border-r border-gray-800 flex-shrink-0 transition-all duration-300 ease-in-out relative",
         open ? "w-[200px]" : "w-[70px]",
         className
       )}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
       {...props}
     >
       {children}
+      {/* Toggle button */}
+      <button
+        onClick={() => setOpen(!open)}
+        className="absolute -right-3 top-20 w-6 h-6 bg-[#12121a] border border-gray-700 rounded-full flex items-center justify-center text-gray-400 hover:text-white hover:border-[#00D9FF] transition-colors z-50"
+        aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+      >
+        {open ? (
+          <IconChevronLeft className="h-4 w-4" />
+        ) : (
+          <IconChevronRight className="h-4 w-4" />
+        )}
+      </button>
     </div>
   )
 }

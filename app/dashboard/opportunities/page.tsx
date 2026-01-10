@@ -253,7 +253,7 @@ export default function OpportunitiesPage() {
           <span className="text-lg">🔍</span>
           <div>
             <h3 className="text-sm font-semibold text-white mb-1">How It Works</h3>
-            <p className="text-xs text-gray-400">
+            <p className="text-sm text-gray-400">
               AI scans Reddit posts for product opportunities - users asking for recommendations, expressing frustrations, or describing unmet needs.
               Each post is analyzed and transformed into actionable business insights.
             </p>

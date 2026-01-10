@@ -41,9 +41,9 @@ const navItems = [
   { href: '/dashboard/warmup', label: 'Warmup', icon: <IconFlame className="h-5 w-5 flex-shrink-0" /> },
   { href: '/dashboard/spy-mode', label: 'Spy Mode', icon: <IconEye className="h-5 w-5 flex-shrink-0" /> },
   { href: '/dashboard/leaderboard', label: 'Leaderboard', icon: <IconTrophy className="h-5 w-5 flex-shrink-0" /> },
-  { href: '/dashboard/opportunities', label: 'Opportunities', icon: <IconBulb className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/opportunities', label: 'Opportunity', icon: <IconBulb className="h-5 w-5 flex-shrink-0" /> },
   { href: '/dashboard/speed-alerts', label: 'AI Alerts', icon: <IconBell className="h-5 w-5 flex-shrink-0" /> },
-  { href: '/dashboard/seo-finder', label: 'SEO Finder', icon: <IconSearch className="h-5 w-5 flex-shrink-0" /> },
+  { href: '/dashboard/seo-finder', label: 'SEO Traffic', icon: <IconSearch className="h-5 w-5 flex-shrink-0" /> },
   { href: '/dashboard/comments', label: 'Comments', icon: <IconMessageCircle className="h-5 w-5 flex-shrink-0" /> },
   { href: '/dashboard/posts', label: 'Posts', icon: <IconFileText className="h-5 w-5 flex-shrink-0" /> },
   { href: '/dashboard/calendar', label: 'Calendar', icon: <IconCalendar className="h-5 w-5 flex-shrink-0" /> },
@@ -51,7 +51,7 @@ const navItems = [
 
 export default function DashboardNav() {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(true)
 
   const dashboardLink = {
     label: dashboardItem.label,
@@ -81,7 +81,7 @@ export default function DashboardNav() {
           </div>
 
           {/* Other items with significant spacing below Dashboard */}
-          <div className="mt-12 flex flex-col gap-2">
+          <div className="mt-16 flex flex-col gap-4">
             {links.map((link) => {
               const isActive = pathname === link.href ||
                 pathname?.startsWith(link.href + '/')

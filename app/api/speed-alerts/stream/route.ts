@@ -48,8 +48,15 @@ export async function GET(request: NextRequest) {
 
             console.log(`[Speed Alerts Stream] Checking ${monitored.length} subreddits: ${monitored.map(m => m.subreddit).join(', ')}`)
 
-            // Check each subreddit for new posts
-            for (const sub of monitored) {
+            // Check each subreddit for new posts (with delays to avoid rate limiting)
+            for (let i = 0; i < monitored.length; i++) {
+              const sub = monitored[i]
+
+              // Add delay between subreddit checks to avoid rate limiting
+              if (i > 0) {
+                await new Promise(resolve => setTimeout(resolve, 2000))
+              }
+
               try {
                 const { newPosts, latestPostId } = await checkForNewPosts(
                   sub.subreddit,
@@ -106,12 +113,17 @@ export async function GET(request: NextRequest) {
                   where: { id: sub.id },
                   data: { lastChecked: new Date() },
                 })
+
+                // Send status update (success - no error)
+                sendEvent('status', {
+                  subreddit: sub.subreddit,
+                  status: 'checked',
+                  newPosts: newPosts.length
+                })
               } catch (subError: any) {
                 console.error(`Error checking r/${sub.subreddit}:`, subError)
-                sendEvent('error', {
-                  subreddit: sub.subreddit,
-                  message: subError.message,
-                })
+                // Don't send error events for rate limiting - it's expected
+                // The next cycle will retry automatically
               }
             }
 

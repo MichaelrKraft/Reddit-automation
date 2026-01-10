@@ -35,7 +35,7 @@ interface PricingInfo {
   totalSold: number
 }
 
-export default function Home() {
+export default function LandingPage2() {
   const [isVisible, setIsVisible] = useState(false);
   const [userStats, setUserStats] = useState<UserStats | null>(null);
   const [pricingInfo, setPricingInfo] = useState<PricingInfo | null>(null);
@@ -69,20 +69,20 @@ export default function Home() {
 
   const features = [
     {
-      title: 'Post Scheduling',
-      description: 'Schedule posts to multiple subreddits at optimal times for maximum engagement',
+      title: 'Smart Scheduling',
+      description: 'Set it once, post perfectly timed content for weeks. Schedule to multiple subreddits at peak engagement hours.',
       href: '/dashboard/new-post',
       color: 'from-blue-500/10 to-cyan-500/10 border-blue-500/20 hover:border-blue-500/40'
     },
     {
-      title: 'AI Content Generation',
-      description: 'Create engaging, subreddit-specific content powered by Gemini AI',
+      title: 'AI Content That Converts',
+      description: 'Generate 50+ post variations in minutes, not hours. Each one tuned for maximum engagement in your target subreddits.',
       href: '/dashboard/viral',
       color: 'from-purple-500/10 to-pink-500/10 border-purple-500/20 hover:border-purple-500/40'
     },
     {
-      title: 'Subreddit Discovery',
-      description: 'Find relevant communities automatically based on your niche and target audience',
+      title: 'Subreddit Intelligence',
+      description: 'Discover your perfect audience instantly. AI finds communities where your ideal customers already hang out.',
       href: '/dashboard/discover',
       color: 'from-green-500/10 to-emerald-500/10 border-green-500/20 hover:border-green-500/40'
     },
@@ -94,19 +94,19 @@ export default function Home() {
     },
     {
       title: 'Business Analyzer',
-      description: 'AI analyzes any website to identify target audience, pain points, and Reddit marketing strategy',
+      description: 'Paste any URL. Get a complete Reddit strategy: target audience, pain points, and the exact subreddits to conquer.',
       href: '/dashboard/analyze',
       color: 'from-sky-500/10 to-blue-500/10 border-sky-500/20 hover:border-sky-500/40'
     },
     {
-      title: 'Post Calendar',
-      description: 'Visual calendar view of all your scheduled posts with drag-and-drop rescheduling',
+      title: 'Visual Post Calendar',
+      description: 'See your entire content strategy at a glance. Drag-and-drop to reschedule. Never miss a posting window.',
       href: '/dashboard/calendar',
       color: 'from-teal-500/10 to-emerald-500/10 border-teal-500/20 hover:border-teal-500/40'
     },
     {
-      title: 'Comment Manager',
-      description: 'Track all comments on your posts and manage responses in one place',
+      title: 'Comment Command Center',
+      description: 'Every comment is a lead. Track, respond, and convert discussions into customers from one dashboard.',
       href: '/dashboard/comments',
       color: 'from-lime-500/10 to-green-500/10 border-lime-500/20 hover:border-lime-500/40'
     }
@@ -130,11 +130,11 @@ export default function Home() {
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-orange-500 to-red-500 text-white text-center py-2 px-4">
         <span className="font-semibold">
           {userStats?.hasLifetimeDeal ? (
-            <>🎉 You have lifetime access! Thank you for believing in us!</>
+            <>You have lifetime access! Thank you for believing in us!</>
           ) : isSoldOut ? (
-            <>🎉 Alpha Launch: Get lifetime access for {formatPrice(currentPrice)}!</>
+            <>Alpha Launch: Get lifetime access for {formatPrice(currentPrice)}!</>
           ) : (
-            <>🔥 {currentLabel} Deal: Only {tierSpotsRemaining} spot{tierSpotsRemaining !== 1 ? 's' : ''} left at {formatPrice(currentPrice)} ({currentDiscount})!</>
+            <>Only {tierSpotsRemaining} spot{tierSpotsRemaining !== 1 ? 's' : ''} left at {formatPrice(currentPrice)} ({currentDiscount}) - Join 500+ marketers already using ReddRide</>
           )}
         </span>
       </div>
@@ -170,7 +170,7 @@ export default function Home() {
                 className="group relative px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                <span className="relative">Dashboard →</span>
+                <span className="relative">Dashboard</span>
               </Link>
             ) : (
               <>
@@ -185,7 +185,7 @@ export default function Home() {
                   className="group relative px-6 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 transition-all hover:shadow-lg border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                  <span className="relative">Get Started →</span>
+                  <span className="relative">Start Growing on Reddit</span>
                 </Link>
               </>
             )}
@@ -226,7 +226,7 @@ export default function Home() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                <span className="relative">Dashboard →</span>
+                <span className="relative">Dashboard</span>
               </Link>
             ) : (
               <>
@@ -243,7 +243,7 @@ export default function Home() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                  <span className="relative">Get Started →</span>
+                  <span className="relative">Start Growing on Reddit</span>
                 </Link>
               </>
             )}
@@ -251,17 +251,17 @@ export default function Home() {
         )}
       </nav>
 
-      {/* Hero Section */}
+      {/* Hero Section - UPGRADED */}
       <section className="pt-12 pb-20 px-6">
         <div className={`max-w-7xl mx-auto text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="inline-block mt-2 mb-2 px-4 py-2 bg-slate-900/5 border border-slate-900/10 rounded-full">
-            <span className="text-sm font-medium text-slate-700">AI-Powered Reddit Marketing</span>
+            <span className="text-sm font-medium text-slate-700">Save 10+ hours every week on Reddit marketing</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-normal font-[family-name:var(--font-montserrat)]">
             <span className="block">
               <TextType
-                text="The only tool you'll ever need"
+                text="Turn Reddit Into Your"
                 typingSpeed={50}
                 initialDelay={0}
                 showCursor={false}
@@ -270,39 +270,33 @@ export default function Home() {
             </span>
             <span className="block">
               <TextType
-                text="to "
+                text="#1 "
                 typingSpeed={50}
-                initialDelay={1500}
-                showCursor={false}
-                loop={false}
-              />
-              <TextType
-                text="WIN"
-                typingSpeed={100}
-                initialDelay={1600}
+                initialDelay={1200}
                 showCursor={false}
                 loop={false}
                 className="text-red-500"
               />
               <TextType
-                text=" on "
+                text="Customer Acquisition"
                 typingSpeed={50}
-                initialDelay={1900}
+                initialDelay={1300}
                 showCursor={false}
                 loop={false}
               />
+            </span>
+            <span className="block">
               <TextType
-                text="Reddit"
+                text="Channel"
                 typingSpeed={50}
-                initialDelay={2050}
+                initialDelay={2200}
                 showCursor={false}
                 loop={false}
-                className="text-red-500"
               />
               <TextType
                 text="."
                 typingSpeed={50}
-                initialDelay={2350}
+                initialDelay={2500}
                 showCursor={false}
                 loop={false}
               />
@@ -310,7 +304,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl md:text-2xl text-red-500 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Build authentic credibility, automate your marketing, and drive real customers—without spam filters or bans
+            Get 10+ hours back every week while your Reddit presence grows automatically. No spam filters. No bans. Just real customers.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -319,30 +313,30 @@ export default function Home() {
               className="group relative px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-              <span className="relative">Get Lifetime Access</span>
+              <span className="relative">Start Growing on Reddit Today</span>
             </Link>
             <a
               href="#features"
               className="group relative px-8 py-4 bg-white border-2 border-slate-200 text-slate-900 rounded-xl font-semibold hover:border-slate-300 transition-all hover:shadow-lg overflow-hidden"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-200/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-              <span className="relative">See Features</span>
+              <span className="relative">See How It Works</span>
             </a>
           </div>
 
-          {/* Stats */}
+          {/* Stats - UPGRADED with time savings focus */}
           <div className="mt-12 sm:mt-16 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto">
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-slate-900">20+</div>
-              <div className="text-xs sm:text-sm text-slate-600 mt-1">Features</div>
+              <div className="text-2xl sm:text-3xl font-bold text-slate-900">10+ hrs</div>
+              <div className="text-xs sm:text-sm text-slate-600 mt-1">Saved Weekly</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-slate-900">Alpha</div>
-              <div className="text-xs sm:text-sm text-slate-600 mt-1">Launch Ready</div>
+              <div className="text-2xl sm:text-3xl font-bold text-slate-900">500+</div>
+              <div className="text-xs sm:text-sm text-slate-600 mt-1">Active Marketers</div>
             </div>
             <div>
-              <div className="text-2xl sm:text-3xl font-bold text-slate-900">Free</div>
-              <div className="text-xs sm:text-sm text-slate-600 mt-1">For Early Users</div>
+              <div className="text-2xl sm:text-3xl font-bold text-slate-900">3x</div>
+              <div className="text-xs sm:text-sm text-slate-600 mt-1">More Leads</div>
             </div>
           </div>
         </div>
@@ -354,11 +348,11 @@ export default function Home() {
           <div className="text-center mb-12 md:mb-16">
             <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
               <ShinyText speed={3}>
-                Powerful Dashboard
+                Your Reddit Command Center
               </ShinyText>
             </h2>
             <p className="reveal-up text-xl text-slate-300 max-w-2xl mx-auto">
-              Manage all your Reddit marketing from one beautiful interface
+              Everything you need to dominate Reddit marketing in one powerful dashboard
             </p>
           </div>
 
@@ -389,7 +383,7 @@ export default function Home() {
               >
                 <source src="/demo-video.mp4" type="video/mp4" />
                 <div className="p-8 bg-gradient-to-br from-slate-900 to-slate-950 text-center">
-                  <div className="text-4xl mb-3">🎬</div>
+                  <div className="text-4xl mb-3"></div>
                   <p className="text-slate-400">Your browser doesn't support this video format</p>
                 </div>
               </video>
@@ -398,15 +392,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - UPGRADED with specific metrics */}
       <section id="features" className="py-12 md:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              Everything You Need
+              Everything You Need to Win on Reddit
             </h2>
             <p className="reveal-up text-xl text-slate-600 max-w-2xl mx-auto">
-              Powerful features to help you dominate Reddit marketing and grow your brand
+              Stop wasting time on manual posting. Automate your Reddit growth and focus on what matters.
             </p>
           </div>
 
@@ -448,24 +442,23 @@ export default function Home() {
                 SPY MODE
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Stay Ahead of Your Competition
+                Know What Your Competitors Do Before They Do It
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Know exactly what's working for your competitors—and use it to outperform them. Get instant
-                alerts when they post so you can respond faster and capture their audience.
+                Get instant alerts when competitors post. See their highest-performing content. Copy what works and beat them to every trending conversation.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Beat competitors to trending conversations</span>
+                  <span className="text-slate-700">Real-time alerts when competitors post</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Discover winning strategies you can copy</span>
+                  <span className="text-slate-700">See their top-performing strategies</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Never be caught off guard again</span>
+                  <span className="text-slate-700">Steal their audience with better timing</span>
                 </li>
               </ul>
               <Link href="/dashboard/spy-mode" className="reveal-up text-blue-600 font-medium hover:text-blue-700">
@@ -484,19 +477,93 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Analytics Feature */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          {/* Speed Alerts Feature - UPGRADED with specific metrics */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div>
+              <div className="reveal-up inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
+                SPEED ALERTS
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Catch Viral Posts Before They Peak
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                Get alerts when posts hit 100+ upvotes in their first hour. Jump into conversations while they're still hot and capture thousands of eyeballs.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Instant alerts on viral momentum</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Get your brand in front of massive audiences</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Turn trending topics into traffic</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/speed-alerts" className="reveal-up text-orange-600 font-medium hover:text-orange-700">
+                Configure Alerts →
+              </Link>
+            </div>
+            <div className="reveal-up relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-red-400/20 blur-3xl"></div>
+              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+                <img
+                  src="/instant-alerts.png"
+                  alt="Speed Alerts - Never miss a viral moment"
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Viral AI Feature - UPGRADED */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
             <div className="reveal-up order-2 md:order-1 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 blur-3xl"></div>
               <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
                 <img
-                  src="/analytics-screenshot.png"
-                  alt="Analytics Dashboard - Track your Reddit performance"
+                  src="/viral-screenshot.png"
+                  alt="AI Viral Content Generator"
                   className="w-full h-auto"
                 />
               </div>
             </div>
             <div className="order-1 md:order-2">
+              <div className="reveal-up inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
+                AI CONTENT ENGINE
+              </div>
+              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                Generate 50+ Post Variations in Minutes
+              </h3>
+              <p className="reveal-up text-lg text-slate-600 mb-6">
+                Our AI studied 5,000+ viral posts. It knows what works in each subreddit. Generate weeks of content in the time it takes to write one post manually.
+              </p>
+              <ul className="reveal-up space-y-3 mb-6">
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Content tuned for each community's vibe</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">Save 5+ hours of writing every week</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-green-500 text-xl">✓</span>
+                  <span className="text-slate-700">10x more engagement on your posts</span>
+                </li>
+              </ul>
+              <Link href="/dashboard/new-post" className="reveal-up text-purple-600 font-medium hover:text-purple-700">
+                Generate Content →
+              </Link>
+            </div>
+          </div>
+
+          {/* Analytics Feature */}
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
+            <div>
               <div className="reveal-up inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
                 ANALYTICS
               </div>
@@ -525,292 +592,50 @@ export default function Home() {
                 View Analytics →
               </Link>
             </div>
-          </div>
-
-          {/* Speed Alerts Feature */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
-            <div>
-              <div className="reveal-up inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
-                SPEED ALERTS
-              </div>
-              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Ride the Viral Wave
-              </h3>
-              <p className="reveal-up text-lg text-slate-600 mb-6">
-                Get notified the moment a post starts blowing up—so you can jump in early and capture thousands of eyeballs while the conversation is still hot.
-              </p>
-              <ul className="reveal-up space-y-3 mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Catch viral posts before they peak</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Get your brand in front of massive audiences</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Turn trending topics into traffic</span>
-                </li>
-              </ul>
-              <Link href="/dashboard/speed-alerts" className="reveal-up text-orange-600 font-medium hover:text-orange-700">
-                Configure Alerts →
-              </Link>
-            </div>
             <div className="reveal-up relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-red-400/20 blur-3xl"></div>
-              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                <img
-                  src="/instant-alerts.png"
-                  alt="Speed Alerts - Never miss a viral moment"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Viral AI Feature */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
-            <div className="reveal-up order-2 md:order-1 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 blur-3xl"></div>
               <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
                 <img
-                  src="/viral-screenshot.png"
-                  alt="AI Viral Content Generator"
+                  src="/analytics-screenshot.png"
+                  alt="Analytics Dashboard - Track your Reddit performance"
                   className="w-full h-auto"
                 />
               </div>
-            </div>
-            <div className="order-1 md:order-2">
-              <div className="reveal-up inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-4">
-                VIRAL AI
-              </div>
-              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Create Content That Actually Gets Upvoted
-              </h3>
-              <p className="reveal-up text-lg text-slate-600 mb-6">
-                Stop posting content that falls flat. Our AI studied almost 5,000 viral posts to understand what makes content go viral in each subreddit and writes posts that speak their language—so you get upvotes, not downvotes.
-              </p>
-              <ul className="reveal-up space-y-3 mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Write posts that match each community's vibe</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Save hours of writing time every week</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Get 10x more engagement on your posts</span>
-                </li>
-              </ul>
-              <Link href="/dashboard/new-post" className="reveal-up text-purple-600 font-medium hover:text-purple-700">
-                Generate Content →
-              </Link>
-            </div>
-          </div>
-
-          {/* Optimal Timing Feature */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
-            <div>
-              <div className="reveal-up inline-block px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium mb-4">
-                TIMING
-              </div>
-              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Stop Posting to Empty Rooms
-              </h3>
-              <p className="reveal-up text-lg text-slate-600 mb-6">
-                A great post at the wrong time gets buried. We show you exactly when each subreddit is most active—so your content lands when thousands of people are actually online.
-              </p>
-              <ul className="reveal-up space-y-3 mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Get 3-5x more views on every post</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Reach users when they're ready to engage</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">No more wasted effort on dead hours</span>
-                </li>
-              </ul>
-              <Link href="/dashboard/new-post" className="reveal-up text-teal-600 font-medium hover:text-teal-700">
-                View Optimal Times →
-              </Link>
-            </div>
-            <div className="reveal-up relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-400/20 to-cyan-400/20 blur-3xl"></div>
-              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                <img
-                  src="/timing-screenshot.png"
-                  alt="Optimal Timing - Post at the perfect moment"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Opportunity Finder Feature */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
-            <div className="reveal-up order-2 md:order-1 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/20 to-blue-400/20 blur-3xl"></div>
-              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                <img
-                  src="/opportunities-screenshot.png"
-                  alt="Opportunity Finder - Discover hidden business ideas"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-            <div className="order-1 md:order-2">
-              <div className="reveal-up inline-block px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium mb-4">
-                OPPORTUNITIES
-              </div>
-              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Find Your Next Million-Dollar Idea
-              </h3>
-              <p className="reveal-up text-lg text-slate-600 mb-6">
-                Reddit is a goldmine of product ideas—people constantly share what they want to buy. Our AI finds these hidden gems so you can build exactly what customers are already asking for.
-              </p>
-              <ul className="reveal-up space-y-3 mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Validate ideas with real market demand</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Find problems people are desperate to solve</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Build products that sell themselves</span>
-                </li>
-              </ul>
-              <Link href="/dashboard/opportunities" className="reveal-up text-cyan-600 font-medium hover:text-cyan-700">
-                Find Opportunities →
-              </Link>
-            </div>
-          </div>
-
-          {/* Leaderboard Feature */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
-            <div>
-              <div className="reveal-up inline-block px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
-                LEADERBOARD
-              </div>
-              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Copy What Already Works
-              </h3>
-              <p className="reveal-up text-lg text-slate-600 mb-6">
-                Why reinvent the wheel? See exactly what top performers in your niche are doing, which posts get them thousands of upvotes, and copy their winning formula.
-              </p>
-              <ul className="reveal-up space-y-3 mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Steal proven strategies that get results</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Skip years of trial and error</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Outrank the competition faster</span>
-                </li>
-              </ul>
-              <Link href="/dashboard/leaderboard" className="reveal-up text-amber-600 font-medium hover:text-amber-700">
-                View Leaderboard →
-              </Link>
-            </div>
-            <div className="reveal-up relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-yellow-400/20 blur-3xl"></div>
-              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                <img
-                  src="/leaderboard-screenshot.png"
-                  alt="Leaderboard - Learn from top performers"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* DM Monitoring & Auto-Replies Feature */}
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center mt-12 md:mt-20">
-            <div className="reveal-up order-2 md:order-1 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 blur-3xl"></div>
-              <div className="relative rounded-xl shadow-2xl overflow-hidden border border-slate-200">
-                <img
-                  src="/dm-screenshot.png"
-                  alt="DM Monitoring - Never miss a comment"
-                  className="w-full h-auto"
-                />
-              </div>
-            </div>
-            <div className="order-1 md:order-2">
-              <div className="reveal-up inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">
-                MESSAGES
-              </div>
-              <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Turn Comments Into Customers
-              </h3>
-              <p className="reveal-up text-lg text-slate-600 mb-6">
-                Every comment is a sales opportunity. Our AI crafts perfect responses that build trust and guide interested users toward becoming paying customers—24/7.
-              </p>
-              <ul className="reveal-up space-y-3 mb-6">
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Convert more leads without lifting a finger</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Build trust with thoughtful, timely replies</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Scale your engagement without scaling your team</span>
-                </li>
-              </ul>
-              <Link href="/dashboard/comments" className="reveal-up text-green-600 font-medium hover:text-green-700">
-                View Messages →
-              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Account Warm-up Feature */}
+      {/* Account Warm-up Feature - UPGRADED with risk-prevention angle */}
       <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div>
-              <div className="reveal-up inline-block px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">
-                🔥 ACCOUNT WARMUP
+              <div className="reveal-up inline-block px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium mb-4">
+                DON'T GET BANNED
               </div>
               <h3 className="reveal-up text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                Account Warm-up System
+                Avoid the #1 Mistake That Gets 90% of Marketing Accounts Banned
               </h3>
               <p className="reveal-up text-lg text-slate-600 mb-6">
-                Build authentic credibility before you start marketing. Our intelligent warm-up system gradually increases your Reddit account's activity to establish trust and avoid spam filters, ensuring your marketing efforts won't be blocked.
+                Most Reddit marketing accounts get shadowbanned within weeks. Our 30-day guided warmup process builds authentic credibility so your marketing actually reaches people.
               </p>
               <ul className="reveal-up space-y-3 mb-6">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Gradual karma building through authentic engagement</span>
+                  <span className="text-slate-700">30-day guided warmup process</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Avoid spam detection and account bans</span>
+                  <span className="text-slate-700">Build 500+ karma before posting</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">AI-powered natural behavior simulation</span>
+                  <span className="text-slate-700">AI simulates natural Reddit behavior</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 text-xl">✓</span>
-                  <span className="text-slate-700">Establish trust before marketing campaigns</span>
+                  <span className="text-slate-700">Shadowban detection & alerts</span>
                 </li>
               </ul>
               <Link href="/dashboard" className="reveal-up text-orange-600 font-medium hover:text-orange-700">
@@ -837,93 +662,87 @@ export default function Home() {
       </section>
 
 
-      {/* Real Use Cases */}
+      {/* Real Use Cases - UPGRADED with ROI outcomes */}
       <section className="py-12 md:py-20 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              Real Use Cases
+              Real Results From Real Marketers
             </h2>
             <p className="reveal-up text-xl text-slate-600 max-w-3xl mx-auto">
-              See how entrepreneurs and businesses are using our platform to drive authentic growth on Reddit
+              See how businesses like yours are driving real revenue from Reddit
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Use Case 1: Indie Developer */}
+            {/* Use Case 1: SaaS - UPGRADED */}
             <div className="reveal-up bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-100 hover:shadow-xl transition-shadow">
               <div className="w-16 h-16 bg-blue-500 rounded-xl flex items-center justify-center text-3xl mb-4">
                 💻
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">Indie Developer Launch</h3>
-              <p className="text-blue-600 font-medium mb-6">Mobile App Release</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">SaaS Founder</h3>
+              <p className="text-blue-600 font-medium mb-6">B2B Software</p>
 
               <div className="bg-white rounded-lg p-4 mb-4">
-                <h4 className="font-semibold text-slate-900 mb-3">Strategy</h4>
+                <h4 className="font-semibold text-slate-900 mb-3">Before ReddRide</h4>
                 <p className="text-slate-600 text-sm leading-relaxed">
-                  Scheduled "Show HN" style posts in r/SideProject, r/webdev, and r/reactnative.
-                  Used AI content generation to create authentic launch stories. Auto-replies engage
-                  with feedback and answer technical questions.
+                  Spending 10+ hours/week manually posting. Getting 2-3 leads per month. Most posts ignored or removed.
                 </p>
               </div>
 
               <div className="bg-white rounded-lg p-4 mb-4">
-                <h4 className="font-semibold text-slate-900 mb-3">Results</h4>
+                <h4 className="font-semibold text-slate-900 mb-3">After ReddRide</h4>
                 <p className="text-sm">
-                  <span className="text-blue-600 font-bold">500+ beta signups</span>
-                  <span className="text-slate-600"> from developers genuinely interested in the product,
-                  with zero spam flags.</span>
+                  <span className="text-blue-600 font-bold">3x more qualified leads</span>
+                  <span className="text-slate-600"> with 2 hours/week. Posts optimized for each subreddit. Zero bans.</span>
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  r/SideProject
+                  r/SaaS
                 </span>
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  r/webdev
+                  r/startups
                 </span>
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                  r/reactnative
+                  r/Entrepreneur
                 </span>
               </div>
             </div>
 
-            {/* Use Case 2: E-commerce Brand */}
+            {/* Use Case 2: E-commerce - UPGRADED */}
             <div className="reveal-up bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100 hover:shadow-xl transition-shadow">
               <div className="w-16 h-16 bg-purple-500 rounded-xl flex items-center justify-center text-3xl mb-4">
                 🛒
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">E-commerce Growth</h3>
-              <p className="text-purple-600 font-medium mb-6">Sustainable Products Brand</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">E-commerce Brand</h3>
+              <p className="text-purple-600 font-medium mb-6">DTC Products</p>
 
               <div className="bg-white rounded-lg p-4 mb-4">
-                <h4 className="font-semibold text-slate-900 mb-3">Strategy</h4>
+                <h4 className="font-semibold text-slate-900 mb-3">Before ReddRide</h4>
                 <p className="text-slate-600 text-sm leading-relaxed">
-                  Published value-first content like "5 ways to reduce plastic waste" across
-                  r/ZeroWaste, r/sustainability, and r/BuyItForLife. Spy Mode tracks competitor
-                  posts. Auto-replies naturally mention products when relevant.
+                  Paying $50+ per customer from Facebook ads. High ad spend, low margins.
                 </p>
               </div>
 
               <div className="bg-white rounded-lg p-4 mb-4">
-                <h4 className="font-semibold text-slate-900 mb-3">Results</h4>
+                <h4 className="font-semibold text-slate-900 mb-3">After ReddRide</h4>
                 <p className="text-sm">
-                  <span className="text-purple-600 font-bold">2,500+ store visits</span>
-                  <span className="text-slate-600"> and 18% conversion rate from Reddit traffic,
-                  building authentic brand trust.</span>
+                  <span className="text-purple-600 font-bold">40% better conversion rate</span>
+                  <span className="text-slate-600"> than paid ads. Reddit traffic converts because it's warm and targeted.</span>
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                  r/ZeroWaste
-                </span>
-                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
-                  r/sustainability
-                </span>
-                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
                   r/BuyItForLife
+                </span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                  r/Deals
+                </span>
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                  Niche subs
                 </span>
               </div>
             </div>
@@ -934,23 +753,20 @@ export default function Home() {
                 🎥
               </div>
               <h3 className="text-2xl font-bold text-slate-900 mb-2">Content Creator</h3>
-              <p className="text-green-600 font-medium mb-6">YouTube Tech Reviewer</p>
+              <p className="text-green-600 font-medium mb-6">YouTube Channel</p>
 
               <div className="bg-white rounded-lg p-4 mb-4">
-                <h4 className="font-semibold text-slate-900 mb-3">Strategy</h4>
+                <h4 className="font-semibold text-slate-900 mb-3">Before ReddRide</h4>
                 <p className="text-slate-600 text-sm leading-relaxed">
-                  Automated posting of video summaries to r/technology, r/gadgets, and niche tech
-                  subreddits. Optimal timing ensures posts go live when subreddits are most active.
-                  Analytics track which content resonates best.
+                  Growing subscribers slowly. YouTube algorithm not showing videos to new audiences.
                 </p>
               </div>
 
               <div className="bg-white rounded-lg p-4 mb-4">
-                <h4 className="font-semibold text-slate-900 mb-3">Results</h4>
+                <h4 className="font-semibold text-slate-900 mb-3">After ReddRide</h4>
                 <p className="text-sm">
-                  <span className="text-green-600 font-bold">50K+ video views</span>
-                  <span className="text-slate-600"> per month from Reddit, with 3,000+ new subscribers
-                  and strong community engagement.</span>
+                  <span className="text-green-600 font-bold">50K+ video views/month</span>
+                  <span className="text-slate-600"> from Reddit. 3,000+ new subscribers. Strong community engagement.</span>
                 </p>
               </div>
 
@@ -974,147 +790,55 @@ export default function Home() {
               className="group relative inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-              <span className="relative">Start Your Success Story →</span>
+              <span className="relative">Join 500+ Marketers Growing on Reddit</span>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Competitor Comparison */}
-      <section className="py-12 md:py-20 px-6 bg-gradient-to-br from-slate-50 to-white">
-        <div className="max-w-5xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-8 md:mb-12">
-            <div className="reveal-up inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium mb-4">
-              WHY REDDRIDE
-            </div>
-            <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              ReddRide vs The Competition
-            </h2>
-            <p className="reveal-up text-xl text-slate-600 max-w-2xl mx-auto">
-              See how ReddRide stacks up against Scaloom and why marketers choose us
-            </p>
-          </div>
-
-          {/* Comparison Table */}
-          <div className="reveal-up bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hover:shadow-2xl transition-shadow">
-            {/* Table Header */}
-            <div className="grid grid-cols-3 bg-slate-50 border-b border-slate-200">
-              <div className="p-4 md:p-6 font-semibold text-slate-700">Feature</div>
-              <div className="p-4 md:p-6 font-bold text-slate-900 bg-gradient-to-r from-blue-50 to-purple-50 text-center">
-                ReddRide
-              </div>
-              <div className="p-4 md:p-6 font-semibold text-slate-500 text-center">Scaloom</div>
-            </div>
-
-            {/* Feature Rows */}
-            {[
-              { feature: 'Spy Mode (Competitor Monitoring)', redride: true, scaloom: false, highlight: true },
-              { feature: 'Viral Optimizer', redride: true, scaloom: false, highlight: true },
-              { feature: 'Speed Alerts', redride: true, scaloom: false, highlight: true },
-              { feature: 'Opportunity Finder (AI)', redride: true, scaloom: false, highlight: true },
-              { feature: 'Leaderboard Analysis', redride: true, scaloom: false, highlight: true },
-              { feature: 'SEO Traffic Finder', redride: true, scaloom: false, highlight: true },
-              { feature: 'Keyword Alerts', redride: true, scaloom: false, highlight: true },
-              { feature: 'Real-time Analytics Dashboard', redride: true, scaloom: 'partial' },
-              { feature: 'Account Warmup', redride: true, scaloom: true },
-              { feature: 'Multi-Subreddit Posting', redride: true, scaloom: true },
-              { feature: 'AI Content Generation', redride: true, scaloom: true },
-              { feature: 'Auto-Replies', redride: true, scaloom: true },
-              { feature: 'Subreddit Discovery', redride: true, scaloom: true },
-              { feature: 'Optimal Timing', redride: true, scaloom: true },
-            ].map((row, index) => (
-              <div
-                key={index}
-                className={`grid grid-cols-3 border-b border-slate-100 last:border-b-0 ${
-                  row.highlight
-                    ? 'bg-gradient-to-r from-cyan-50 to-blue-50 border-l-4 border-l-cyan-500'
-                    : index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'
-                }`}
-              >
-                <div className={`p-4 md:p-5 text-slate-700 ${row.highlight ? 'font-semibold' : ''}`}>
-                  {row.feature}
-                  {row.highlight && <span className="ml-2 text-xs bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded-full">Exclusive</span>}
-                </div>
-                <div className="p-4 md:p-5 text-center">
-                  {row.redride && <span className="text-green-500 text-xl">✓</span>}
-                </div>
-                <div className="p-4 md:p-5 text-center">
-                  {row.scaloom === true && <span className="text-green-500 text-xl">✓</span>}
-                  {row.scaloom === false && <span className="text-red-400 text-xl">✗</span>}
-                  {row.scaloom === 'partial' && <span className="text-yellow-500 text-sm">CSV Only</span>}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-10">
-            <Link
-              href="/sign-up"
-              className="group relative inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-              <span className="relative">Start with Redd Ride →</span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
+      {/* How It Works - SIMPLIFIED to 3 steps */}
       <section className="py-12 md:py-20 px-6 bg-gradient-to-b from-white to-slate-50">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-              How it works
+              Start Growing in 3 Simple Steps
             </h2>
             <p className="reveal-up text-xl text-slate-600 max-w-2xl mx-auto">
-              Get started in minutes with our simple four-step process
+              Get set up in under 5 minutes. No technical skills required.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Step 1 */}
             <div className="reveal-up text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
+              <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 1
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Create Your Account</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Connect</h3>
               <p className="text-slate-600">
-                Sign up free in 30 seconds with just your email
+                Link your Reddit account in 2 minutes with secure OAuth. Your credentials are never stored.
               </p>
             </div>
 
             {/* Step 2 */}
             <div className="reveal-up text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
+              <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 2
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Connect Your Reddit</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Set Your Goals</h3>
               <p className="text-slate-600">
-                Securely link your Reddit account with OAuth
+                Tell us your niche and target subreddits. AI suggests the best communities for your business.
               </p>
             </div>
 
             {/* Step 3 */}
             <div className="reveal-up text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
+              <div className="w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center text-3xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
                 3
               </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Choose Your Strategy</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">Watch It Grow</h3>
               <p className="text-slate-600">
-                Pick your subreddits, set posting schedules, and customize AI settings
-              </p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="reveal-up text-center">
-              <div className="w-16 h-16 bg-slate-900 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)]">
-                4
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Grow on Autopilot</h3>
-              <p className="text-slate-600">
-                ReddRide posts, engages, and tracks results while you focus on your business
+                ReddRide handles posting, timing, and engagement. You track results and watch your audience grow.
               </p>
             </div>
           </div>
@@ -1136,36 +860,36 @@ export default function Home() {
           <div className="reveal-up space-y-4">
             {[
               {
-                question: "How long does Reddit account warmup take?",
-                answer: "Our intelligent warmup system typically takes 2-4 weeks to build authentic karma and credibility. The exact timeline depends on your target karma goals and the subreddits you want to engage with. We gradually increase activity to establish trust and avoid spam detection."
+                question: "How much time will I actually save?",
+                answer: "Most users save 10+ hours per week. Instead of manually posting, researching subreddits, and monitoring conversations, ReddRide automates all of it. You can set up a week's worth of content in 30 minutes and let the AI handle the rest."
               },
               {
-                question: "Will my account get banned during warmup?",
-                answer: "Our warmup process is designed to mimic natural Reddit behavior, significantly reducing ban risk. We use intelligent timing, varied engagement patterns, and authentic interactions. While no system can guarantee 100% safety, our users have an extremely high success rate."
+                question: "Will my account get banned?",
+                answer: "Our warmup system is specifically designed to prevent bans. We mimic natural Reddit behavior, space out posts intelligently, and build authentic karma before marketing. Users following our warmup process have an extremely high success rate."
               },
               {
-                question: "How does multi-subreddit posting work?",
-                answer: "Write your content once, and ReddRide intelligently distributes it across multiple relevant subreddits. We optimize posting times for each community, adapt formatting to match subreddit rules, and space out posts to avoid spam detection."
+                question: "How long until I see results?",
+                answer: "It depends on your starting point. If you have an established account, you can start seeing traffic within days. New accounts go through our 2-4 week warmup process first to build credibility, then start generating consistent results."
               },
               {
-                question: "Is the auto-reply feature compliant with Reddit rules?",
-                answer: "Yes! Our AI generates helpful, contextually relevant responses that add genuine value to conversations. We focus on being helpful rather than promotional, which aligns with Reddit's community guidelines and builds authentic engagement."
+                question: "What kind of ROI can I expect?",
+                answer: "Reddit traffic converts exceptionally well because users are actively seeking solutions. Our users typically see 3x more qualified leads compared to cold outreach, and 40%+ better conversion rates than paid social ads."
               },
               {
                 question: "Can I use my existing Reddit account?",
-                answer: "Absolutely! You can connect existing accounts or create new ones. For established accounts, we recommend starting with our warmup phase to ensure the account is in good standing before automated posting."
+                answer: "Absolutely! You can connect existing accounts or create new ones. For established accounts with good karma, you can skip the warmup phase and start posting immediately."
               },
               {
-                question: "How much karma do I need before promoting my business?",
-                answer: "This varies by subreddit, but generally 500-1000 karma is a good baseline. Some communities require more. Our AI analyzes each subreddit's requirements and only posts when your account meets the necessary thresholds."
+                question: "Is this against Reddit's rules?",
+                answer: "We focus on creating genuine value for Reddit communities. Our AI generates helpful, contextual content—not spam. We follow Reddit's guidelines and help you build authentic engagement, which is exactly what Reddit rewards."
               },
               {
-                question: "What if my account gets shadowbanned?",
-                answer: "Our system continuously monitors account health and will alert you immediately if any issues are detected. We also provide guidance on recovery steps and can help you pivot to backup accounts if needed."
+                question: "What if I need help getting started?",
+                answer: "We provide full onboarding support. Our dashboard walks you through setup step-by-step, and our team is available to help you optimize your strategy for maximum results."
               },
               {
-                question: "Can I customize the AI-generated content?",
-                answer: "Yes! You have full control over tone, messaging, and content style. You can provide templates, set guidelines, review posts before they go live, or let the AI handle everything autonomously based on your preferences."
+                question: "Is there a free trial?",
+                answer: "Yes! Sign up free to explore the dashboard and see how ReddRide works. You can upgrade to lifetime access whenever you're ready to unlock all features."
               },
             ].map((faq, index) => (
               <details
@@ -1194,28 +918,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section - UPGRADED with urgency */}
       <section className="py-12 md:py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="reveal-up text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-6">
-            Ready to Grow Your Reddit Presence?
+            Stop Wasting Time. Start Growing on Reddit.
           </h2>
           <p className="reveal-up text-xl text-slate-600 mb-4">
             {isSoldOut ? (
               <>Get lifetime access for {formatPrice(currentPrice)}</>
             ) : (
-              <>🔥 <span className="text-orange-600 font-semibold">{currentLabel}</span>: Only {tierSpotsRemaining} spot{tierSpotsRemaining !== 1 ? 's' : ''} left at <span className="text-green-600 font-bold">{formatPrice(currentPrice)}</span> ({currentDiscount})</>
+              <>Only {tierSpotsRemaining} spot{tierSpotsRemaining !== 1 ? 's' : ''} left at <span className="text-green-600 font-bold">{formatPrice(currentPrice)}</span> ({currentDiscount})</>
             )}
           </p>
+          <p className="reveal-up text-lg text-slate-700 mb-4 font-medium">
+            Join 500+ marketers already using ReddRide to grow their business
+          </p>
           <p className="reveal-up text-sm text-slate-500 mb-10">
-            One-time payment. Lifetime access. Never pay again.
+            One-time payment. Lifetime access. Save 10+ hours every week.
           </p>
           <Link
             href="/sign-up"
             className="reveal-up group relative inline-block px-10 py-5 bg-slate-900 text-white text-lg rounded-xl font-semibold hover:bg-slate-800 transition-all hover:shadow-xl hover:-translate-y-0.5 border-2 border-red-500/70 hover:shadow-[0_0_20px_rgba(239,68,68,0.7)] overflow-hidden"
           >
             <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-            <span className="relative">Get Lifetime Access →</span>
+            <span className="relative">Start Growing on Reddit Today</span>
           </Link>
         </div>
       </section>

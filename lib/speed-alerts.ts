@@ -19,23 +19,43 @@ export interface GeneratedComment {
 
 /**
  * Fetch new posts from a subreddit using Reddit's public JSON API
+ * Returns empty array on rate limiting (403/429) instead of throwing
  */
 export async function fetchNewPosts(subreddit: string, limit: number = 10): Promise<RedditPost[]> {
   try {
+    // Add a small random delay to avoid hitting rate limits
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500))
+
     const response = await fetch(
       `https://www.reddit.com/r/${subreddit}/new.json?limit=${limit}`,
       {
         headers: {
-          'User-Agent': 'RedRider/1.0 (Speed Alerts Feature)',
+          // Reddit-compliant User-Agent format
+          'User-Agent': 'web:reddride:v1.0.0 (by /u/reddride_app)',
+          'Accept': 'application/json',
         },
+        // Don't cache to get fresh results
+        cache: 'no-store',
       }
     )
 
+    // Handle rate limiting gracefully - return empty array, don't crash
+    if (response.status === 403 || response.status === 429) {
+      console.warn(`[Speed Alerts] Reddit rate limiting r/${subreddit} (${response.status}), will retry next cycle`)
+      return []
+    }
+
     if (!response.ok) {
-      throw new Error(`Reddit API returned ${response.status}`)
+      console.error(`[Speed Alerts] Reddit API error for r/${subreddit}: ${response.status}`)
+      return []
     }
 
     const data = await response.json()
+
+    if (!data?.data?.children) {
+      console.warn(`[Speed Alerts] Unexpected response format for r/${subreddit}`)
+      return []
+    }
 
     return data.data.children.map((child: any) => ({
       id: child.data.id,
@@ -47,8 +67,9 @@ export async function fetchNewPosts(subreddit: string, limit: number = 10): Prom
       selftext: child.data.selftext,
     }))
   } catch (error: any) {
-    console.error(`Failed to fetch posts from r/${subreddit}:`, error)
-    throw error
+    // Network errors - log and return empty array instead of crashing
+    console.error(`[Speed Alerts] Network error fetching r/${subreddit}:`, error.message)
+    return []
   }
 }
 

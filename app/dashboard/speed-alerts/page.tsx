@@ -438,8 +438,8 @@ export default function SpeedAlertsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Left Panel - Monitored Subreddits */}
-          <div className="feature-card rounded-lg p-4">
-            <h2 className="text-lg font-semibold text-white mb-3">
+          <div className="feature-card rounded-lg p-4 flex flex-col">
+            <h2 className="text-[22px] font-semibold text-white mb-3">
               Monitored Subreddits
             </h2>
 
@@ -467,44 +467,47 @@ export default function SpeedAlertsPage() {
               </div>
             )}
 
-            {isLoading ? (
-              <div className="text-center py-4">
-                <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-reddit-orange"></div>
-              </div>
-            ) : monitored.length === 0 ? (
-              <div className="text-center py-4 text-gray-400 text-sm">
-                No subreddits monitored yet. Add one above to get started.
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-[120px] overflow-y-auto">
-                {monitored.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className="flex items-center justify-between p-3 bg-[#1a1a24] border border-gray-700 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`w-2 h-2 rounded-full ${
-                          sub.isActive ? 'bg-green-500' : 'bg-gray-400'
-                        }`}
-                      ></span>
-                      <span className="font-medium text-[#00D9FF]">
-                        r/{sub.subreddit}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => removeSubreddit(sub.id)}
-                      className="text-red-400 hover:text-red-300 text-sm"
+            {/* Subreddits list - takes remaining space */}
+            <div className="flex-1 mb-4">
+              {isLoading ? (
+                <div className="text-center py-4">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-reddit-orange"></div>
+                </div>
+              ) : monitored.length === 0 ? (
+                <div className="text-center py-4 text-gray-400 text-sm">
+                  No subreddits monitored yet. Add one above to get started.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {monitored.map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="flex items-center justify-between p-3 bg-[#1a1a24] border border-gray-700 rounded-lg"
                     >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            sub.isActive ? 'bg-green-500' : 'bg-gray-400'
+                          }`}
+                        ></span>
+                        <span className="font-medium text-[#00D9FF]">
+                          r/{sub.subreddit}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => removeSubreddit(sub.id)}
+                        className="text-red-400 hover:text-red-300 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-            {/* Instructions */}
-            <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+            {/* Instructions - pushed to bottom */}
+            <div className="mt-auto p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
               <h3 className="font-medium text-blue-300 text-sm mb-1">
                 How It Works
               </h3>
@@ -517,7 +520,7 @@ export default function SpeedAlertsPage() {
           {/* Right Panel - Recent Alerts */}
           <div className="feature-card rounded-lg p-4">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold text-[#00D9FF]">
+              <h2 className="text-[22px] font-semibold text-[#00D9FF]">
                 Recent Alerts
               </h2>
               <div className="flex items-center gap-3">
@@ -588,32 +591,23 @@ export default function SpeedAlertsPage() {
                       </div>
                     </div>
 
-                    {/* Comment Options */}
-                    <div className="space-y-2">
+                    {/* Comment Options - Compact titles only */}
+                    <div className="flex flex-wrap gap-2">
                       {alert.commentOptions.map((comment) => (
-                        <div
+                        <button
                           key={`${alert.id}-${comment.style}`}
-                          className={`p-3 rounded border ${styleColors[comment.style]} cursor-pointer hover:opacity-80 transition`}
+                          className={`px-3 py-1.5 rounded border text-xs font-semibold uppercase ${styleColors[comment.style]} cursor-pointer hover:opacity-80 transition`}
+                          title={`Click to copy ${comment.style} comment and open Reddit post`}
                           onClick={() => {
                             copyComment(comment.text, alert.id, comment.style)
                             window.open(alert.postUrl, '_blank')
                             markActedOn(alert.id)
                           }}
                         >
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <span className="text-xs font-semibold uppercase">
-                                {comment.style}
-                              </span>
-                              <p className="text-sm mt-1">{comment.text}</p>
-                            </div>
-                            <span className="text-xs ml-2 whitespace-nowrap">
-                              {copiedComment === `${alert.id}-${comment.style}`
-                                ? '✓ Copied!'
-                                : 'Click to copy'}
-                            </span>
-                          </div>
-                        </div>
+                          {copiedComment === `${alert.id}-${comment.style}`
+                            ? '✓ Copied!'
+                            : comment.style}
+                        </button>
                       ))}
                     </div>
                   </div>
@@ -626,11 +620,11 @@ export default function SpeedAlertsPage() {
       {/* Keyword Alerts & Discover Subreddits Side by Side */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
-          <h2 className="text-lg font-bold text-white mb-3">Keyword Alerts</h2>
+          <h2 className="text-[22px] font-bold text-white mb-3">Keyword Alerts</h2>
           <KeywordAlertsSection />
         </div>
         <div>
-          <h2 className="text-lg font-bold text-white mb-3">Discover Subreddits</h2>
+          <h2 className="text-[22px] font-bold text-white mb-3">Discover Subreddits</h2>
           <DiscoverSection />
         </div>
       </div>
