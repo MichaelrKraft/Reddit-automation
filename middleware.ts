@@ -2,6 +2,8 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 const isProtectedRoute = createRouteMatcher([
   '/dashboard(.*)',
+  '/admin(.*)',           // Admin dashboard (additional admin check in routes)
+  '/api/admin(.*)',       // Admin API routes
   '/api/posts(.*)',
   '/api/campaigns(.*)',
   '/api/subreddits(.*)',

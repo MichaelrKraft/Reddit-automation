@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AIContentGenerator from '@/components/AIContentGenerator'
@@ -8,6 +8,14 @@ import SubredditAnalysis from '@/components/SubredditAnalysis'
 import TopPostsAnalyzer from '@/components/TopPostsAnalyzer'
 import OptimalTimingWidget from '@/components/OptimalTimingWidget'
 import ImageUpload from '@/components/ImageUpload'
+import {
+  trackPostCreateStarted,
+  trackPostCreateStep,
+  trackPostAIGenerate,
+  trackPostViralCheck,
+  trackPostScheduled,
+  trackPostCreateAbandoned
+} from '@/lib/analytics'
 
 export default function NewPost() {
   const router = useRouter()
@@ -37,7 +45,13 @@ export default function NewPost() {
   const [analyzingBody, setAnalyzingBody] = useState(false)
   const [bodyAnalysis, setBodyAnalysis] = useState<any>(null)
 
+  // Track last completed step for abandonment tracking
+  const lastStepRef = useRef(0)
+  const postCreatedRef = useRef(false)
+
   useEffect(() => {
+    // Track page load
+    trackPostCreateStarted()
     fetchAccount()
 
     const params = new URLSearchParams(window.location.search)
@@ -45,7 +59,30 @@ export default function NewPost() {
     if (subreddit) {
       setFormData(prev => ({ ...prev, subredditName: subreddit }))
     }
+
+    // Track abandonment on unmount
+    return () => {
+      if (!postCreatedRef.current && lastStepRef.current > 0) {
+        trackPostCreateAbandoned(lastStepRef.current)
+      }
+    }
   }, [])
+
+  // Track step progression
+  useEffect(() => {
+    if (formData.subredditName && lastStepRef.current < 1) {
+      lastStepRef.current = 1
+      trackPostCreateStep(1, { subreddit: formData.subredditName })
+    }
+    if (formData.title && lastStepRef.current < 2) {
+      lastStepRef.current = 2
+      trackPostCreateStep(2, { hasTitle: true })
+    }
+    if (formData.content && lastStepRef.current < 3) {
+      lastStepRef.current = 3
+      trackPostCreateStep(3, { hasContent: true, postType: formData.postType })
+    }
+  }, [formData.subredditName, formData.title, formData.content, formData.postType])
 
   // Fetch flairs when subreddit changes
   useEffect(() => {
@@ -211,6 +248,10 @@ export default function NewPost() {
         scheduledTime = scheduledAt.toLocaleString()
       }
 
+      // Track successful post creation
+      postCreatedRef.current = true
+      trackPostScheduled(formData.subredditName, scheduledTime || 'immediate')
+
       const successMsg = scheduledTime
         ? `Post scheduled for ${scheduledTime}! Redirecting to dashboard...`
         : 'Post created successfully! Redirecting to dashboard...'
@@ -243,7 +284,11 @@ export default function NewPost() {
         }),
       })
       const data = await response.json()
-      if (response.ok) setTitleAnalysis(data)
+      if (response.ok) {
+        setTitleAnalysis(data)
+        // Track viral analysis
+        trackPostViralCheck(data.score || 0, formData.subredditName.trim() || 'general')
+      }
     } catch (err) {
       console.error('Title analysis failed:', err)
     } finally {
@@ -387,6 +432,8 @@ export default function NewPost() {
               <AIContentGenerator
                 subreddit={formData.subredditName}
                 onSelectContent={(title, content) => {
+                  // Track AI content generation
+                  trackPostAIGenerate(formData.subredditName || 'unknown')
                   setFormData(prev => ({ ...prev, title, content }))
                 }}
               />

@@ -254,16 +254,31 @@ export default function LandingPage2() {
       {/* Hero Section - UPGRADED */}
       <section className="pt-12 pb-20 px-6">
         <div className={`max-w-7xl mx-auto text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <div className="inline-block mt-2 mb-2 px-4 py-2 bg-slate-900/5 border border-slate-900/10 rounded-full">
+          <div className="inline-block mb-8 px-4 py-2 bg-slate-900/5 border border-slate-900/10 rounded-full">
             <span className="text-sm font-medium text-slate-700">Save 10+ hours every week on Reddit marketing</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-normal font-[family-name:var(--font-montserrat)]">
             <span className="block">
               <TextType
-                text="Turn Reddit Into Your"
+                text="Turn "
                 typingSpeed={50}
                 initialDelay={0}
+                showCursor={false}
+                loop={false}
+              />
+              <TextType
+                text="Reddit"
+                typingSpeed={50}
+                initialDelay={200}
+                showCursor={false}
+                loop={false}
+                className="text-red-500"
+              />
+              <TextType
+                text=" Into Your"
+                typingSpeed={50}
+                initialDelay={500}
                 showCursor={false}
                 loop={false}
               />

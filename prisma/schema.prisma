@@ -20,6 +20,7 @@ model User {
   stripeCustomerId     String?
   stripePaymentId      String?
   tier                 UserTier              @default(ALPHA)
+  isAdmin              Boolean               @default(false)
   brandKeywords        BrandKeyword[]
   draftPosts           DraftPost[]
   keywordMatches       KeywordMatch[]
@@ -684,4 +685,40 @@ model LeaderboardEntry {
   @@index([leaderboardId, rank])
   @@index([username])
   @@index([influenceScore])
+}
+
+// ==========================================
+// Admin Analytics - User Event Tracking
+// ==========================================
+
+model UserEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  eventType   String   // click, submit, navigate, feature_use, error
+  eventName   String   // button_click, form_submit, feature_opened, etc.
+  page        String   // /dashboard/warmup, /dashboard/spy-mode
+  target      String?  // element clicked: "generate_post_btn", "connect_reddit"
+  metadata    Json?    // additional context
+  sessionId   String?  // group events by session
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([eventName])
+  @@index([timestamp])
+  @@index([page])
+}
+
+model PageView {
+  id          String   @id @default(cuid())
+  userId      String
+  page        String
+  referrer    String?
+  sessionId   String?
+  duration    Int?     // seconds on page
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([page])
+  @@index([timestamp])
 }

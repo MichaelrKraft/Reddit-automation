@@ -3,6 +3,7 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Montserrat } from 'next/font/google'
 import './globals.css'
 import AlphaFeedbackWidget from '@/components/AlphaFeedbackWidget'
+import AnalyticsProvider from '@/components/AnalyticsProvider'
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -58,8 +59,10 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={montserrat.variable}>
         <body>
-          {children}
-          <AlphaFeedbackWidget />
+          <AnalyticsProvider>
+            {children}
+            <AlphaFeedbackWidget />
+          </AnalyticsProvider>
         </body>
       </html>
     </ClerkProvider>

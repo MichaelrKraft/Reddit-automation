@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react'
 import WarmupOnboarding from './WarmupOnboarding'
 import WarmupJourneyStepper from './WarmupJourneyStepper'
+import {
+  trackRedditConnectStarted,
+  trackRedditConnectSuccess,
+  trackRedditConnectFailed
+} from '@/lib/analytics'
 
 interface WarmupPost {
   title: string
@@ -326,6 +331,9 @@ export default function WarmupDashboard() {
       return
     }
 
+    // Track Reddit connection started
+    trackRedditConnectStarted('/dashboard/warmup')
+
     setAddingAccount(true)
     setAddError(null)
 
@@ -342,6 +350,9 @@ export default function WarmupDashboard() {
         throw new Error(data.error || 'Failed to add account')
       }
 
+      // Track Reddit connection success
+      trackRedditConnectSuccess('/dashboard/warmup', newUsername.trim())
+
       // Success - refresh data and reset form
       setNewUsername('')
       setShowAddAccount(false)
@@ -352,6 +363,8 @@ export default function WarmupDashboard() {
         await handleStartAccountWarmup(data.account.id)
       }
     } catch (error: any) {
+      // Track Reddit connection failed
+      trackRedditConnectFailed('/dashboard/warmup', error.message)
       setAddError(error.message)
     } finally {
       setAddingAccount(false)
