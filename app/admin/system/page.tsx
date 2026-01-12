@@ -75,7 +75,7 @@ function ConnectionCard({
   error
 }: {
   title: string
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   connected: boolean
   details?: string
   error?: string

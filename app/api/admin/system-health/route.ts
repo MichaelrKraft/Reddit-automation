@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Check Redis connection
-    let redisStatus = { connected: false, error: undefined as string | undefined }
+    let redisStatus: { connected: boolean; error?: string } = { connected: false }
     try {
       redisStatus = await checkRedisConnection()
     } catch (error: any) {

@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       status: charge.status,
       paid: charge.paid,
       refunded: charge.refunded,
-      customerEmail: typeof charge.customer === 'object' && charge.customer?.email
+      customerEmail: typeof charge.customer === 'object' && charge.customer && 'email' in charge.customer && charge.customer.email
         ? charge.customer.email
         : charge.billing_details?.email || 'N/A',
       customerName: charge.billing_details?.name || 'N/A',

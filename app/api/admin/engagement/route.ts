@@ -59,23 +59,30 @@ export async function GET(req: NextRequest) {
         _count: {
           select: {
             redditAccounts: true,
-            posts: true,
             spyAccounts: true,
             brandKeywords: true
           }
         },
         redditAccounts: {
           select: {
-            warmupStatus: true
+            warmupStatus: true,
+            _count: {
+              select: {
+                posts: true
+              }
+            }
           }
-        },
-        events: {
-          orderBy: { timestamp: 'desc' },
-          take: 1,
-          select: { timestamp: true }
         }
       }
     })
+
+    // Get last activity for each user from UserEvent table
+    const lastActivities = await prisma.$queryRaw<{ userId: string; lastActivity: Date }[]>`
+      SELECT "userId", MAX("timestamp") as "lastActivity"
+      FROM "UserEvent"
+      GROUP BY "userId"
+    `
+    const lastActivityMap = new Map(lastActivities.map(a => [a.userId, a.lastActivity]))
 
     // Calculate engagement scores for all users
     const usersWithScores = users.map(user => {
@@ -83,11 +90,14 @@ export async function GET(req: NextRequest) {
         acc => !['COMPLETED', 'FAILED', 'NOT_STARTED'].includes(acc.warmupStatus)
       ).length
 
-      const lastActivity = user.events[0]?.timestamp || null
+      // Sum up posts from all reddit accounts
+      const postCount = user.redditAccounts.reduce((sum, acc) => sum + acc._count.posts, 0)
+
+      const lastActivity = lastActivityMap.get(user.id) || null
 
       const score = calculateEngagementScore({
         redditAccountCount: user._count.redditAccounts,
-        postCount: user._count.posts,
+        postCount: postCount,
         spyAccountCount: user._count.spyAccounts,
         keywordCount: user._count.brandKeywords,
         warmupAccountCount: warmupCount,
@@ -102,7 +112,7 @@ export async function GET(req: NextRequest) {
         createdAt: user.createdAt,
         engagementScore: score,
         redditAccounts: user._count.redditAccounts,
-        posts: user._count.posts,
+        posts: postCount,
         spyAccounts: user._count.spyAccounts,
         keywords: user._count.brandKeywords,
         lastActiveAt: lastActivity

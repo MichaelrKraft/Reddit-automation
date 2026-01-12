@@ -12,6 +12,30 @@ export interface RedditPost {
   selftext?: string
 }
 
+/**
+ * Check if a post is asking a question
+ * Detects question patterns in the title
+ */
+export function isQuestionPost(title: string): boolean {
+  const lowerTitle = title.toLowerCase().trim()
+
+  // Check if title ends with a question mark
+  if (title.trim().endsWith('?')) {
+    return true
+  }
+
+  // Common question starters
+  const questionStarters = [
+    'how ', 'what ', 'why ', 'when ', 'where ', 'who ', 'which ',
+    'can ', 'could ', 'should ', 'would ', 'will ', 'is ', 'are ',
+    'does ', 'do ', 'did ', 'has ', 'have ', 'am i ', 'anyone ',
+    'anybody ', 'any tips', 'any advice', 'any suggestions',
+    'help me', 'need help', 'looking for advice', 'seeking advice'
+  ]
+
+  return questionStarters.some(starter => lowerTitle.startsWith(starter))
+}
+
 export interface GeneratedComment {
   style: 'helpful' | 'curious' | 'supportive'
   text: string

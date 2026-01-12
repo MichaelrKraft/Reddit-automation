@@ -83,7 +83,7 @@ function StatCard({
   title: string
   value: string | number
   subtitle?: string
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   trend?: 'up' | 'down' | 'neutral'
   trendValue?: string
 }) {
@@ -325,7 +325,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {activities.map((activity) => {
-              const activityConfig: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
+              const activityConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
                 signup: { icon: UserPlus, color: 'text-blue-400', bg: 'bg-blue-500/10' },
                 post_published: { icon: Send, color: 'text-green-400', bg: 'bg-green-500/10' },
                 reddit_connected: { icon: Users, color: 'text-purple-400', bg: 'bg-purple-500/10' },

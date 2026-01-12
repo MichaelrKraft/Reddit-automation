@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
-import { checkForNewPosts, generateCommentOptions, RedditPost } from '@/lib/speed-alerts'
+import { checkForNewPosts, generateCommentOptions, RedditPost, isQuestionPost } from '@/lib/speed-alerts'
 
 // SSE endpoint for real-time speed alerts
 export async function GET(request: NextRequest) {
@@ -75,8 +75,15 @@ export async function GET(request: NextRequest) {
                   })
                 }
 
-                // Process new posts and generate comments
-                for (const post of newPosts) {
+                // Filter posts based on filterMode
+                let filteredPosts = newPosts
+                if (sub.filterMode === 'questions') {
+                  filteredPosts = newPosts.filter(post => isQuestionPost(post.title))
+                  console.log(`[Speed Alerts Stream] r/${sub.subreddit}: Filtered to ${filteredPosts.length}/${newPosts.length} question posts`)
+                }
+
+                // Process filtered posts and generate comments
+                for (const post of filteredPosts) {
                   const comments = await generateCommentOptions(post)
 
                   // Store alert in database
@@ -118,7 +125,8 @@ export async function GET(request: NextRequest) {
                 sendEvent('status', {
                   subreddit: sub.subreddit,
                   status: 'checked',
-                  newPosts: newPosts.length
+                  newPosts: filteredPosts.length,
+                  filterMode: sub.filterMode
                 })
               } catch (subError: any) {
                 console.error(`Error checking r/${sub.subreddit}:`, subError)

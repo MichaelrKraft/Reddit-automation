@@ -94,7 +94,7 @@ export function AnalyticsProvider({ children, enabled = true }: AnalyticsProvide
   }, [pathname, shouldTrack])
 
   return (
-    <AnalyticsContext.Provider value={{ isEnabled: shouldTrack }}>
+    <AnalyticsContext.Provider value={{ isEnabled: shouldTrack ?? false }}>
       {children}
     </AnalyticsContext.Provider>
   )

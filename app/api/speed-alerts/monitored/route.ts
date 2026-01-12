@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = await requireUser()
     const body = await request.json()
-    const { subreddit } = body
+    const { subreddit, filterMode = 'all' } = body
 
     if (!subreddit) {
       return NextResponse.json(
@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         isActive: true,
         checkInterval: 15,
+        filterMode: filterMode === 'questions' ? 'questions' : 'all',
       },
     })
 
@@ -153,12 +154,12 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// PATCH /api/speed-alerts/monitored - Toggle active status
+// PATCH /api/speed-alerts/monitored - Update subreddit settings (active status, filter mode)
 export async function PATCH(request: NextRequest) {
   try {
     const user = await requireUser()
     const body = await request.json()
-    const { id, isActive } = body
+    const { id, isActive, filterMode } = body
 
     if (!id) {
       return NextResponse.json(
@@ -179,9 +180,18 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
+    // Build update data - only include provided fields
+    const updateData: { isActive?: boolean; filterMode?: string } = {}
+    if (typeof isActive === 'boolean') {
+      updateData.isActive = isActive
+    }
+    if (filterMode && (filterMode === 'all' || filterMode === 'questions')) {
+      updateData.filterMode = filterMode
+    }
+
     const updated = await prisma.monitoredSubreddit.update({
       where: { id },
-      data: { isActive },
+      data: updateData,
     })
 
     return NextResponse.json({ monitored: updated })

@@ -8,6 +8,7 @@ interface MonitoredSubreddit {
   subreddit: string
   isActive: boolean
   lastChecked: string
+  filterMode: 'all' | 'questions'
   alerts: AlertHistory[]
 }
 
@@ -213,6 +214,23 @@ export default function SpeedAlertsPage() {
       setMonitored(monitored.filter((m) => m.id !== id))
     } catch (err) {
       console.error('Failed to remove subreddit:', err)
+    }
+  }
+
+  async function updateFilterMode(id: string, filterMode: 'all' | 'questions') {
+    try {
+      const response = await fetch('/api/speed-alerts/monitored', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, filterMode }),
+      })
+      if (response.ok) {
+        setMonitored(monitored.map(m =>
+          m.id === id ? { ...m, filterMode } : m
+        ))
+      }
+    } catch (err) {
+      console.error('Failed to update filter mode:', err)
     }
   }
 
@@ -494,12 +512,23 @@ export default function SpeedAlertsPage() {
                           r/{sub.subreddit}
                         </span>
                       </div>
-                      <button
-                        onClick={() => removeSubreddit(sub.id)}
-                        className="text-red-400 hover:text-red-300 text-sm"
-                      >
-                        Remove
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={sub.filterMode || 'all'}
+                          onChange={(e) => updateFilterMode(sub.id, e.target.value as 'all' | 'questions')}
+                          className="text-xs px-2 py-1 bg-[#12121a] border border-gray-600 rounded text-gray-300 focus:border-[#00D9FF] focus:outline-none"
+                          title="Filter posts by type"
+                        >
+                          <option value="all">All Posts</option>
+                          <option value="questions">Questions Only</option>
+                        </select>
+                        <button
+                          onClick={() => removeSubreddit(sub.id)}
+                          className="text-red-400 hover:text-red-300 text-sm"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
