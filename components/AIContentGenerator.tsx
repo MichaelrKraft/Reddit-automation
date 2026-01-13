@@ -8,6 +8,12 @@ interface ContentVariation {
   reasoning: string
 }
 
+interface ViralAnalysis {
+  score: number
+  tier: string
+  suggestions: string[]
+}
+
 interface AIContentGeneratorProps {
   subreddit: string
   onSelectContent: (title: string, content: string) => void
@@ -15,11 +21,34 @@ interface AIContentGeneratorProps {
 
 export default function AIContentGenerator({ subreddit, onSelectContent }: AIContentGeneratorProps) {
   const [topic, setTopic] = useState('')
-  const [tone, setTone] = useState<'professional' | 'casual' | 'humorous' | 'informative'>('casual')
+  const [tone, setTone] = useState<'question' | 'casual' | 'humorous' | 'informative' | 'controversial' | 'educational' | 'storytelling'>('casual')
+  const [contentLength, setContentLength] = useState<'short' | 'medium' | 'long'>('medium')
+  const [variationCount, setVariationCount] = useState<3 | 4 | 5 | 6>(3)
   const [additionalContext, setAdditionalContext] = useState('')
   const [variations, setVariations] = useState<ContentVariation[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [viralAnalyses, setViralAnalyses] = useState<Record<number, ViralAnalysis>>({})
+  const [analyzingIndex, setAnalyzingIndex] = useState<number | null>(null)
+
+  async function analyzeViral(index: number, content: string) {
+    setAnalyzingIndex(index)
+    try {
+      const response = await fetch('/api/viral/analyze-body', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, subreddit }),
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setViralAnalyses(prev => ({ ...prev, [index]: data }))
+      }
+    } catch (err) {
+      console.error('Viral analysis failed:', err)
+    } finally {
+      setAnalyzingIndex(null)
+    }
+  }
 
   async function generateContent() {
     if (!topic.trim()) {
@@ -35,6 +64,7 @@ export default function AIContentGenerator({ subreddit, onSelectContent }: AICon
     setLoading(true)
     setError('')
     setVariations([])
+    setViralAnalyses({})
 
     try {
       const response = await fetch('/api/ai/generate', {
@@ -45,6 +75,8 @@ export default function AIContentGenerator({ subreddit, onSelectContent }: AICon
           subreddit,
           tone,
           postType: 'text',
+          contentLength,
+          variationCount,
           additionalContext,
         }),
       })
@@ -74,38 +106,63 @@ export default function AIContentGenerator({ subreddit, onSelectContent }: AICon
           <label className="block text-sm font-medium text-gray-300 mb-2">
             What do you want to post about?
           </label>
-          <input
-            type="text"
-            placeholder="e.g., New productivity app for developers"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-600 bg-[#0a0a0f] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
-          />
+          <div className="flex gap-3">
+            <input
+              type="text"
+              placeholder="e.g., New productivity app for developers"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-600 bg-[#0a0a0f] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white placeholder-gray-500"
+            />
+            <select
+              value={tone}
+              onChange={(e) => setTone(e.target.value as typeof tone)}
+              className="px-3 py-2 border border-gray-600 bg-[#0a0a0f] rounded-lg focus:ring-2 focus:ring-[#00D9FF] focus:border-transparent text-white cursor-pointer"
+            >
+              <option value="casual">Casual</option>
+              <option value="question">Question</option>
+              <option value="humorous">Humorous</option>
+              <option value="informative">Informative</option>
+              <option value="controversial">Controversial</option>
+              <option value="educational">Educational</option>
+              <option value="storytelling">Storytelling</option>
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Tone
-          </label>
-          <div className="grid grid-cols-4 gap-2">
-            {([
-              { value: 'casual', tooltip: 'Friendly and conversational, like chatting with a friend' },
-              { value: 'professional', tooltip: 'Polished and formal, suitable for business or expert discussions' },
-              { value: 'humorous', tooltip: 'Witty and entertaining, great for engaging audiences' },
-              { value: 'informative', tooltip: 'Educational and fact-focused, ideal for sharing knowledge' },
-            ] as const).map((t) => (
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">Length:</span>
+            {(['short', 'medium', 'long'] as const).map((l) => (
               <button
-                key={t.value}
+                key={l}
                 type="button"
-                onClick={() => setTone(t.value)}
-                title={t.tooltip}
-                className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                  tone === t.value
-                    ? 'bg-[#00D9FF] text-black'
-                    : 'bg-[#0a0a0f] text-gray-300 border border-gray-600 hover:bg-gray-800'
+                onClick={() => setContentLength(l)}
+                className={`text-sm transition ${
+                  contentLength === l
+                    ? 'text-[#00D9FF] font-medium'
+                    : 'text-gray-400 hover:text-white'
                 }`}
               >
-                {t.value.charAt(0).toUpperCase() + t.value.slice(1)}
+                {l.charAt(0).toUpperCase() + l.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">Variations:</span>
+            {([3, 4, 5, 6] as const).map((num) => (
+              <button
+                key={num}
+                type="button"
+                onClick={() => setVariationCount(num)}
+                className={`text-sm transition ${
+                  variationCount === num
+                    ? 'text-[#00D9FF] font-medium'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {num}
               </button>
             ))}
           </div>
@@ -157,14 +214,33 @@ export default function AIContentGenerator({ subreddit, onSelectContent }: AICon
                 <div className="flex justify-between items-start mb-2">
                   <span className="text-xs font-medium text-[#00D9FF]">
                     Variation {index + 1}
+                    {viralAnalyses[index] && (
+                      <span className={`ml-2 px-2 py-0.5 rounded text-xs font-bold ${
+                        viralAnalyses[index].score >= 80 ? 'bg-green-500/20 text-green-400' :
+                        viralAnalyses[index].score >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        {viralAnalyses[index].score}/100
+                      </span>
+                    )}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => onSelectContent(variation.title, variation.content)}
-                    className="text-xs bg-[#00D9FF] text-black px-3 py-1 rounded hover:bg-cyan-400 transition"
-                  >
-                    Use This
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => analyzeViral(index, variation.content)}
+                      disabled={analyzingIndex === index}
+                      className="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-500 transition disabled:opacity-50"
+                    >
+                      {analyzingIndex === index ? 'Analyzing...' : 'Viral Score'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onSelectContent(variation.title, variation.content)}
+                      className="text-xs bg-[#00D9FF] text-black px-3 py-1 rounded hover:bg-cyan-400 transition"
+                    >
+                      Use This
+                    </button>
+                  </div>
                 </div>
                 <h5 className="font-semibold text-white mb-2">{variation.title}</h5>
                 <p className="text-sm text-gray-400 mb-2 whitespace-pre-wrap line-clamp-3">

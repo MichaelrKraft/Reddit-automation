@@ -52,11 +52,13 @@ export default function SpeedAlertsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [addingPending, setAddingPending] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
+  const [isKeywordMonitoring, setIsKeywordMonitoring] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const soundEnabledRef = useRef(true)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const reconnectAttemptsRef = useRef(0)
+  const keywordIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const maxReconnectAttempts = 10
   const baseReconnectDelay = 2000 // 2 seconds
 
@@ -349,6 +351,29 @@ export default function SpeedAlertsPage() {
     setIsMonitoring(false)
   }, [])
 
+  // Keyword monitoring functions
+  const startKeywordMonitoring = useCallback(() => {
+    // Trigger initial scan
+    const scanBtn = document.querySelector('[data-keyword-scan]') as HTMLButtonElement
+    if (scanBtn) scanBtn.click()
+
+    // Set up interval for periodic scanning (every 60 seconds)
+    keywordIntervalRef.current = setInterval(() => {
+      const btn = document.querySelector('[data-keyword-scan]') as HTMLButtonElement
+      if (btn) btn.click()
+    }, 60000)
+
+    setIsKeywordMonitoring(true)
+  }, [])
+
+  const stopKeywordMonitoring = useCallback(() => {
+    if (keywordIntervalRef.current) {
+      clearInterval(keywordIntervalRef.current)
+      keywordIntervalRef.current = null
+    }
+    setIsKeywordMonitoring(false)
+  }, [])
+
   // Clean up on unmount
   useEffect(() => {
     return () => {
@@ -360,6 +385,9 @@ export default function SpeedAlertsPage() {
       }
       if (audioContextRef.current) {
         audioContextRef.current.close()
+      }
+      if (keywordIntervalRef.current) {
+        clearInterval(keywordIntervalRef.current)
       }
     }
   }, [])
@@ -677,17 +705,24 @@ export default function SpeedAlertsPage() {
 
         {/* Controls - matches top section pattern */}
         <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
-          <button
-            type="button"
-            className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition text-sm sm:text-base cursor-pointer"
-            onClick={() => {
-              // Trigger scan via the KeywordMonitoredPanel
-              const scanBtn = document.querySelector('[data-keyword-scan]') as HTMLButtonElement
-              if (scanBtn) scanBtn.click()
-            }}
-          >
-            Start Monitoring
-          </button>
+          {isKeywordMonitoring ? (
+            <button
+              type="button"
+              onClick={stopKeywordMonitoring}
+              className="bg-red-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2 text-sm sm:text-base"
+            >
+              <span className="w-3 h-3 bg-white rounded-full animate-pulse"></span>
+              Stop Monitoring
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={startKeywordMonitoring}
+              className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition text-sm sm:text-base cursor-pointer"
+            >
+              Start Monitoring
+            </button>
+          )}
           <button
             onClick={() => {
               setSoundEnabled(!soundEnabled)

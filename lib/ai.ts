@@ -60,8 +60,10 @@ export async function generateCompletion(prompt: string): Promise<string> {
 export interface ContentGenerationOptions {
   topic: string
   subreddit: string
-  tone?: 'professional' | 'casual' | 'humorous' | 'informative'
+  tone?: 'question' | 'casual' | 'humorous' | 'informative' | 'controversial' | 'educational' | 'storytelling'
   postType?: 'text' | 'link'
+  contentLength?: 'short' | 'medium' | 'long'
+  variationCount?: 3 | 4 | 5 | 6
   additionalContext?: string
 }
 
@@ -73,12 +75,23 @@ export async function generatePostContent(options: ContentGenerationOptions) {
 
   const viralBodyRules = getViralBodyPrompt()
 
+  // Content length word counts
+  const lengthConfig = {
+    short: { min: 100, max: 300, description: 'short and punchy' },
+    medium: { min: 300, max: 600, description: 'balanced with good detail' },
+    long: { min: 600, max: 1200, description: 'in-depth and comprehensive' }
+  }
+  const contentLengthSetting = options.contentLength || 'medium'
+  const lengthInfo = lengthConfig[contentLengthSetting]
+  const numVariations = options.variationCount || 3
+
   const prompt = `
 Generate a Reddit post for r/${options.subreddit}.
 
 Topic: ${options.topic}
 Post Type: ${options.postType || 'text'}
 Tone: ${options.tone || 'casual'}
+Content Length: ${contentLengthSetting.toUpperCase()} (${lengthInfo.min}-${lengthInfo.max} words - ${lengthInfo.description})
 ${options.additionalContext ? `Additional Context: ${options.additionalContext}` : ''}
 
 ${viralBodyRules}
@@ -92,8 +105,9 @@ Requirements:
 6. Add emotional reactions throughout the post
 7. Use transformation words (but, finally, realized, then) for story arc
 8. Keep paragraphs to 3-5 sentences each
-9. Add TL;DR at the end for posts over 300 words
-10. Be natural and conversational - avoid overly promotional language
+9. IMPORTANT: Content must be ${lengthInfo.min}-${lengthInfo.max} words (${contentLengthSetting} length)
+10. Add TL;DR at the end for posts over 300 words
+11. Be natural and conversational - avoid overly promotional language
 
 Return the response in the following JSON format:
 {
@@ -102,20 +116,62 @@ Return the response in the following JSON format:
   "reasoning": "Brief explanation of which viral patterns this uses"
 }
 
-Generate 3 different variations, each using different viral opening patterns.
+Generate ${numVariations} different variations, each using different viral opening patterns.
 `
 
   // Helper to parse AI response
   const parseResponse = (text: string) => {
-    const jsonMatch = text.match(/\{[\s\S]*\}/g)
-    if (jsonMatch) {
+    // Strip markdown code blocks if present
+    let cleanText = text
+      .replace(/```json\s*/gi, '')
+      .replace(/```\s*/g, '')
+      .replace(/^\s*json\s*/i, '') // Handle "json" prefix without backticks
+      .trim()
+
+    // Try to parse the entire cleaned text directly
+    try {
+      const parsed = JSON.parse(cleanText)
+      if (Array.isArray(parsed)) return parsed
+      if (parsed && typeof parsed === 'object') return [parsed]
+    } catch {
+      // Continue to extraction methods
+    }
+
+    // Try to extract JSON array from text
+    const arrayStart = cleanText.indexOf('[')
+    const arrayEnd = cleanText.lastIndexOf(']')
+    if (arrayStart !== -1 && arrayEnd > arrayStart) {
       try {
-        const variations = jsonMatch.map(json => JSON.parse(json))
-        return variations
+        const parsed = JSON.parse(cleanText.slice(arrayStart, arrayEnd + 1))
+        if (Array.isArray(parsed)) return parsed
       } catch {
-        return parseNonJsonResponse(text)
+        // Continue to object extraction
       }
     }
+
+    // Try to extract individual JSON objects using balanced brace matching
+    const objects: any[] = []
+    let depth = 0
+    let start = -1
+    for (let i = 0; i < cleanText.length; i++) {
+      if (cleanText[i] === '{') {
+        if (depth === 0) start = i
+        depth++
+      } else if (cleanText[i] === '}') {
+        depth--
+        if (depth === 0 && start !== -1) {
+          try {
+            const obj = JSON.parse(cleanText.slice(start, i + 1))
+            if (obj.title || obj.content) objects.push(obj)
+          } catch {
+            // Skip malformed object
+          }
+          start = -1
+        }
+      }
+    }
+    if (objects.length > 0) return objects
+
     return parseNonJsonResponse(text)
   }
 
