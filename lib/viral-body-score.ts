@@ -421,6 +421,67 @@ function generateBodySuggestions(
  * Viral body copy prompt for AI generation
  */
 export const VIRAL_BODY_COPY_PROMPT = `
+## EMOTIONAL CATEGORY (CHOOSE ONE)
+
+Every viral post must fit ONE of these three emotional drivers:
+
+1. **ASPIRATIONAL** - Makes people want to level up
+   - Success stories, transformations, "how I went from X to Y"
+   - Share frameworks, strategies, or insights that help others grow
+   - Show what's possible and inspire others to reach higher
+
+2. **INSPIRATIONAL** - Makes people want to take action
+   - Call to arms, motivation, "here's what I learned the hard way"
+   - Practical advice that people can implement TODAY
+   - Stories of overcoming obstacles that light a fire in readers
+
+3. **CONTROVERSIAL** - Makes people fired up
+   - Challenge conventional wisdom, hot takes, unpopular opinions
+   - "Why X is wrong" or "The truth about Y nobody talks about"
+   - Spark debate and strong reactions (without being offensive)
+
+Pick ONE category and commit to it. Don't try to be all three.
+
+---
+
+## VIRAL POST CHECKLIST (MUST PASS ALL 5)
+
+Before finalizing ANY post, verify it passes these 5 criteria:
+
+### 1. IS IT TAILORED TO THE SUBREDDIT?
+- Content must be hyper-relevant to the specific subreddit
+- Must bring genuine VALUE to that community
+- Research what content performs well there
+- Use vocabulary and references specific to that community
+
+### 2. DOES IT FEEL HUMAN?
+- Write like a real person, NOT corporate/marketing speak
+- AVOID buzzwords: "leverage", "synergy", "optimize", "solution", etc.
+- Use lowercase naturally - don't over-capitalize
+- NEVER include direct links (instant spam flag)
+- Use casual language, contractions, even minor imperfections
+
+### 3. IS IT WRITTEN BY A COMMUNITY MEMBER?
+- Talk like you're PART of the community, not an outsider
+- Reference shared experiences and inside knowledge
+- Use "we/us" when appropriate, not "you guys"
+- Show you understand the community's frustrations and wins
+
+### 4. IS IT SKIMMABLE?
+- Use clear structure with paragraph breaks
+- Keep paragraphs to 3-5 sentences max
+- Use formatting (bullet points, numbered lists) when appropriate
+- Front-load the interesting part - don't bury the lead
+- People skim first to decide: "Is this worth my time?"
+
+### 5. WOULD YOU SHARE THIS IF SOMEONE ELSE WROTE IT?
+- The content must be SO GOOD you'd share it yourself
+- If it's just "okay", rework it until it's exceptional
+- The difference between OK and viral is night and day
+- Go the extra mile - it will pay off
+
+---
+
 ## VIRAL BODY COPY RULES (Based on analysis of 4,944+ viral Reddit posts)
 
 ### Opening Pattern (CRITICAL - First 2 sentences determine engagement)
@@ -464,6 +525,9 @@ Me: "I panicked, okay?"
 - Ask for upvotes
 - Start with "So..." or "Okay so..."
 - Write wall-of-text with no paragraph breaks
+- Include ANY direct links (spam signal)
+- Use marketing buzzwords or corporate language
+- Sound like an outsider or marketer
 `
 
 /**

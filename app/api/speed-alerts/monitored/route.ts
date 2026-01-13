@@ -154,12 +154,12 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// PATCH /api/speed-alerts/monitored - Update subreddit settings (active status, filter mode)
+// PATCH /api/speed-alerts/monitored - Update subreddit settings (active status, filter mode, reset)
 export async function PATCH(request: NextRequest) {
   try {
     const user = await requireUser()
     const body = await request.json()
-    const { id, isActive, filterMode } = body
+    const { id, isActive, filterMode, reset } = body
 
     if (!id) {
       return NextResponse.json(
@@ -181,12 +181,18 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Build update data - only include provided fields
-    const updateData: { isActive?: boolean; filterMode?: string } = {}
+    const updateData: { isActive?: boolean; filterMode?: string; lastPostId?: null; lastChecked?: null } = {}
     if (typeof isActive === 'boolean') {
       updateData.isActive = isActive
     }
     if (filterMode && (filterMode === 'all' || filterMode === 'questions')) {
       updateData.filterMode = filterMode
+    }
+    // Reset option clears lastPostId to force fresh alerts
+    if (reset === true) {
+      updateData.lastPostId = null
+      updateData.lastChecked = null
+      console.log(`[Speed Alerts] Resetting r/${monitored.subreddit} - will fetch fresh posts on next check`)
     }
 
     const updated = await prisma.monitoredSubreddit.update({

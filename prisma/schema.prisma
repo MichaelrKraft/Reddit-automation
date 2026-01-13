@@ -484,6 +484,7 @@ model AlphaFeedback {
   clerkId   String?
   type      String   @default("general")
   message   String
+  rating    Int?     // 1-5 star rating for "How do you like the app?"
   name      String?
   email     String?
   page      String?
@@ -541,6 +542,7 @@ model UserKeyword {
   userId        String
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   keyword       String
+  subreddits    String?        // Optional: comma-separated subreddit names (e.g., "startups,SaaS,entrepreneur"). If null, searches all of Reddit.
   isActive      Boolean        @default(true)
   lastCheckedAt DateTime?
   matchCount    Int            @default(0)

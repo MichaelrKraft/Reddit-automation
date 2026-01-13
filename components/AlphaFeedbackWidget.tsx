@@ -22,6 +22,8 @@ export default function AlphaFeedbackWidget() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [rating, setRating] = useState<number>(0)
+  const [hoveredRating, setHoveredRating] = useState<number>(0)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,6 +37,7 @@ export default function AlphaFeedbackWidget() {
         body: JSON.stringify({
           type,
           message,
+          rating: rating || null,
           name: name || null,
           email: email || null,
           page: pathname,
@@ -45,6 +48,7 @@ export default function AlphaFeedbackWidget() {
       if (response.ok) {
         setSubmitted(true)
         setMessage('')
+        setRating(0)
         setName('')
         setEmail('')
         setTimeout(() => {
@@ -102,6 +106,25 @@ export default function AlphaFeedbackWidget() {
                     {ft.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Star Rating */}
+              <div className="space-y-1">
+                <p className="text-[10px] text-gray-400">How do you like the app?</p>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      onMouseEnter={() => setHoveredRating(star)}
+                      onMouseLeave={() => setHoveredRating(0)}
+                      className="text-xl transition-transform hover:scale-110"
+                    >
+                      {star <= (hoveredRating || rating) ? '⭐' : '☆'}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Message */}

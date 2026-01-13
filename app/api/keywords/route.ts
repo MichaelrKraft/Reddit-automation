@@ -48,11 +48,22 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { action, keyword, keywordId } = body
+    const { action, keyword, keywordId, subreddits } = body
 
     // Action: add - Add a new keyword
     if (action === 'add' && keyword) {
       const normalized = keyword.toLowerCase().trim()
+
+      // Normalize subreddits: remove r/ prefix, lowercase, comma-separated
+      let normalizedSubreddits: string | null = null
+      if (subreddits && typeof subreddits === 'string' && subreddits.trim()) {
+        normalizedSubreddits = subreddits
+          .split(',')
+          .map(s => s.trim().replace(/^r\//, '').toLowerCase())
+          .filter(Boolean)
+          .join(',')
+        if (!normalizedSubreddits) normalizedSubreddits = null
+      }
 
       // Check if already exists
       const existing = await prisma.userKeyword.findFirst({
@@ -70,6 +81,7 @@ export async function POST(request: NextRequest) {
         data: {
           userId: user.id,
           keyword: normalized,
+          subreddits: normalizedSubreddits,
         },
       })
 

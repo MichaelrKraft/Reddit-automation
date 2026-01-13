@@ -178,9 +178,10 @@ export async function checkForNewPosts(
   const latestPostId = posts[0].id
 
   if (!lastPostId) {
-    // First check - return only the most recent post
-    console.log(`[Speed Alerts] r/${subreddit}: First check, returning 1 post`)
-    return { newPosts: [posts[0]], latestPostId }
+    // First check - return the 5 most recent posts to show the system is working
+    const initialPosts = posts.slice(0, 5)
+    console.log(`[Speed Alerts] r/${subreddit}: First check, returning ${initialPosts.length} initial posts`)
+    return { newPosts: initialPosts, latestPostId }
   }
 
   // If latest post is same as last seen, no new posts

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const { userId } = getAuth(req)
     const body = await req.json()
 
-    const { type, message, name, email, page, userAgent } = body
+    const { type, message, rating, name, email, page, userAgent } = body
 
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
       return NextResponse.json(
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         clerkId: userId || null,
         type: type || 'general',
         message: message.trim(),
+        rating: rating && rating >= 1 && rating <= 5 ? rating : null,
         name: name?.trim() || null,
         email: email?.trim() || null,
         page: page || null,
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
     console.log('[Alpha Feedback]', {
       id: feedback.id,
       type: feedback.type,
+      rating: feedback.rating,
       clerkId: feedback.clerkId,
       page: feedback.page,
       messagePreview: feedback.message.substring(0, 100),

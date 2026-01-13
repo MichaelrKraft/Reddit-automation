@@ -81,9 +81,10 @@ export function AnalyticsProvider({ children, enabled = true }: AnalyticsProvide
 
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement
+      const className = typeof target.className === 'string' ? target.className : ''
       const targetId = target.id ||
         target.getAttribute('data-track') ||
-        target.className?.split(' ')[0] ||
+        className.split(' ')[0] ||
         target.tagName.toLowerCase()
 
       detectRageClick(targetId, pathname)

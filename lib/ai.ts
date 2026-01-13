@@ -412,14 +412,39 @@ Original Post Content: ${options.postContent.slice(0, 500)}
 Comment by u/${options.commentAuthor}:
 ${options.commentContent}
 
+## VIRAL REPLY CHECKLIST (Must Pass All 5):
+
+1. IS IT TAILORED TO THE SUBREDDIT?
+   - Use vocabulary and tone specific to r/${options.subreddit}
+   - Reference community-specific knowledge
+
+2. DOES IT FEEL HUMAN?
+   - Write like a real person, not corporate/marketing speak
+   - NO buzzwords: "leverage", "synergy", "optimize", "solution"
+   - Use lowercase naturally, contractions, casual language
+   - NEVER include direct links
+
+3. IS IT WRITTEN BY A COMMUNITY MEMBER?
+   - Sound like you BELONG in this community
+   - Reference shared experiences and inside knowledge
+   - Don't sound like an outsider or marketer
+
+4. IS IT SKIMMABLE?
+   - Keep it concise (2-4 sentences)
+   - Get to the point quickly
+
+5. WOULD YOU SHARE THIS IF SOMEONE ELSE WROTE IT?
+   - Add genuine value to the discussion
+   - Make it helpful, not generic
+
 Requirements:
 1. Be helpful, friendly, and authentic
 2. Address the commenter's points directly
 3. Match the tone of the subreddit
 4. Be conversational and natural
 5. Keep it concise (2-4 sentences)
-6. Don't be overly promotional
-7. Add value to the discussion
+6. Don't be promotional AT ALL
+7. Add real value to the discussion
 
 Return ONLY the reply text, no JSON or formatting.
 `
@@ -628,8 +653,14 @@ Generate 6 DIFFERENT post variations. Each must:
 2. Optimize for the viral scoring rules in Part 2
 3. Achieve the user's goal naturally (no obvious promotion)
 4. Feel authentic to r/${subredditName}
+5. Fit ONE emotional category (Aspirational, Inspirational, or Controversial)
 
-Vary your approaches:
+Vary your approaches across these emotional categories:
+- 2 ASPIRATIONAL posts (makes people want to level up, success stories, transformations)
+- 2 INSPIRATIONAL posts (makes people want to take action, practical advice, motivation)
+- 2 CONTROVERSIAL posts (hot takes, challenges conventional wisdom, sparks debate)
+
+Also vary:
 - Some with first-person storytelling
 - Some with questions (if allowed)
 - Some with emotional hooks

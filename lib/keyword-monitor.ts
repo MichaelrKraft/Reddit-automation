@@ -22,8 +22,49 @@ export function getKeywordQueue(): Queue {
 }
 
 // Search Reddit using public JSON API (no auth required, FREE)
-async function searchReddit(keyword: string): Promise<any[]> {
-  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(keyword)}&sort=new&t=day&limit=25`
+// type=link ensures we only get posts, not comments
+// If subreddits provided, search within those specific subreddits
+async function searchReddit(keyword: string, subreddits?: string | null): Promise<any[]> {
+  let allPosts: any[] = []
+
+  // If subreddits specified, search each one individually
+  if (subreddits && subreddits.trim()) {
+    const subredditList = subreddits.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+
+    for (const subreddit of subredditList) {
+      // Use restrict_sr=1 to limit search to this subreddit only
+      const url = `https://www.reddit.com/r/${subreddit}/search.json?q=${encodeURIComponent(keyword)}&restrict_sr=1&sort=new&t=day&limit=15&type=link`
+
+      try {
+        // Add delay between subreddit searches to avoid rate limiting
+        if (allPosts.length > 0) {
+          await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+
+        const response = await fetch(url, {
+          headers: {
+            'User-Agent': 'ReddRide/1.0 (Keyword Monitor)',
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          const posts = data.data?.children?.map((child: any) => child.data) || []
+          allPosts = [...allPosts, ...posts]
+          console.log(`[KeywordMonitor] Found ${posts.length} posts for "${keyword}" in r/${subreddit}`)
+        } else {
+          console.warn(`[KeywordMonitor] Search failed for r/${subreddit}: ${response.status}`)
+        }
+      } catch (error) {
+        console.error(`[KeywordMonitor] Search error for r/${subreddit}:`, error)
+      }
+    }
+
+    return allPosts
+  }
+
+  // No subreddits specified - search all of Reddit
+  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(keyword)}&sort=new&t=day&limit=25&type=link`
 
   try {
     const response = await fetch(url, {
@@ -82,9 +123,12 @@ async function monitorKeyword(keywordId: string) {
     return { newMatches: 0 }
   }
 
-  console.log(`[KeywordMonitor] Searching for "${keyword.keyword}"`)
+  const searchScope = keyword.subreddits
+    ? `in r/${keyword.subreddits.split(',').join(', r/')}`
+    : 'across all of Reddit'
+  console.log(`[KeywordMonitor] Searching for "${keyword.keyword}" ${searchScope}`)
 
-  const posts = await searchReddit(keyword.keyword)
+  const posts = await searchReddit(keyword.keyword, keyword.subreddits)
   let newMatches = 0
 
   for (const post of posts) {
