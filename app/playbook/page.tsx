@@ -63,7 +63,7 @@ export default function PlaybookPage() {
           </a>
 
           <p className="text-sm text-gray-500 mt-4">
-            PDF format &bull; 503 KB
+            PDF format &bull; 510 KB
           </p>
         </div>
 
