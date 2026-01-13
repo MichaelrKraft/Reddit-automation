@@ -165,8 +165,8 @@ export default function NewPost() {
         throw new Error(data.error || 'Failed to save draft')
       }
 
-      setMessage({ type: 'success', text: 'Draft saved successfully! Redirecting to dashboard...' })
-      setTimeout(() => router.push('/dashboard'), 1500)
+      setMessage({ type: 'success', text: 'Draft saved successfully! Redirecting to drafts...' })
+      setTimeout(() => router.push('/dashboard/drafts'), 1500)
     } catch (error: any) {
       console.error('Save draft error:', error)
       setMessage({ type: 'error', text: `Error: ${error.message}` })

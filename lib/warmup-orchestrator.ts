@@ -1,7 +1,7 @@
 import { Queue } from 'bullmq'
 import { prisma } from '@/lib/prisma'
 import { getConnection } from '@/lib/queue'
-import { WARMUP_PHASES, calculatePhase } from '@/lib/warmup-worker'
+import { WARMUP_PHASES, calculatePhase, getCurrentSubreddit, WARMUP_SUBREDDITS } from '@/lib/warmup-worker'
 
 // Helper to get today's date string in YYYY-MM-DD format
 function getTodayDateString(): string {
@@ -120,6 +120,9 @@ class WarmupOrchestrator {
         account.warmupStartedAt = new Date()
       }
 
+      // FIX #5: Get current subreddit for this account (rotates if banned)
+      const targetSubreddit = await getCurrentSubreddit(account.id)
+
       // Calculate current phase
       const calculatedPhase = calculatePhase(account.warmupStartedAt)
 
@@ -175,7 +178,7 @@ class WarmupOrchestrator {
             {
               accountId: account.id,
               action: 'upvote',
-              targetSubreddit: 'CasualConversation',
+              targetSubreddit, // FIX #5: Use dynamic subreddit
             },
             {
               jobId, // Prevents duplicate jobs for same account on same day
@@ -204,7 +207,7 @@ class WarmupOrchestrator {
             {
               accountId: account.id,
               action: 'comment',
-              targetSubreddit: 'CasualConversation',
+              targetSubreddit, // FIX #5: Use dynamic subreddit
             },
             {
               jobId,
@@ -233,7 +236,7 @@ class WarmupOrchestrator {
             {
               accountId: account.id,
               action: 'post',
-              targetSubreddit: 'CasualConversation',
+              targetSubreddit, // FIX #5: Use dynamic subreddit
             },
             {
               jobId,
@@ -251,7 +254,7 @@ class WarmupOrchestrator {
         }
       }
 
-      console.log(`📋 Scheduled jobs for account ${account.username} (${account.warmupStatus})`)
+      console.log(`📋 Scheduled jobs for account ${account.username} (${account.warmupStatus}) → r/${targetSubreddit}`)
     } catch (error) {
       console.error(`Error scheduling jobs for account ${account.id}:`, error)
     }

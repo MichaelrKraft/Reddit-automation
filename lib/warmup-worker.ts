@@ -8,6 +8,96 @@ import { getConnection } from '@/lib/queue'
 const MAX_CONSECUTIVE_ERRORS = 3 // Mark as FAILED after 3 consecutive 403 errors
 const COOLDOWN_HOURS = 1 // Pause for 1 hour after a 403 error
 
+// FIX #5: Multiple warmup subreddits with automatic rotation on bans
+// These are friendly, high-activity subreddits that allow text posts
+export const WARMUP_SUBREDDITS = [
+  'CasualConversation',  // Default - friendly casual chat
+  'self',                // Personal stories and thoughts
+  'TrueOffMyChest',      // Venting and sharing experiences
+  'NoStupidQuestions',   // Q&A format, very welcoming
+  'AskReddit',           // Questions (comments only, no posts for new accounts)
+  'TooAfraidToAsk',      // Q&A, welcoming to new users
+  'RandomThoughts',      // Random musings
+  'benignexistence',     // Low-key life updates
+  'PointlessStories',    // Mundane stories welcome
+  'Showerthoughts',      // Quick thoughts
+]
+
+// Helper to get current subreddit for an account (with rotation support)
+export async function getCurrentSubreddit(accountId: string): Promise<string> {
+  const account = await prisma.redditAccount.findUnique({
+    where: { id: accountId },
+  })
+
+  if (!account) return WARMUP_SUBREDDITS[0]
+
+  const progress = (account.warmupProgress as any) || {}
+  const bannedSubreddits = progress.bannedSubreddits || []
+
+  // Find first non-banned subreddit
+  for (const subreddit of WARMUP_SUBREDDITS) {
+    if (!bannedSubreddits.includes(subreddit)) {
+      return subreddit
+    }
+  }
+
+  // All subreddits banned - return first one (will fail but triggers FAILED status)
+  return WARMUP_SUBREDDITS[0]
+}
+
+// Helper to mark a subreddit as banned for an account and rotate to next
+export async function rotateToNextSubreddit(accountId: string, bannedSubreddit: string): Promise<string | null> {
+  const account = await prisma.redditAccount.findUnique({
+    where: { id: accountId },
+  })
+
+  if (!account) return null
+
+  const progress = (account.warmupProgress as any) || { daily: [] }
+
+  // Initialize banned subreddits array if not present
+  if (!progress.bannedSubreddits) {
+    progress.bannedSubreddits = []
+  }
+
+  // Add to banned list if not already there
+  if (!progress.bannedSubreddits.includes(bannedSubreddit)) {
+    progress.bannedSubreddits.push(bannedSubreddit)
+    console.log(`🚫 Marked r/${bannedSubreddit} as banned for account ${accountId}`)
+  }
+
+  // Find next available subreddit
+  let nextSubreddit: string | null = null
+  for (const subreddit of WARMUP_SUBREDDITS) {
+    if (!progress.bannedSubreddits.includes(subreddit)) {
+      nextSubreddit = subreddit
+      break
+    }
+  }
+
+  // Update progress in database
+  await prisma.redditAccount.update({
+    where: { id: accountId },
+    data: { warmupProgress: progress },
+  })
+
+  if (nextSubreddit) {
+    console.log(`🔄 Rotated to r/${nextSubreddit} for account ${accountId}`)
+  } else {
+    console.log(`⚠️ All subreddits banned for account ${accountId}`)
+  }
+
+  return nextSubreddit
+}
+
+// Check if error indicates a ban
+function isBanError(error: Error): boolean {
+  const message = error.message.toLowerCase()
+  return message.includes('banned') ||
+         message.includes('subreddit_notallowed') ||
+         message.includes('banned_from_subreddit')
+}
+
 // Helper to track and check consecutive errors
 async function recordError(accountId: string, errorType: string): Promise<number> {
   const account = await prisma.redditAccount.findUnique({
@@ -449,7 +539,30 @@ async function processWarmupJob(job: Job<WarmupJobData>): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : String(error)
     await trackFailedAttempt(accountId, action, errorMessage)
 
-    // FIX #3: Progressive error handling - don't fail immediately on first 403
+    // FIX #5: Handle ban errors by rotating to next subreddit
+    if (error instanceof Error && isBanError(error)) {
+      console.log(`🚫 Ban detected for account ${accountId} in r/${targetSubreddit}`)
+
+      const nextSubreddit = await rotateToNextSubreddit(accountId, targetSubreddit)
+
+      if (nextSubreddit) {
+        // Clear error tracking since this is a ban, not a rate limit
+        await clearErrorTracking(accountId)
+        console.log(`✅ Will try r/${nextSubreddit} on next run`)
+        // Don't throw - let the job complete so next run uses new subreddit
+        return
+      } else {
+        // All subreddits exhausted
+        await prisma.redditAccount.update({
+          where: { id: accountId },
+          data: { warmupStatus: 'FAILED' },
+        })
+        console.log(`🚫 Account ${accountId} marked as FAILED - banned from all warmup subreddits`)
+        throw error
+      }
+    }
+
+    // FIX #3: Progressive error handling - don't fail immediately on first 403/429
     if (error instanceof Error && (error.message.includes('403') || error.message.includes('429'))) {
       const errorCount = await recordError(accountId, error.message.includes('403') ? '403' : '429')
 
