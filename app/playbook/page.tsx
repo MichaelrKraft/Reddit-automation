@@ -1,16 +1,17 @@
 'use client'
 
 import Link from 'next/link'
+import ShinyText from '@/components/ShinyText'
 
 export default function PlaybookPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]">
       {/* Header */}
       <header className="border-b border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col items-center">
-          <Link href="/" className="flex items-center justify-center">
-            <img src="/reddride-logo.png" alt="ReddRide" className="h-24" />
-          </Link>
+        <div className="max-w-6xl mx-auto px-6 py-2 flex flex-col items-center">
+          <a href="https://reddride.com" className="flex items-center justify-center">
+            <img src="/reddride-logo.png" alt="ReddRide" className="h-12 scale-[2] origin-center" />
+          </a>
         </div>
       </header>
 
@@ -21,7 +22,7 @@ export default function PlaybookPage() {
             FREE DOWNLOAD
           </span>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            The Reddit Marketing Playbook
+            <ShinyText>The Reddit Marketing Playbook</ShinyText>
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             The complete guide to growing your business on Reddit without getting banned.
