@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Add to suggestions array based on style index
-        const styleIndex = { helpful: 0, curious: 1, supportive: 2 }[style] ?? 0
+        const styleMap: Record<string, number> = { helpful: 0, curious: 1, supportive: 2 }
+        const styleIndex = styleMap[style as string] ?? 0
         while (suggestions.length <= styleIndex) {
           suggestions.push('')
         }
