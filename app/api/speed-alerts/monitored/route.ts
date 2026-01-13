@@ -191,7 +191,6 @@ export async function PATCH(request: NextRequest) {
     // Reset option clears lastPostId to force fresh alerts
     if (reset === true) {
       updateData.lastPostId = null
-      updateData.lastChecked = null
       console.log(`[Speed Alerts] Resetting r/${monitored.subreddit} - will fetch fresh posts on next check`)
     }
 
