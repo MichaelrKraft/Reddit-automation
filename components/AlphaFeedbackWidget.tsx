@@ -16,6 +16,11 @@ export default function AlphaFeedbackWidget() {
   const { userId } = useAuth()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+
+  // Hide on landing pages
+  if (pathname === '/playbook') {
+    return null
+  }
   const [type, setType] = useState<FeedbackType>('general')
   const [message, setMessage] = useState('')
   const [name, setName] = useState('')
