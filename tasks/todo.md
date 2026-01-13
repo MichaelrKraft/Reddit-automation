@@ -199,3 +199,26 @@ ADMIN_CLERK_IDS=user_370UV0Bh0jm30d9CTuZbrAjNc1N
 3. Add computed metrics (time to first post, engagement scores)
 4. Create retention curve visualizations
 5. Add export functionality for analytics data
+
+---
+
+## Keyword Alerts Improvements (2025-01-12)
+
+### Task
+Fix duplicate alerts and add AI reply buttons to Keyword Alerts
+
+### Completed Changes
+
+**1. Fixed Duplicate Alerts**
+- Added `useMemo` hook to deduplicate matches by `postUrl`
+- Same Reddit post now shows only once, with all matching keywords displayed as badges
+- Uses latest `matchedAt` timestamp when merging duplicates
+
+**2. Added AI Reply Buttons**
+- Parses `aiSuggestions` JSON field (already populated by keyword-monitor.ts)
+- Shows 3 buttons: **Helpful** (cyan), **Curious** (orange), **Supportive** (green)
+- Clicking a button copies the AI reply to clipboard and opens the Reddit post
+- Falls back to "Open Thread →" link if no AI suggestions available
+
+### File Modified
+- `app/dashboard/speed-alerts/page.tsx` - KeywordAlertsPanel component (lines 1254-1486)

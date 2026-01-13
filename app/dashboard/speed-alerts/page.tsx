@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 
 interface MonitoredSubreddit {
@@ -234,6 +234,22 @@ export default function SpeedAlertsPage() {
     }
   }
 
+  async function resetSubreddit(id: string) {
+    try {
+      const response = await fetch('/api/speed-alerts/monitored', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, reset: true }),
+      })
+      if (response.ok) {
+        // The next monitoring cycle will fetch fresh posts
+        console.log('[Speed Alerts UI] Subreddit reset - will fetch fresh posts')
+      }
+    } catch (err) {
+      console.error('Failed to reset subreddit:', err)
+    }
+  }
+
   const startMonitoring = useCallback(() => {
     console.log('[Speed Alerts UI] Starting monitoring...')
 
@@ -424,7 +440,7 @@ export default function SpeedAlertsPage() {
           <button
             onClick={startMonitoring}
             disabled={monitored.length === 0}
-            className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:bg-gray-600 disabled:text-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
+            className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             Start Monitoring
           </button>
@@ -473,7 +489,7 @@ export default function SpeedAlertsPage() {
               />
               <button
                 onClick={addSubreddit}
-                className="bg-reddit-orange text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition"
+                className="bg-[#00D9FF] text-black px-6 py-2 rounded-lg hover:bg-opacity-80 transition font-semibold"
               >
                 Add
               </button>
@@ -516,12 +532,20 @@ export default function SpeedAlertsPage() {
                         <select
                           value={sub.filterMode || 'all'}
                           onChange={(e) => updateFilterMode(sub.id, e.target.value as 'all' | 'questions')}
-                          className="text-xs px-2 py-1 bg-[#12121a] border border-gray-600 rounded text-gray-300 focus:border-[#00D9FF] focus:outline-none"
+                          className="text-xs px-2 py-1 bg-[#12121a] border border-gray-600 rounded text-gray-300 focus:border-[#00D9FF] focus:outline-none cursor-pointer [&>option]:bg-[#12121a] [&>option]:text-gray-300"
                           title="Filter posts by type"
+                          style={{ colorScheme: 'dark' }}
                         >
                           <option value="all">All Posts</option>
                           <option value="questions">Questions Only</option>
                         </select>
+                        <button
+                          onClick={() => resetSubreddit(sub.id)}
+                          className="text-[#00D9FF] hover:text-cyan-300 text-sm"
+                          title="Reset to fetch fresh posts"
+                        >
+                          Refresh
+                        </button>
                         <button
                           onClick={() => removeSubreddit(sub.id)}
                           className="text-red-400 hover:text-red-300 text-sm"
@@ -646,16 +670,60 @@ export default function SpeedAlertsPage() {
           </div>
         </div>
 
-      {/* Keyword Alerts & Discover Subreddits Side by Side */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div>
-          <h2 className="text-[22px] font-bold text-white mb-3">Keyword Alerts</h2>
-          <KeywordAlertsSection />
+      {/* Keyword Monitoring Section */}
+      <div className="mt-8">
+        {/* Section Header */}
+        <h2 className="text-[22px] font-bold text-white mb-3 text-center">Keyword Monitoring</h2>
+
+        {/* Controls - matches top section pattern */}
+        <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-6">
+          <button
+            type="button"
+            className="bg-[#00D9FF] text-black font-medium px-4 sm:px-6 py-2 rounded-lg hover:bg-[#00D9FF]/80 transition text-sm sm:text-base cursor-pointer"
+            onClick={() => {
+              // Trigger scan via the KeywordMonitoredPanel
+              const scanBtn = document.querySelector('[data-keyword-scan]') as HTMLButtonElement
+              if (scanBtn) scanBtn.click()
+            }}
+          >
+            Start Monitoring
+          </button>
+          <button
+            onClick={() => {
+              setSoundEnabled(!soundEnabled)
+              soundEnabledRef.current = !soundEnabled
+            }}
+            className={`p-2 rounded-lg transition ${
+              soundEnabled
+                ? 'bg-[#00D9FF]/20 text-[#00D9FF] border border-[#00D9FF]/50'
+                : 'bg-gray-700 text-gray-400 border border-gray-600'
+            }`}
+            title={soundEnabled ? 'Sound alerts ON - Click to mute' : 'Sound alerts OFF - Click to enable'}
+          >
+            {soundEnabled ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4 3a1 1 0 011.414-.414l14 14a1 1 0 01-1.414 1.414l-1.445-1.445A1 1 0 0116 16H4a1 1 0 01-.707-1.707L4 13.586V8a6 6 0 015.659-5.986L4.414 2.414A1 1 0 014 3zm2 5v.586l8.293 8.293A.996.996 0 0116 16H4.414L6 14.414V8zM10 2a6 6 0 016 6v.586l-2-2V8a4 4 0 00-4-4z" clipRule="evenodd" />
+                <path d="M10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+              </svg>
+            )}
+          </button>
         </div>
-        <div>
-          <h2 className="text-[22px] font-bold text-white mb-3">Discover Subreddits</h2>
-          <DiscoverSection />
+
+        {/* Keyword Alerts - 2 column grid matching above pattern */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <KeywordMonitoredPanel />
+          <KeywordAlertsPanel />
         </div>
+      </div>
+
+      {/* Discover Subreddits - Full Width at Bottom */}
+      <div className="mt-8">
+        <h2 className="text-[22px] font-bold text-white mb-3">Discover Subreddits</h2>
+        <DiscoverSection />
       </div>
 
       <div className="text-center mt-8">
@@ -949,31 +1017,43 @@ interface Subreddit {
   relevance?: number
 }
 
-// Keyword Alerts Section Component
-function KeywordAlertsSection() {
-  const [keywords, setKeywords] = useState<{ id: string; keyword: string; isActive: boolean; _count: { matches: number } }[]>([])
-  const [matches, setMatches] = useState<{ id: string; postTitle: string; postUrl: string; subreddit: string; matchedAt: string; keyword: { keyword: string } }[]>([])
+// Keyword Monitored Panel (Left Panel - matches Monitored Subreddits pattern)
+function KeywordMonitoredPanel() {
+  const [keywords, setKeywords] = useState<{ id: string; keyword: string; subreddits: string | null; isActive: boolean; _count: { matches: number } }[]>([])
   const [newKeyword, setNewKeyword] = useState('')
+  const [newSubreddits, setNewSubreddits] = useState('')
   const [loading, setLoading] = useState(true)
   const [scanning, setScanning] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Retry helper for slow API calls
+  async function fetchWithRetry(url: string, options?: RequestInit, retries = 3): Promise<Response> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url, options)
+        if (!response.ok && response.status >= 500) throw new Error(`HTTP ${response.status}`)
+        return response
+      } catch (error) {
+        if (i === retries - 1) throw error
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)))
+      }
+    }
+    throw new Error('Max retries exceeded')
+  }
 
   useEffect(() => {
-    fetchData()
+    fetchKeywords()
   }, [])
 
-  async function fetchData() {
+  async function fetchKeywords() {
     try {
       setLoading(true)
-      const [keywordsRes, matchesRes] = await Promise.all([
-        fetch('/api/keywords'),
-        fetch('/api/keywords/matches?unreadOnly=true'),
-      ])
-      const keywordsData = await keywordsRes.json()
-      const matchesData = await matchesRes.json()
-      setKeywords(keywordsData.keywords || [])
-      setMatches(matchesData.matches || [])
-    } catch (error) {
-      console.error('Failed to fetch keyword data:', error)
+      const response = await fetchWithRetry('/api/keywords')
+      const data = await response.json()
+      setKeywords(data.keywords || [])
+    } catch (err) {
+      console.error('Failed to fetch keywords:', err)
+      // Silent fail - data will refresh on next attempt
     } finally {
       setLoading(false)
     }
@@ -981,47 +1061,245 @@ function KeywordAlertsSection() {
 
   async function addKeyword() {
     if (!newKeyword.trim()) return
+    setError(null)
     try {
-      const response = await fetch('/api/keywords', {
+      const response = await fetchWithRetry('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', keyword: newKeyword }),
+        body: JSON.stringify({
+          action: 'add',
+          keyword: newKeyword,
+          subreddits: newSubreddits.trim() || null,
+        }),
       })
       if (response.ok) {
         setNewKeyword('')
-        await fetchData()
+        setNewSubreddits('')
+        // Refresh list - if this fails, keyword was still added successfully
+        try {
+          await fetchKeywords()
+        } catch {
+          // Silent fail - keyword was added, will show on next refresh
+        }
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Failed to add keyword')
       }
-    } catch (error) {
-      console.error('Failed to add keyword:', error)
+    } catch (err) {
+      setError('Failed to add keyword - please try again')
     }
   }
 
   async function deleteKeyword(keywordId: string) {
     try {
-      await fetch('/api/keywords', {
+      await fetchWithRetry('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'delete', keywordId }),
       })
-      await fetchData()
-    } catch (error) {
-      console.error('Failed to delete keyword:', error)
+      await fetchKeywords()
+    } catch (err) {
+      console.error('Failed to delete keyword:', err)
+    }
+  }
+
+  async function toggleKeyword(keywordId: string, isActive: boolean) {
+    try {
+      await fetchWithRetry('/api/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'toggle', keywordId, isActive: !isActive }),
+      })
+      await fetchKeywords()
+    } catch (err) {
+      console.error('Failed to toggle keyword:', err)
     }
   }
 
   async function scanNow() {
     try {
       setScanning(true)
-      await fetch('/api/keywords', {
+      await fetchWithRetry('/api/keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'scan' }),
       })
-      await fetchData()
-    } catch (error) {
-      console.error('Scan failed:', error)
+      await fetchKeywords()
+    } catch (err) {
+      console.error('Scan failed:', err)
     } finally {
       setScanning(false)
+    }
+  }
+
+  return (
+    <div className="feature-card rounded-xl p-4 sm:p-5 flex flex-col h-full">
+      {/* Header */}
+      <h3 className="text-[22px] font-semibold text-white mb-3">Monitored Keywords</h3>
+
+      {/* Add Input */}
+      <div className="space-y-2 mb-3">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newKeyword}
+            onChange={(e) => setNewKeyword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
+            placeholder="Enter keyword to monitor..."
+            className="flex-1 px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:border-[#00D9FF] focus:outline-none text-white placeholder-gray-500"
+          />
+          <button
+            onClick={addKeyword}
+            disabled={!newKeyword.trim()}
+            className="bg-[#00D9FF] text-black px-6 py-2 rounded-lg hover:bg-opacity-80 transition font-semibold disabled:opacity-70"
+          >
+            Add
+          </button>
+        </div>
+        <input
+          type="text"
+          value={newSubreddits}
+          onChange={(e) => setNewSubreddits(e.target.value)}
+          placeholder="Subreddits (optional): startups, SaaS, entrepreneur"
+          className="w-full px-4 py-2 border border-gray-600 bg-[#12121a] rounded-lg focus:border-[#00D9FF] focus:outline-none text-white placeholder-gray-500 text-sm"
+        />
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-900/50 border border-red-700 text-red-300 px-3 py-2 rounded-lg mb-3 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Keywords List */}
+      <div className="flex-1 mb-4">
+        {loading ? (
+          <div className="flex items-center justify-center h-20">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00D9FF]"></div>
+          </div>
+        ) : keywords.length === 0 ? (
+          <p className="text-gray-500 text-center py-6">No keywords being monitored. Add one above!</p>
+        ) : (
+          <div className="max-h-[200px] overflow-y-auto space-y-2 pr-2">
+            {keywords.map((kw) => (
+              <div
+                key={kw.id}
+                className="flex items-center justify-between p-3 bg-[#1a1a24] border border-gray-700 rounded-lg hover:border-gray-600 transition"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                        kw.isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
+                      }`}
+                    ></span>
+                    <span className="font-medium text-[#00D9FF]">{kw.keyword}</span>
+                    <span className="text-gray-500 text-sm">({kw._count.matches})</span>
+                  </div>
+                  {kw.subreddits ? (
+                    <div className="ml-5 mt-1 text-xs text-gray-400 truncate">
+                      r/{kw.subreddits.split(',').join(', r/')}
+                    </div>
+                  ) : (
+                    <div className="ml-5 mt-1 text-xs text-gray-500">All Reddit</div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleKeyword(kw.id, kw.isActive)}
+                    className={`text-xs px-2 py-1 rounded ${
+                      kw.isActive
+                        ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30'
+                        : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                    }`}
+                    title={kw.isActive ? 'Pause monitoring' : 'Resume monitoring'}
+                  >
+                    {kw.isActive ? '⏸' : '▶'}
+                  </button>
+                  <button
+                    onClick={() => deleteKeyword(kw.id)}
+                    className="text-red-400 hover:text-red-300 text-sm"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Hidden trigger for top-level Start Monitoring button */}
+      <button
+        data-keyword-scan
+        onClick={scanNow}
+        className="hidden"
+        aria-hidden="true"
+      />
+
+      {/* Instructions */}
+      <div className="mt-auto p-3 bg-blue-900/30 border border-blue-700 rounded-lg">
+        <h3 className="font-medium text-blue-300 text-sm mb-1">
+          How It Works
+        </h3>
+        <p className="text-xs text-blue-200">
+          Add keywords → Start monitoring → Get alerts when posts mention them!
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// Keyword Alerts Panel (Right Panel - matches Recent Alerts pattern)
+function KeywordAlertsPanel() {
+  const [matches, setMatches] = useState<{ id: string; postTitle: string; postUrl: string; subreddit: string; matchedAt: string; keyword: { keyword: string }; isRead?: boolean; aiSuggestions?: string | null }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [copiedComment, setCopiedComment] = useState<string | null>(null)
+
+  // Retry helper for slow API calls
+  async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const response = await fetch(url)
+        if (!response.ok && response.status >= 500) throw new Error(`HTTP ${response.status}`)
+        return response
+      } catch (error) {
+        if (i === retries - 1) throw error
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, i)))
+      }
+    }
+    throw new Error('Max retries exceeded')
+  }
+
+  useEffect(() => {
+    fetchMatches()
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(fetchMatches, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  async function fetchMatches() {
+    try {
+      const response = await fetchWithRetry('/api/keywords/matches?limit=50')
+      const data = await response.json()
+      setMatches(data.matches || [])
+    } catch (err) {
+      console.error('Failed to fetch matches:', err)
+      // Silent fail for polling - data will refresh on next interval
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function clearAll() {
+    try {
+      await fetch('/api/keywords/matches', {
+        method: 'DELETE',
+      })
+      setMatches([])
+    } catch (err) {
+      console.error('Failed to clear matches:', err)
     }
   }
 
@@ -1031,104 +1309,178 @@ function KeywordAlertsSection() {
     const diffMs = now.getTime() - date.getTime()
     const diffMins = Math.floor(diffMs / 60000)
     const diffHours = Math.floor(diffMins / 60)
-    if (diffMins < 60) return `${diffMins}m`
-    if (diffHours < 24) return `${diffHours}h`
-    return `${Math.floor(diffHours / 24)}d`
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    return `${Math.floor(diffHours / 24)}d ago`
+  }
+
+  function copyComment(text: string, matchId: string, style: string) {
+    navigator.clipboard.writeText(text)
+    setCopiedComment(`${matchId}-${style}`)
+    setTimeout(() => setCopiedComment(null), 2000)
+  }
+
+  // Deduplicate matches by postUrl - group keywords for same post
+  const deduplicatedMatches = useMemo(() => {
+    const grouped = new Map<string, {
+      id: string
+      postTitle: string
+      postUrl: string
+      subreddit: string
+      matchedAt: string
+      keywords: string[]
+      aiSuggestions: string[]
+    }>()
+
+    for (const match of matches) {
+      const existing = grouped.get(match.postUrl)
+      if (existing) {
+        // Add keyword if not already present
+        if (!existing.keywords.includes(match.keyword.keyword)) {
+          existing.keywords.push(match.keyword.keyword)
+        }
+        // Use latest matchedAt
+        if (new Date(match.matchedAt) > new Date(existing.matchedAt)) {
+          existing.matchedAt = match.matchedAt
+        }
+        // Merge AI suggestions if available
+        if (match.aiSuggestions) {
+          try {
+            const suggestions = JSON.parse(match.aiSuggestions) as string[]
+            for (const s of suggestions) {
+              if (!existing.aiSuggestions.includes(s)) {
+                existing.aiSuggestions.push(s)
+              }
+            }
+          } catch {}
+        }
+      } else {
+        let aiSuggestions: string[] = []
+        if (match.aiSuggestions) {
+          try {
+            aiSuggestions = JSON.parse(match.aiSuggestions) as string[]
+          } catch {}
+        }
+        grouped.set(match.postUrl, {
+          id: match.id,
+          postTitle: match.postTitle,
+          postUrl: match.postUrl,
+          subreddit: match.subreddit,
+          matchedAt: match.matchedAt,
+          keywords: [match.keyword.keyword],
+          aiSuggestions,
+        })
+      }
+    }
+
+    return Array.from(grouped.values()).sort(
+      (a, b) => new Date(b.matchedAt).getTime() - new Date(a.matchedAt).getTime()
+    )
+  }, [matches])
+
+  const styleLabels = ['helpful', 'curious', 'supportive'] as const
+  const styleColors = {
+    helpful: 'bg-[#00D9FF]/10 text-[#00D9FF] border-[#00D9FF]/50',
+    curious: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
+    supportive: 'bg-green-500/10 text-green-400 border-green-500/50',
   }
 
   return (
-    <>
-      {/* Add Keyword Input */}
-      <div className="feature-card rounded-lg p-4 mb-3">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newKeyword}
-            onChange={(e) => setNewKeyword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addKeyword()}
-            placeholder="Add keyword..."
-            className="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 text-sm"
-          />
-          <button
-            onClick={addKeyword}
-            disabled={!newKeyword.trim()}
-            className="px-4 py-2 bg-[#00D9FF] hover:bg-[#00D9FF]/80 text-black font-medium rounded-lg text-sm disabled:opacity-50"
-          >
-            Add
-          </button>
-          <button
-            onClick={scanNow}
-            disabled={scanning}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50"
-          >
-            {scanning ? '...' : 'Scan'}
-          </button>
-        </div>
-
-        {/* Keywords Pills */}
-        {keywords.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {keywords.map((kw) => (
-              <div
-                key={kw.id}
-                className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
-                  kw.isActive
-                    ? 'bg-[#00D9FF]/10 border border-[#00D9FF]/50 text-[#00D9FF]'
-                    : 'bg-gray-800 border border-gray-600 text-gray-400'
-                }`}
-              >
-                <span>{kw.keyword}</span>
-                <span className="opacity-70">({kw._count.matches})</span>
-                <button
-                  onClick={() => deleteKeyword(kw.id)}
-                  className="text-red-400 hover:text-red-300 ml-1"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+    <div className="feature-card rounded-xl p-4 sm:p-5 flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[22px] font-semibold text-[#00D9FF]">Recent Keyword Alerts</h3>
+        <div className="flex items-center gap-3">
+          {matches.length > 0 && (
+            <button
+              onClick={clearAll}
+              className="text-gray-400 hover:text-red-400 text-sm transition"
+            >
+              Clear All
+            </button>
+          )}
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span className="text-gray-400 text-sm">Live</span>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Matches */}
-      <div className="feature-card rounded-lg p-3 max-h-[200px] overflow-y-auto">
-        {loading ? (
-          <div className="text-center py-6">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00D9FF] mx-auto"></div>
-          </div>
-        ) : matches.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-gray-400 text-sm">
-              {keywords.length === 0 ? 'Add keywords to monitor' : 'No matches yet'}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {matches.slice(0, 5).map((match) => (
+      {/* Alerts List */}
+      {loading ? (
+        <div className="flex items-center justify-center flex-1">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D9FF]"></div>
+        </div>
+      ) : deduplicatedMatches.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 text-center">
+            No keyword matches yet. Add keywords and they&apos;ll appear here when found.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+          {deduplicatedMatches.map((match) => (
+            <div
+              key={match.id}
+              className="p-4 border border-[#00D9FF]/30 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
+            >
+              {/* Match Header */}
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  {match.keywords.map((kw) => (
+                    <span key={kw} className="px-2 py-0.5 bg-[#00D9FF]/20 text-[#00D9FF] rounded text-xs font-medium">
+                      {kw}
+                    </span>
+                  ))}
+                  <span className="text-blue-400">r/{match.subreddit}</span>
+                  <span className="text-gray-500">{formatTimeAgo(match.matchedAt)}</span>
+                </div>
+              </div>
+
+              {/* Post Title */}
               <a
-                key={match.id}
                 href={match.postUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-2 border border-gray-700 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
+                className="block text-white hover:text-[#00D9FF] transition mb-3 line-clamp-2"
               >
-                <div className="flex items-center gap-2 text-xs text-gray-400 mb-1">
-                  <span className="text-[#00D9FF]">{match.keyword.keyword}</span>
-                  <span>•</span>
-                  <span className="text-blue-400">r/{match.subreddit}</span>
-                  <span>•</span>
-                  <span>{formatTimeAgo(match.matchedAt)}</span>
-                </div>
-                <p className="text-white text-sm line-clamp-1">{match.postTitle}</p>
+                {match.postTitle}
               </a>
-            ))}
-            {matches.length > 5 && (
-              <p className="text-center text-xs text-gray-500">+{matches.length - 5} more</p>
-            )}
-          </div>
-        )}
-      </div>
-    </>
+
+              {/* AI Reply Buttons - or Open Thread link if no suggestions */}
+              {match.aiSuggestions.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {match.aiSuggestions.slice(0, 3).map((suggestion, idx) => {
+                    const style = styleLabels[idx] || 'helpful'
+                    return (
+                      <button
+                        key={`${match.id}-${style}`}
+                        className={`px-3 py-1.5 rounded border text-xs font-semibold uppercase ${styleColors[style]} cursor-pointer hover:opacity-80 transition`}
+                        title={`Click to copy ${style} reply and open Reddit post`}
+                        onClick={() => {
+                          copyComment(suggestion, match.id, style)
+                          window.open(match.postUrl, '_blank')
+                        }}
+                      >
+                        {copiedComment === `${match.id}-${style}` ? '✓ Copied!' : style}
+                      </button>
+                    )
+                  })}
+                </div>
+              ) : (
+                <a
+                  href={match.postUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[#00D9FF] text-sm hover:underline"
+                >
+                  Open Thread →
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
