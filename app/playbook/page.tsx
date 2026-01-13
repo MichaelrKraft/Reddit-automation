@@ -7,9 +7,9 @@ export default function PlaybookPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]">
       {/* Header */}
       <header className="border-b border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/reddride-logo.png" alt="ReddRide" className="h-8" />
+        <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col items-center gap-4">
+          <Link href="/" className="flex items-center justify-center">
+            <img src="/reddride-logo.png" alt="ReddRide" className="h-24" />
           </Link>
           <Link
             href="/sign-up"
