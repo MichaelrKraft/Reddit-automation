@@ -1256,6 +1256,8 @@ function KeywordAlertsPanel() {
   const [matches, setMatches] = useState<{ id: string; postTitle: string; postUrl: string; subreddit: string; matchedAt: string; keyword: { keyword: string }; isRead?: boolean; aiSuggestions?: string | null }[]>([])
   const [loading, setLoading] = useState(true)
   const [copiedComment, setCopiedComment] = useState<string | null>(null)
+  const [generatingReply, setGeneratingReply] = useState<string | null>(null)
+  const [generatedReplies, setGeneratedReplies] = useState<Record<string, string>>({})
 
   // Retry helper for slow API calls
   async function fetchWithRetry(url: string, retries = 3): Promise<Response> {
@@ -1318,6 +1320,48 @@ function KeywordAlertsPanel() {
     navigator.clipboard.writeText(text)
     setCopiedComment(`${matchId}-${style}`)
     setTimeout(() => setCopiedComment(null), 2000)
+  }
+
+  async function generateAndCopy(match: { id: string; postTitle: string; postUrl: string; subreddit: string }, style: string, idx: number, existingSuggestion?: string) {
+    const cacheKey = `${match.id}-${style}`
+
+    // If we have an existing suggestion or cached reply, use it
+    if (existingSuggestion) {
+      copyComment(existingSuggestion, match.id, style)
+      window.open(match.postUrl, '_blank')
+      return
+    }
+
+    if (generatedReplies[cacheKey]) {
+      copyComment(generatedReplies[cacheKey], match.id, style)
+      window.open(match.postUrl, '_blank')
+      return
+    }
+
+    // Generate on-demand
+    setGeneratingReply(cacheKey)
+    try {
+      const response = await fetch('/api/keywords/generate-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          matchId: match.id,
+          style,
+          postTitle: match.postTitle,
+          subreddit: match.subreddit,
+        }),
+      })
+      const data = await response.json()
+      if (data.reply) {
+        setGeneratedReplies(prev => ({ ...prev, [cacheKey]: data.reply }))
+        copyComment(data.reply, match.id, style)
+        window.open(match.postUrl, '_blank')
+      }
+    } catch (err) {
+      console.error('Failed to generate reply:', err)
+    } finally {
+      setGeneratingReply(null)
+    }
   }
 
   // Deduplicate matches by postUrl - group keywords for same post
@@ -1447,36 +1491,27 @@ function KeywordAlertsPanel() {
                 {match.postTitle}
               </a>
 
-              {/* AI Reply Buttons - or Open Thread link if no suggestions */}
-              {match.aiSuggestions.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {match.aiSuggestions.slice(0, 3).map((suggestion, idx) => {
-                    const style = styleLabels[idx] || 'helpful'
-                    return (
-                      <button
-                        key={`${match.id}-${style}`}
-                        className={`px-3 py-1.5 rounded border text-xs font-semibold uppercase ${styleColors[style]} cursor-pointer hover:opacity-80 transition`}
-                        title={`Click to copy ${style} reply and open Reddit post`}
-                        onClick={() => {
-                          copyComment(suggestion, match.id, style)
-                          window.open(match.postUrl, '_blank')
-                        }}
-                      >
-                        {copiedComment === `${match.id}-${style}` ? '✓ Copied!' : style}
-                      </button>
-                    )
-                  })}
-                </div>
-              ) : (
-                <a
-                  href={match.postUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[#00D9FF] text-sm hover:underline"
-                >
-                  Open Thread →
-                </a>
-              )}
+              {/* AI Reply Buttons - always show, generate on-demand if needed */}
+              <div className="flex flex-wrap gap-2">
+                {styleLabels.map((style, idx) => {
+                  const cacheKey = `${match.id}-${style}`
+                  const existingSuggestion = match.aiSuggestions[idx]
+                  const isGenerating = generatingReply === cacheKey
+                  const isCopied = copiedComment === cacheKey
+
+                  return (
+                    <button
+                      key={cacheKey}
+                      disabled={isGenerating}
+                      className={`px-3 py-1.5 rounded border text-xs font-semibold uppercase ${styleColors[style]} cursor-pointer hover:opacity-80 transition disabled:opacity-50 disabled:cursor-wait`}
+                      title={`Click to copy ${style} reply and open Reddit post`}
+                      onClick={() => generateAndCopy(match, style, idx, existingSuggestion)}
+                    >
+                      {isGenerating ? '...' : isCopied ? '✓ Copied!' : style}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           ))}
         </div>
