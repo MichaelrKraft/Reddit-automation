@@ -7,15 +7,9 @@ export default function PlaybookPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]">
       {/* Header */}
       <header className="border-b border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col items-center gap-4">
+        <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col items-center">
           <Link href="/" className="flex items-center justify-center">
             <img src="/reddride-logo.png" alt="ReddRide" className="h-24" />
-          </Link>
-          <Link
-            href="/sign-up"
-            className="bg-[#00D9FF] text-black px-4 py-2 rounded-lg font-medium hover:bg-cyan-400 transition"
-          >
-            Try ReddRide Free
           </Link>
         </div>
       </header>
@@ -65,6 +59,19 @@ export default function PlaybookPage() {
           <p className="text-sm text-gray-500 mt-4">
             PDF format &bull; 510 KB
           </p>
+        </div>
+
+        {/* CTA Button */}
+        <div className="mt-10 text-center">
+          <Link
+            href="/sign-up"
+            className="inline-flex items-center gap-2 bg-[#00D9FF] text-black px-6 py-3 rounded-lg font-medium hover:bg-cyan-400 transition"
+          >
+            Try ReddRide Free
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
 
         {/* What's Inside */}
