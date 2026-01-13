@@ -181,7 +181,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Build update data - only include provided fields
-    const updateData: { isActive?: boolean; filterMode?: string; lastPostId?: null; lastChecked?: null } = {}
+    const updateData: { isActive?: boolean; filterMode?: string; lastPostId?: null } = {}
     if (typeof isActive === 'boolean') {
       updateData.isActive = isActive
     }
