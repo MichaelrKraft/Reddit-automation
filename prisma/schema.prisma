@@ -68,15 +68,19 @@ model Campaign {
 }
 
 model Subreddit {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  displayName String
-  subscribers Int      @default(0)
-  relevance   Float    @default(0)
-  lastChecked DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  posts       Post[]
+  id             String    @id @default(cuid())
+  name           String    @unique
+  displayName    String
+  subscribers    Int       @default(0)
+  relevance      Float     @default(0)
+  lastChecked    DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  posts          Post[]
+
+  // Phase 3: Subreddit Rules Integration - Cache community guidelines
+  rules          Json?     // Cached array of subreddit rules
+  rulesUpdatedAt DateTime? // When rules were last fetched from Reddit
 }
 
 model Post {
@@ -203,6 +207,8 @@ model AlertHistory {
   brandKeyword         String?
   contextSnippet       String?
   mentionType          String?
+  relevanceScore       Int?               // 0-100 relevance score based on business context
+  relevanceReason      String?            // AI explanation of the score
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   monitoredSubredditId String
@@ -212,6 +218,7 @@ model AlertHistory {
   @@index([createdAt])
   @@index([alertType])
   @@index([brandKeyword])
+  @@index([relevanceScore])
 }
 
 model BrandKeyword {
@@ -555,26 +562,43 @@ model UserKeyword {
 }
 
 model KeywordMatch {
-  id            String      @id @default(cuid())
-  userId        String
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  keywordId     String
-  keyword       UserKeyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
-  redditPostId  String
-  postTitle     String
-  postUrl       String
-  postAuthor    String?
-  subreddit     String
-  commentCount  Int         @default(0)
-  upvotes       Int         @default(0)
-  aiSuggestions String?     @db.Text  // JSON array of comment suggestions
-  isRead        Boolean     @default(false)
-  isActedOn     Boolean     @default(false)
-  matchedAt     DateTime    @default(now())
+  id              String      @id @default(cuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  keywordId       String
+  keyword         UserKeyword @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+  redditPostId    String
+  postTitle       String
+  postUrl         String
+  postAuthor      String?
+  subreddit       String
+  commentCount    Int         @default(0)
+  upvotes         Int         @default(0)
+  aiSuggestions   String?     @db.Text  // JSON array of comment suggestions
+  relevanceScore  Int?        // 0-100 relevance score based on business context
+  relevanceReason String?     // AI explanation of the score
+  isRead          Boolean     @default(false)
+  isActedOn       Boolean     @default(false)
+  matchedAt       DateTime    @default(now())
+
+  // Phase 1: Intent Classification - Detect buying signals
+  intentType      String?     // BUYING_SIGNAL, COMPARISON, COMPLAINT, RECOMMENDATION, NEUTRAL
+  intentScore     Int?        // 0-100 confidence score
+  buyingSignal    Boolean     @default(false)
+  aiAnalysis      String?     @db.Text  // Full AI reasoning for intent
+
+  // Phase 2: Google Ranking Enrichment - Track search visibility
+  googleRank      Int?        // Position in Google results (1-100, null if not ranked)
+  googleCtr       Float?      // Estimated CTR based on position
+  trafficScore    Int?        // Combined visibility score (0-100)
 
   @@unique([keywordId, redditPostId])
   @@index([userId, isRead])
   @@index([matchedAt])
+  @@index([relevanceScore])
+  @@index([intentType])
+  @@index([buyingSignal])
+  @@index([trafficScore])
 }
 
 model NotificationSettings {

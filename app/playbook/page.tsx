@@ -3,6 +3,17 @@
 import Link from 'next/link'
 import ShinyText from '@/components/ShinyText'
 
+// Track PDF download in Google Analytics
+const trackDownload = () => {
+  if (typeof window !== 'undefined' && (window as any).gtag) {
+    (window as any).gtag('event', 'file_download', {
+      file_name: 'Reddit-Marketing-Playbook.pdf',
+      file_extension: 'pdf',
+      link_url: '/reddit-marketing-playbook.pdf'
+    })
+  }
+}
+
 export default function PlaybookPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0f] via-[#12121a] to-[#0a0a0f]">
@@ -49,6 +60,7 @@ export default function PlaybookPage() {
           <a
             href="/reddit-marketing-playbook.pdf"
             download="The-Reddit-Marketing-Playbook.pdf"
+            onClick={trackDownload}
             className="inline-flex items-center gap-3 bg-gradient-to-r from-[#00D9FF] to-cyan-600 text-black px-8 py-4 rounded-xl font-bold text-lg hover:from-cyan-400 hover:to-cyan-500 transition shadow-lg shadow-cyan-500/25"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

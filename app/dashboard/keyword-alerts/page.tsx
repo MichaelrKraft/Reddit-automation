@@ -26,17 +26,37 @@ interface KeywordMatch {
   isActedOn: boolean
   matchedAt: string
   keyword: { keyword: string }
+  // Phase 1: Intent Classification
+  intentType: string | null
+  intentScore: number | null
+  buyingSignal: boolean
+  aiAnalysis: string | null
+  // Phase 2: Google Ranking
+  googleRank: number | null
+  trafficScore: number | null
 }
 
-type SortOption = 'newest' | 'oldest' | 'upvotes' | 'comments' | 'keyword'
+type SortOption = 'newest' | 'oldest' | 'upvotes' | 'comments' | 'keyword' | 'buyingSignal' | 'intentScore' | 'googleRank'
 
 const sortOptions: { value: SortOption; label: string }[] = [
+  { value: 'buyingSignal', label: '🔥 Buying Signals' },
+  { value: 'intentScore', label: '🎯 Intent Score' },
+  { value: 'googleRank', label: '📈 Google Rank' },
   { value: 'newest', label: 'Newest First' },
   { value: 'oldest', label: 'Oldest First' },
   { value: 'upvotes', label: 'Most Upvotes' },
   { value: 'comments', label: 'Most Comments' },
   { value: 'keyword', label: 'Keyword (A-Z)' },
 ]
+
+// Intent badge configuration
+const INTENT_BADGES: Record<string, { emoji: string; color: string; bgColor: string; label: string }> = {
+  BUYING_SIGNAL: { emoji: '🔥', color: 'text-green-400', bgColor: 'bg-green-900/30 border-green-500/50', label: 'Buying Signal' },
+  COMPARISON: { emoji: '⚖️', color: 'text-yellow-400', bgColor: 'bg-yellow-900/30 border-yellow-500/50', label: 'Comparison' },
+  COMPLAINT: { emoji: '😤', color: 'text-orange-400', bgColor: 'bg-orange-900/30 border-orange-500/50', label: 'Complaint' },
+  RECOMMENDATION: { emoji: '👍', color: 'text-blue-400', bgColor: 'bg-blue-900/30 border-blue-500/50', label: 'Recommendation' },
+  NEUTRAL: { emoji: '💭', color: 'text-gray-400', bgColor: 'bg-gray-800/30 border-gray-600/50', label: 'Neutral' },
+}
 
 export default function KeywordAlertsPage() {
   const [keywords, setKeywords] = useState<UserKeyword[]>([])
@@ -244,6 +264,19 @@ export default function KeywordAlertsPage() {
   // Sort matches based on selected option
   const sortedMatches = [...matches].sort((a, b) => {
     switch (sortBy) {
+      case 'buyingSignal':
+        // Sort by buying signal first, then by intent score
+        if (a.buyingSignal && !b.buyingSignal) return -1
+        if (!a.buyingSignal && b.buyingSignal) return 1
+        return (b.intentScore || 0) - (a.intentScore || 0)
+      case 'intentScore':
+        return (b.intentScore || 0) - (a.intentScore || 0)
+      case 'googleRank':
+        // Lower rank is better (1 = top), null values go to bottom
+        if (a.googleRank === null && b.googleRank === null) return 0
+        if (a.googleRank === null) return 1
+        if (b.googleRank === null) return -1
+        return a.googleRank - b.googleRank
       case 'newest':
         return new Date(b.matchedAt).getTime() - new Date(a.matchedAt).getTime()
       case 'oldest':
@@ -461,6 +494,31 @@ export default function KeywordAlertsPage() {
                   {/* Match Header */}
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
+                      {/* Intent Badges Row */}
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        {/* Intent Type Badge */}
+                        {match.intentType && INTENT_BADGES[match.intentType] && (
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border ${INTENT_BADGES[match.intentType].bgColor} ${INTENT_BADGES[match.intentType].color}`}>
+                            {INTENT_BADGES[match.intentType].emoji} {INTENT_BADGES[match.intentType].label}
+                            {match.intentScore && (
+                              <span className="opacity-70">({match.intentScore}%)</span>
+                            )}
+                          </span>
+                        )}
+                        {/* Buying Signal Highlight */}
+                        {match.buyingSignal && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gradient-to-r from-green-900/50 to-emerald-900/50 border border-green-400/50 text-green-300 animate-pulse">
+                            🎯 High Intent
+                          </span>
+                        )}
+                        {/* Google Rank Badge */}
+                        {match.googleRank && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-purple-900/30 border border-purple-500/50 text-purple-400">
+                            📈 #{match.googleRank} on Google
+                          </span>
+                        )}
+                      </div>
+
                       <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
                         <span className="text-[#00D9FF] font-medium">{match.keyword.keyword}</span>
                         <span>•</span>

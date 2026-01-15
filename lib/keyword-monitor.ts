@@ -1,7 +1,9 @@
 import { Queue, Worker } from 'bullmq'
 import { getConnection } from './queue'
 import { prisma } from './prisma'
-import { generateReply } from './ai'
+import { generateReply, classifyIntent } from './ai'
+import { scoreRelevance, BusinessContext } from './relevance-scorer'
+import { getGoogleRankForRedditPost } from './seo-finder'
 
 let _keywordQueue: Queue | null = null
 
@@ -123,6 +125,27 @@ async function monitorKeyword(keywordId: string) {
     return { newMatches: 0 }
   }
 
+  // Get user's business context for relevance scoring
+  const businessAnalysis = await prisma.businessAnalysis.findFirst({
+    where: { userId: keyword.userId },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  let businessContext: BusinessContext | null = null
+  if (businessAnalysis) {
+    businessContext = {
+      businessName: businessAnalysis.businessName || undefined,
+      description: businessAnalysis.description || undefined,
+      keywords: businessAnalysis.keywords ? JSON.parse(businessAnalysis.keywords) : undefined,
+      painPoints: businessAnalysis.painPoints
+        ? JSON.parse(businessAnalysis.painPoints).map((p: any) => p.pain || p)
+        : undefined,
+      targetAudience: businessAnalysis.targetAudience
+        ? JSON.parse(businessAnalysis.targetAudience).map((a: any) => a.segment || a)
+        : undefined,
+    }
+  }
+
   const searchScope = keyword.subreddits
     ? `in r/${keyword.subreddits.split(',').join(', r/')}`
     : 'across all of Reddit'
@@ -148,21 +171,105 @@ async function monitorKeyword(keywordId: string) {
       aiSuggestions = await generateSuggestions(post.title, post.subreddit)
     }
 
-    // Create the match
-    await prisma.keywordMatch.create({
-      data: {
-        userId: keyword.userId,
-        keywordId: keyword.id,
-        redditPostId: post.id,
-        postTitle: post.title,
-        postUrl: `https://reddit.com${post.permalink}`,
-        postAuthor: post.author,
-        subreddit: post.subreddit,
-        commentCount: post.num_comments || 0,
-        upvotes: post.ups || 0,
-        aiSuggestions: aiSuggestions.length > 0 ? JSON.stringify(aiSuggestions) : null,
-      },
-    })
+    // Score relevance if business context is available
+    let relevanceScore: number | null = null
+    let relevanceReason: string | null = null
+
+    if (businessContext) {
+      try {
+        const relevanceResult = await scoreRelevance(
+          {
+            title: post.title,
+            content: post.selftext,
+            subreddit: post.subreddit,
+            author: post.author,
+          },
+          businessContext
+        )
+        relevanceScore = relevanceResult.score
+        relevanceReason = relevanceResult.reason
+        console.log(`[KeywordMonitor] Scored "${post.title.slice(0, 50)}..." = ${relevanceScore}%`)
+      } catch (scoreError) {
+        console.error(`[KeywordMonitor] Failed to score post:`, scoreError)
+      }
+    }
+
+    // Classify intent to detect buying signals (Phase 1 enhancement)
+    let intentType: string | null = null
+    let intentScore: number | null = null
+    let buyingSignal = false
+    let aiAnalysis: string | null = null
+
+    try {
+      const intentResult = await classifyIntent(
+        post.title,
+        post.selftext || '',
+        keyword.keyword
+      )
+      intentType = intentResult.intentType
+      intentScore = intentResult.intentScore
+      buyingSignal = intentResult.buyingSignal
+      aiAnalysis = intentResult.reasoning
+      console.log(`[KeywordMonitor] Intent: ${intentType} (${intentScore}%) ${buyingSignal ? '🔥 BUYING SIGNAL' : ''}`)
+    } catch (intentError) {
+      console.error(`[KeywordMonitor] Failed to classify intent:`, intentError)
+    }
+
+    // Check Google ranking for high-priority posts (Phase 2 enhancement)
+    // Only check for buying signals to save API calls
+    let googleRank: number | null = null
+    let googleCtr: number | null = null
+    let trafficScore: number | null = null
+
+    if (buyingSignal && process.env.SERPAPI_KEY) {
+      try {
+        const postUrl = `https://reddit.com${post.permalink}`
+        const rankResult = await getGoogleRankForRedditPost(postUrl, keyword.keyword)
+        googleRank = rankResult.googleRank
+        googleCtr = rankResult.googleCtr
+        trafficScore = rankResult.trafficScore
+        if (googleRank) {
+          console.log(`[KeywordMonitor] 📈 Google Rank: #${googleRank} (Traffic Score: ${trafficScore})`)
+        }
+      } catch (rankError) {
+        console.error(`[KeywordMonitor] Failed to check Google rank:`, rankError)
+      }
+    }
+
+    // Create the match (use upsert to handle race conditions)
+    try {
+      await prisma.keywordMatch.create({
+        data: {
+          userId: keyword.userId,
+          keywordId: keyword.id,
+          redditPostId: post.id,
+          postTitle: post.title,
+          postUrl: `https://reddit.com${post.permalink}`,
+          postAuthor: post.author,
+          subreddit: post.subreddit,
+          commentCount: post.num_comments || 0,
+          upvotes: post.ups || 0,
+          aiSuggestions: aiSuggestions.length > 0 ? JSON.stringify(aiSuggestions) : null,
+          relevanceScore,
+          relevanceReason,
+          // Phase 1: Intent Classification
+          intentType,
+          intentScore,
+          buyingSignal,
+          aiAnalysis,
+          // Phase 2: Google Ranking
+          googleRank,
+          googleCtr,
+          trafficScore,
+        },
+      })
+    } catch (err: any) {
+      // Ignore duplicate key errors (P2002) - race condition with concurrent scans
+      if (err.code !== 'P2002') {
+        throw err
+      }
+      continue // Skip this match, it already exists
+    }
 
     newMatches++
     console.log(`[KeywordMonitor] New match: "${post.title}" in r/${post.subreddit}`)

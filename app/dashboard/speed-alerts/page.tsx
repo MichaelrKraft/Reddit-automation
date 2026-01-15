@@ -22,6 +22,8 @@ interface AlertHistory {
   commentOptions: string
   wasActedOn: boolean
   createdAt: string
+  relevanceScore: number | null
+  relevanceReason: string | null
 }
 
 interface GeneratedComment {
@@ -39,6 +41,8 @@ interface StreamAlert {
   commentOptions: GeneratedComment[]
   wasActedOn?: boolean
   createdAt: string
+  relevanceScore?: number | null
+  relevanceReason?: string | null
 }
 
 export default function SpeedAlertsPage() {
@@ -452,6 +456,30 @@ export default function SpeedAlertsPage() {
     supportive: 'bg-[#00D9FF]/10 text-[#00D9FF] border-[#00D9FF]/50',
   }
 
+  // Relevance score display helper
+  function getRelevanceDisplay(score: number | null | undefined) {
+    if (score === null || score === undefined) return null
+
+    let color: string
+    let label: string
+
+    if (score >= 81) {
+      color = 'bg-purple-500/20 text-purple-400 border-purple-500/50'
+      label = 'Very High'
+    } else if (score >= 61) {
+      color = 'bg-green-500/20 text-green-400 border-green-500/50'
+      label = 'High'
+    } else if (score >= 30) {
+      color = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
+      label = 'Moderate'
+    } else {
+      color = 'bg-red-500/20 text-red-400 border-red-500/50'
+      label = 'Low'
+    }
+
+    return { color, label, score }
+  }
+
   return (
     <>
       {/* Controls */}
@@ -622,13 +650,35 @@ export default function SpeedAlertsPage() {
               </div>
             </div>
 
-            {alerts.length === 0 ? (
-              <div className="text-center py-6 text-gray-400 text-sm">
-                No alerts yet. Start monitoring to receive alerts.
-              </div>
-            ) : (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                {alerts.map((alert) => (
+            {(() => {
+              const relevantAlerts = alerts.filter((alert) => !alert.relevanceScore || alert.relevanceScore >= 60)
+              const filteredCount = alerts.length - relevantAlerts.length
+
+              if (alerts.length === 0) {
+                return (
+                  <div className="text-center py-6 text-gray-400 text-sm">
+                    No alerts yet. Start monitoring to receive alerts.
+                  </div>
+                )
+              }
+
+              if (relevantAlerts.length === 0) {
+                return (
+                  <div className="text-center py-6 text-gray-400 text-sm">
+                    {filteredCount} low-relevance posts hidden. Only showing 60%+ relevance.
+                  </div>
+                )
+              }
+
+              return (
+                <>
+                  {filteredCount > 0 && (
+                    <div className="text-xs text-gray-500 mb-2">
+                      {filteredCount} low-relevance post{filteredCount > 1 ? 's' : ''} hidden
+                    </div>
+                  )}
+                  <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                    {relevantAlerts.map((alert) => (
                   <div
                     key={alert.id}
                     className={`border rounded-lg p-4 ${
@@ -645,6 +695,19 @@ export default function SpeedAlertsPage() {
                           <span className="text-xs text-gray-500">
                             by u/{alert.postAuthor}
                           </span>
+                          {/* Relevance Score Badge */}
+                          {(() => {
+                            const relevance = getRelevanceDisplay(alert.relevanceScore)
+                            if (!relevance) return null
+                            return (
+                              <span
+                                className={`px-2 py-0.5 rounded text-xs font-medium border ${relevance.color}`}
+                                title={alert.relevanceReason || `${relevance.score}% relevance to your business`}
+                              >
+                                {relevance.score}% {relevance.label}
+                              </span>
+                            )
+                          })()}
                         </div>
                         <a
                           href={alert.postUrl}
@@ -693,8 +756,10 @@ export default function SpeedAlertsPage() {
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
+                  </div>
+                </>
+              )
+            })()}
           </div>
         </div>
 
@@ -1288,7 +1353,7 @@ function KeywordMonitoredPanel() {
 
 // Keyword Alerts Panel (Right Panel - matches Recent Alerts pattern)
 function KeywordAlertsPanel() {
-  const [matches, setMatches] = useState<{ id: string; postTitle: string; postUrl: string; subreddit: string; matchedAt: string; keyword: { keyword: string }; isRead?: boolean; aiSuggestions?: string | null }[]>([])
+  const [matches, setMatches] = useState<{ id: string; postTitle: string; postUrl: string; subreddit: string; matchedAt: string; keyword: { keyword: string }; isRead?: boolean; aiSuggestions?: string | null; relevanceScore?: number | null; relevanceReason?: string | null }[]>([])
   const [loading, setLoading] = useState(true)
   const [copiedComment, setCopiedComment] = useState<string | null>(null)
   const [generatingReply, setGeneratingReply] = useState<string | null>(null)
@@ -1409,6 +1474,8 @@ function KeywordAlertsPanel() {
       matchedAt: string
       keywords: string[]
       aiSuggestions: string[]
+      relevanceScore: number | null
+      relevanceReason: string | null
     }>()
 
     for (const match of matches) {
@@ -1433,6 +1500,11 @@ function KeywordAlertsPanel() {
             }
           } catch {}
         }
+        // Keep highest relevance score
+        if (match.relevanceScore && (!existing.relevanceScore || match.relevanceScore > existing.relevanceScore)) {
+          existing.relevanceScore = match.relevanceScore
+          existing.relevanceReason = match.relevanceReason ?? null
+        }
       } else {
         let aiSuggestions: string[] = []
         if (match.aiSuggestions) {
@@ -1448,6 +1520,8 @@ function KeywordAlertsPanel() {
           matchedAt: match.matchedAt,
           keywords: [match.keyword.keyword],
           aiSuggestions,
+          relevanceScore: match.relevanceScore ?? null,
+          relevanceReason: match.relevanceReason ?? null,
         })
       }
     }
@@ -1462,6 +1536,30 @@ function KeywordAlertsPanel() {
     helpful: 'bg-[#00D9FF]/10 text-[#00D9FF] border-[#00D9FF]/50',
     curious: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
     supportive: 'bg-green-500/10 text-green-400 border-green-500/50',
+  }
+
+  // Relevance score display helper
+  function getRelevanceDisplay(score: number | null | undefined) {
+    if (score === null || score === undefined) return null
+
+    let color: string
+    let label: string
+
+    if (score >= 81) {
+      color = 'bg-purple-500/20 text-purple-400 border-purple-500/50'
+      label = 'Very High'
+    } else if (score >= 61) {
+      color = 'bg-green-500/20 text-green-400 border-green-500/50'
+      label = 'High'
+    } else if (score >= 30) {
+      color = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
+      label = 'Moderate'
+    } else {
+      color = 'bg-red-500/20 text-red-400 border-red-500/50'
+      label = 'Low'
+    }
+
+    return { color, label, score }
   }
 
   return (
@@ -1498,7 +1596,9 @@ function KeywordAlertsPanel() {
         </div>
       ) : (
         <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-          {deduplicatedMatches.map((match) => (
+          {deduplicatedMatches
+            .filter((match) => !match.relevanceScore || match.relevanceScore >= 60)
+            .map((match) => (
             <div
               key={match.id}
               className="p-4 border border-[#00D9FF]/30 bg-[#12121a] rounded-lg hover:border-[#00D9FF] transition"
@@ -1513,6 +1613,19 @@ function KeywordAlertsPanel() {
                   ))}
                   <span className="text-blue-400">r/{match.subreddit}</span>
                   <span className="text-gray-500">{formatTimeAgo(match.matchedAt)}</span>
+                  {/* Relevance Score Badge */}
+                  {(() => {
+                    const relevance = getRelevanceDisplay(match.relevanceScore)
+                    if (!relevance) return null
+                    return (
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-medium border ${relevance.color}`}
+                        title={match.relevanceReason || `${relevance.score}% relevance to your business`}
+                      >
+                        {relevance.score}% {relevance.label}
+                      </span>
+                    )
+                  })()}
                 </div>
               </div>
 

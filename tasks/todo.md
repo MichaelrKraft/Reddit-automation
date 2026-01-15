@@ -222,3 +222,63 @@ Fix duplicate alerts and add AI reply buttons to Keyword Alerts
 
 ### File Modified
 - `app/dashboard/speed-alerts/page.tsx` - KeywordAlertsPanel component (lines 1254-1486)
+
+---
+
+## AI Content Generator Enhancement (2025-01-13)
+
+### Task
+Add three new features to the AI Content Generator panel in "Create New Post":
+1. More tone options (controversial, educational, storytelling)
+2. Content length control (short/medium/long)
+3. Variable number of variations (3-6)
+
+### Completed Changes
+
+**1. `components/AIContentGenerator.tsx`**
+- Extended tone type to include: `controversial`, `educational`, `storytelling` (7 total)
+- Added `contentLength` state with options: `short`, `medium`, `long`
+- Added `variationCount` state with options: `3`, `4`, `5`, `6`
+- Added compact button groups for all new options (matching existing design)
+- Updated API call to pass new parameters
+
+**2. `app/api/ai/generate/route.ts`**
+- Now accepts `contentLength` and `variationCount` from request body
+- Passes new parameters to `generatePostContent()`
+
+**3. `lib/ai.ts`**
+- Updated `ContentGenerationOptions` interface with new types
+- Added `lengthConfig` with word count ranges:
+  - short: 100-300 words
+  - medium: 300-600 words
+  - long: 600-1200 words
+- Prompt now includes explicit word count requirements
+- Variation count is now dynamic (3-6)
+
+### UI Layout
+```
+┌─────────────────────────────────────────────┐
+│ What do you want to post about?             │
+│ [Input field]                               │
+├─────────────────────────────────────────────┤
+│ Tone                                        │
+│ [Casual] [Professional] [Humorous] [Info]   │
+│ [Controversial] [Educational] [Storytelling]│
+├─────────────────────────────────────────────┤
+│ Content Length                              │
+│ [Short] [Medium] [Long]                     │
+├─────────────────────────────────────────────┤
+│ Number of Variations                        │
+│ [3] [4] [5] [6]                             │
+├─────────────────────────────────────────────┤
+│ Additional Context (Optional)               │
+│ [Textarea]                                  │
+├─────────────────────────────────────────────┤
+│ [Generate Content with AI]                  │
+└─────────────────────────────────────────────┘
+```
+
+### Verification
+- TypeScript compilation passed with no errors
+- Existing design system (cyan/dark theme) preserved
+- All changes are minimal and targeted

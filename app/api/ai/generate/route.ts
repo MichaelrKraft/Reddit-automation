@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     topic = body.topic
     subreddit = body.subreddit
-    const { tone, postType, contentLength, variationCount, additionalContext } = body
+    const { tone, postType, contentLength, variationCount, additionalContext, subredditRules } = body
 
     if (!topic || !subreddit) {
       return NextResponse.json(
@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
       contentLength,
       variationCount,
       additionalContext,
+      subredditRules,
     })
 
     return NextResponse.json({ variations })

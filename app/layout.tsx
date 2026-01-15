@@ -4,6 +4,7 @@ import { Montserrat } from 'next/font/google'
 import './globals.css'
 import AlphaFeedbackWidget from '@/components/AlphaFeedbackWidget'
 import AnalyticsProvider from '@/components/AnalyticsProvider'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -59,6 +60,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en" className={montserrat.variable}>
         <body>
+          <GoogleAnalytics />
           <AnalyticsProvider>
             {children}
             <AlphaFeedbackWidget />

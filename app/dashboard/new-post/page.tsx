@@ -39,6 +39,11 @@ export default function NewPost() {
   const [flairsLoading, setFlairsLoading] = useState(false)
   const [contentMode, setContentMode] = useState<'ai' | 'manual' | null>('manual')
 
+  // Subreddit rules state
+  const [rules, setRules] = useState<Array<{ shortName: string; description: string; priority: number; violationReason: string; kind: string }>>([])
+  const [rulesLoading, setRulesLoading] = useState(false)
+  const [rulesExpanded, setRulesExpanded] = useState(false)
+
   // Viral analysis states
   const [analyzingTitle, setAnalyzingTitle] = useState(false)
   const [titleAnalysis, setTitleAnalysis] = useState<any>(null)
@@ -111,6 +116,36 @@ export default function NewPost() {
 
     // Debounce the fetch
     const timeoutId = setTimeout(fetchFlairs, 500)
+    return () => clearTimeout(timeoutId)
+  }, [formData.subredditName])
+
+  // Fetch rules when subreddit changes
+  useEffect(() => {
+    async function fetchRules() {
+      if (!formData.subredditName || formData.subredditName.length < 2) {
+        setRules([])
+        return
+      }
+
+      setRulesLoading(true)
+      try {
+        const response = await fetch(`/api/subreddits/${formData.subredditName}/rules`)
+        const data = await response.json()
+        if (data.rules) {
+          setRules(data.rules)
+        } else {
+          setRules([])
+        }
+      } catch (error) {
+        console.error('Failed to fetch rules:', error)
+        setRules([])
+      } finally {
+        setRulesLoading(false)
+      }
+    }
+
+    // Debounce the fetch
+    const timeoutId = setTimeout(fetchRules, 500)
     return () => clearTimeout(timeoutId)
   }, [formData.subredditName])
 
@@ -392,6 +427,66 @@ export default function NewPost() {
               </div>
             )}
 
+            {/* Subreddit Rules Display */}
+            {formData.subredditName && (
+              <div className="border border-gray-700 rounded-lg overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setRulesExpanded(!rulesExpanded)}
+                  className="w-full px-4 py-3 flex items-center justify-between bg-[#1a1a24] hover:bg-[#1e1e2a] transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-yellow-500">📋</span>
+                    <span className="text-sm font-medium text-gray-300">
+                      Subreddit Rules
+                      {rulesLoading ? (
+                        <span className="ml-2 text-gray-500">Loading...</span>
+                      ) : rules.length > 0 ? (
+                        <span className="ml-2 text-gray-500">({rules.length} rules)</span>
+                      ) : (
+                        <span className="ml-2 text-gray-500">(No rules found)</span>
+                      )}
+                    </span>
+                  </div>
+                  <span className={`text-gray-400 transition-transform ${rulesExpanded ? 'rotate-180' : ''}`}>
+                    ▼
+                  </span>
+                </button>
+
+                {rulesExpanded && rules.length > 0 && (
+                  <div className="px-4 py-3 bg-[#12121a] border-t border-gray-700 space-y-3 max-h-64 overflow-y-auto">
+                    <p className="text-xs text-gray-500 mb-2">
+                      AI content generation will consider these rules to avoid violations.
+                    </p>
+                    {rules.map((rule, index) => (
+                      <div key={index} className="flex gap-3 text-sm">
+                        <span className="text-yellow-500 font-bold shrink-0">{rule.priority}.</span>
+                        <div>
+                          <span className="font-medium text-white">{rule.shortName}</span>
+                          {rule.description && rule.description !== rule.shortName && (
+                            <p className="text-gray-400 text-xs mt-0.5">{rule.description}</p>
+                          )}
+                          {rule.kind !== 'all' && (
+                            <span className="inline-block mt-1 text-xs px-1.5 py-0.5 bg-gray-700 text-gray-300 rounded">
+                              {rule.kind === 'link' ? 'Links only' : 'Comments only'}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {rulesExpanded && rules.length === 0 && !rulesLoading && (
+                  <div className="px-4 py-3 bg-[#12121a] border-t border-gray-700">
+                    <p className="text-sm text-gray-500">
+                      No rules found for this subreddit, or the subreddit restricts access to rules.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Content Creation Mode Picker */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -436,6 +531,11 @@ export default function NewPost() {
                   trackPostAIGenerate(formData.subredditName || 'unknown')
                   setFormData(prev => ({ ...prev, title, content }))
                 }}
+                subredditRules={rules.map(r => ({
+                  shortName: r.shortName,
+                  description: r.description,
+                  priority: r.priority,
+                }))}
               />
             )}
 

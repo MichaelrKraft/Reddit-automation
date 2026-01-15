@@ -14,12 +14,19 @@ interface ViralAnalysis {
   suggestions: string[]
 }
 
+interface SubredditRule {
+  shortName: string
+  description: string
+  priority: number
+}
+
 interface AIContentGeneratorProps {
   subreddit: string
   onSelectContent: (title: string, content: string) => void
+  subredditRules?: SubredditRule[]
 }
 
-export default function AIContentGenerator({ subreddit, onSelectContent }: AIContentGeneratorProps) {
+export default function AIContentGenerator({ subreddit, onSelectContent, subredditRules }: AIContentGeneratorProps) {
   const [topic, setTopic] = useState('')
   const [tone, setTone] = useState<'question' | 'casual' | 'humorous' | 'informative' | 'controversial' | 'educational' | 'storytelling'>('casual')
   const [contentLength, setContentLength] = useState<'short' | 'medium' | 'long'>('medium')
@@ -78,6 +85,7 @@ export default function AIContentGenerator({ subreddit, onSelectContent }: AICon
           contentLength,
           variationCount,
           additionalContext,
+          subredditRules,
         }),
       })
 

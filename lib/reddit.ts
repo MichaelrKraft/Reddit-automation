@@ -182,3 +182,97 @@ export async function getSubredditFlairs(subredditName: string): Promise<Subredd
     return []
   }
 }
+
+/**
+ * Phase 3: Subreddit Rules Integration
+ * Fetch community guidelines and rules from a subreddit.
+ * Used to inform AI post generation to avoid rule violations.
+ */
+export interface SubredditRule {
+  shortName: string      // e.g., "No Self-Promotion"
+  description: string    // Full rule text
+  priority: number       // Rule order (1-based)
+  violationReason: string // What happens if violated
+  kind: string           // "all", "link", "comment"
+}
+
+export async function getSubredditRules(subredditName: string): Promise<SubredditRule[]> {
+  const reddit = getRedditClient()
+  const subreddit = reddit.getSubreddit(subredditName)
+
+  try {
+    // getRules() returns the subreddit's posting rules
+    const rulesResponse = await subreddit.getRules()
+
+    // Extract rules from the response
+    const rules = rulesResponse.rules || []
+
+    return rules.map((rule: any, index: number) => ({
+      shortName: rule.short_name || `Rule ${index + 1}`,
+      description: rule.description || rule.short_name || '',
+      priority: index + 1,
+      violationReason: rule.violation_reason || 'Post removal',
+      kind: rule.kind || 'all', // "all", "link", or "comment"
+    }))
+  } catch (error: any) {
+    // Some subreddits may not have rules accessible or may restrict access
+    console.log(`[Reddit] Could not fetch rules for r/${subredditName}:`, error.message)
+    return []
+  }
+}
+
+/**
+ * Get subreddit rules, with caching support.
+ * Checks if rules are cached in the database first.
+ */
+export async function getSubredditRulesWithCache(
+  subredditName: string,
+  prisma: any,
+  maxAgeHours: number = 168 // 1 week default cache
+): Promise<SubredditRule[]> {
+  try {
+    // Check if we have cached rules in the database
+    const subreddit = await prisma.subreddit.findUnique({
+      where: { name: subredditName.toLowerCase() },
+      select: { rules: true, rulesUpdatedAt: true }
+    })
+
+    // Check if cache is valid
+    if (subreddit?.rules && subreddit?.rulesUpdatedAt) {
+      const cacheAge = Date.now() - new Date(subreddit.rulesUpdatedAt).getTime()
+      const maxAgeMs = maxAgeHours * 60 * 60 * 1000
+
+      if (cacheAge < maxAgeMs) {
+        console.log(`[Reddit] Using cached rules for r/${subredditName}`)
+        return subreddit.rules as SubredditRule[]
+      }
+    }
+
+    // Fetch fresh rules from Reddit
+    console.log(`[Reddit] Fetching fresh rules for r/${subredditName}`)
+    const rules = await getSubredditRules(subredditName)
+
+    // Cache the rules in the database (upsert)
+    if (rules.length > 0) {
+      await prisma.subreddit.upsert({
+        where: { name: subredditName.toLowerCase() },
+        update: {
+          rules: rules as any,
+          rulesUpdatedAt: new Date()
+        },
+        create: {
+          name: subredditName.toLowerCase(),
+          displayName: `r/${subredditName}`,
+          rules: rules as any,
+          rulesUpdatedAt: new Date()
+        }
+      })
+    }
+
+    return rules
+  } catch (error: any) {
+    console.error(`[Reddit] Error getting rules with cache for r/${subredditName}:`, error.message)
+    // Fallback to direct fetch
+    return getSubredditRules(subredditName)
+  }
+}

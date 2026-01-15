@@ -57,6 +57,125 @@ export async function generateCompletion(prompt: string): Promise<string> {
   throw new Error('AI service not configured. Please contact support.')
 }
 
+// Intent Classification Types
+export type IntentType = 'BUYING_SIGNAL' | 'COMPARISON' | 'COMPLAINT' | 'RECOMMENDATION' | 'NEUTRAL'
+
+export interface IntentClassificationResult {
+  intentType: IntentType
+  intentScore: number  // 0-100 confidence
+  buyingSignal: boolean
+  reasoning: string
+}
+
+/**
+ * Classify the intent of a Reddit post to detect buying signals.
+ * Used by keyword monitoring to prioritize high-value opportunities.
+ */
+export async function classifyIntent(
+  postTitle: string,
+  postBody: string,
+  keyword: string
+): Promise<IntentClassificationResult> {
+  const prompt = `
+Analyze this Reddit post for buying intent related to the keyword "${keyword}".
+
+Post Title: ${postTitle}
+Post Body: ${postBody?.slice(0, 1500) || '[No body content]'}
+
+Classify the post into ONE of these intent categories:
+
+1. **BUYING_SIGNAL** - User is actively looking for solutions
+   - Phrases like: "I need", "looking for", "recommendations for", "best tool for", "anyone know a", "what do you use for", "help me find"
+   - Asking for product/service recommendations
+   - Ready to purchase or try something
+
+2. **COMPARISON** - User is comparing options
+   - Phrases like: "X vs Y", "which is better", "choosing between", "alternative to"
+   - Evaluating multiple solutions
+   - Close to making a decision
+
+3. **COMPLAINT** - User is frustrated with current solution
+   - Phrases like: "hate", "frustrated with", "looking to switch", "X sucks", "problems with"
+   - Opportunity to offer alternative
+   - Pain point being expressed
+
+4. **RECOMMENDATION** - User is recommending something
+   - Phrases like: "you should try", "I recommend", "best X I've found", "switched to"
+   - Potential competitor mention
+   - Social proof opportunity
+
+5. **NEUTRAL** - General discussion, not actionable
+   - News, opinions, general questions
+   - No clear purchase intent
+   - Low commercial value
+
+Return ONLY valid JSON (no markdown):
+{
+  "intentType": "BUYING_SIGNAL" or "COMPARISON" or "COMPLAINT" or "RECOMMENDATION" or "NEUTRAL",
+  "intentScore": <number 0-100 representing confidence>,
+  "buyingSignal": <true if intentType is BUYING_SIGNAL, COMPARISON, or COMPLAINT, false otherwise>,
+  "reasoning": "<brief explanation of why this classification>"
+}
+`
+
+  try {
+    const text = await generateCompletion(prompt)
+
+    // Clean up response
+    let cleanText = text
+      .replace(/```json\s*/gi, '')
+      .replace(/```\s*/g, '')
+      .trim()
+
+    // Extract JSON object
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0])
+
+        // Validate and return
+        const validIntentTypes: IntentType[] = ['BUYING_SIGNAL', 'COMPARISON', 'COMPLAINT', 'RECOMMENDATION', 'NEUTRAL']
+        const intentType = validIntentTypes.includes(parsed.intentType) ? parsed.intentType : 'NEUTRAL'
+        const intentScore = typeof parsed.intentScore === 'number' ? Math.min(100, Math.max(0, parsed.intentScore)) : 50
+        const buyingSignal = ['BUYING_SIGNAL', 'COMPARISON', 'COMPLAINT'].includes(intentType)
+
+        return {
+          intentType,
+          intentScore,
+          buyingSignal,
+          reasoning: parsed.reasoning || 'Classification completed'
+        }
+      } catch (parseError) {
+        console.error('[AI] Intent classification parse error:', parseError)
+      }
+    }
+
+    // Fallback if parsing fails
+    console.warn('[AI] Intent classification fallback - could not parse response')
+    return {
+      intentType: 'NEUTRAL',
+      intentScore: 30,
+      buyingSignal: false,
+      reasoning: 'Unable to classify - defaulting to neutral'
+    }
+  } catch (error: any) {
+    console.error('[AI] Intent classification failed:', error.message)
+    return {
+      intentType: 'NEUTRAL',
+      intentScore: 0,
+      buyingSignal: false,
+      reasoning: 'Classification error: ' + error.message
+    }
+  }
+}
+
+// Subreddit rule type for Phase 3 integration
+export interface SubredditRuleForAI {
+  shortName: string
+  description: string
+  priority: number
+}
+
 export interface ContentGenerationOptions {
   topic: string
   subreddit: string
@@ -65,6 +184,7 @@ export interface ContentGenerationOptions {
   contentLength?: 'short' | 'medium' | 'long'
   variationCount?: 3 | 4 | 5 | 6
   additionalContext?: string
+  subredditRules?: SubredditRuleForAI[] // Phase 3: Subreddit rules to consider
 }
 
 export async function generatePostContent(options: ContentGenerationOptions) {
@@ -85,6 +205,18 @@ export async function generatePostContent(options: ContentGenerationOptions) {
   const lengthInfo = lengthConfig[contentLengthSetting]
   const numVariations = options.variationCount || 3
 
+  // Build subreddit rules section for the prompt (Phase 3)
+  const rulesSection = options.subredditRules && options.subredditRules.length > 0
+    ? `
+=== SUBREDDIT RULES - MUST FOLLOW ===
+The following are the community guidelines for r/${options.subreddit}. Your post MUST NOT violate any of these rules:
+
+${options.subredditRules.map((r, i) => `${i + 1}. **${r.shortName}**: ${r.description}`).join('\n')}
+
+IMPORTANT: Before generating each post, verify it does not violate any of the above rules. If a rule prohibits self-promotion, make the post sound like genuine community discussion. If a rule requires specific formatting, follow it exactly.
+`
+    : ''
+
   const prompt = `
 Generate a Reddit post for r/${options.subreddit}.
 
@@ -93,7 +225,7 @@ Post Type: ${options.postType || 'text'}
 Tone: ${options.tone || 'casual'}
 Content Length: ${contentLengthSetting.toUpperCase()} (${lengthInfo.min}-${lengthInfo.max} words - ${lengthInfo.description})
 ${options.additionalContext ? `Additional Context: ${options.additionalContext}` : ''}
-
+${rulesSection}
 ${viralBodyRules}
 
 Requirements:
@@ -108,6 +240,7 @@ Requirements:
 9. IMPORTANT: Content must be ${lengthInfo.min}-${lengthInfo.max} words (${contentLengthSetting} length)
 10. Add TL;DR at the end for posts over 300 words
 11. Be natural and conversational - avoid overly promotional language
+${options.subredditRules && options.subredditRules.length > 0 ? '12. CRITICAL: Ensure post complies with ALL subreddit rules listed above' : ''}
 
 Return the response in the following JSON format:
 {

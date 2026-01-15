@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireUser } from '@/lib/auth'
 import { checkForNewPosts, generateCommentOptions, RedditPost, isQuestionPost } from '@/lib/speed-alerts'
+import { scoreRelevance, BusinessContext } from '@/lib/relevance-scorer'
 
 // SSE endpoint for real-time speed alerts
 export async function GET(request: NextRequest) {
@@ -39,6 +40,27 @@ export async function GET(request: NextRequest) {
                 isActive: true,
               },
             })
+
+            // Get user's business context for relevance scoring
+            const businessAnalysis = await prisma.businessAnalysis.findFirst({
+              where: { userId: user.id },
+              orderBy: { createdAt: 'desc' },
+            })
+
+            let businessContext: BusinessContext | null = null
+            if (businessAnalysis) {
+              businessContext = {
+                businessName: businessAnalysis.businessName || undefined,
+                description: businessAnalysis.description || undefined,
+                keywords: businessAnalysis.keywords ? JSON.parse(businessAnalysis.keywords) : undefined,
+                painPoints: businessAnalysis.painPoints
+                  ? JSON.parse(businessAnalysis.painPoints).map((p: any) => p.pain || p)
+                  : undefined,
+                targetAudience: businessAnalysis.targetAudience
+                  ? JSON.parse(businessAnalysis.targetAudience).map((a: any) => a.segment || a)
+                  : undefined,
+              }
+            }
 
             if (monitored.length === 0) {
               console.log('[Speed Alerts Stream] No subreddits being monitored')
@@ -86,6 +108,29 @@ export async function GET(request: NextRequest) {
                 for (const post of filteredPosts) {
                   const comments = await generateCommentOptions(post)
 
+                  // Score relevance if business context is available
+                  let relevanceScore: number | null = null
+                  let relevanceReason: string | null = null
+
+                  if (businessContext) {
+                    try {
+                      const relevanceResult = await scoreRelevance(
+                        {
+                          title: post.title,
+                          content: post.selftext,
+                          subreddit: post.subreddit,
+                          author: post.author,
+                        },
+                        businessContext
+                      )
+                      relevanceScore = relevanceResult.score
+                      relevanceReason = relevanceResult.reason
+                      console.log(`[Speed Alerts] r/${post.subreddit}: Scored "${post.title.slice(0, 50)}..." = ${relevanceScore}%`)
+                    } catch (scoreError) {
+                      console.error(`[Speed Alerts] Failed to score post:`, scoreError)
+                    }
+                  }
+
                   // Store alert in database
                   const alert = await prisma.alertHistory.create({
                     data: {
@@ -97,6 +142,8 @@ export async function GET(request: NextRequest) {
                       commentOptions: JSON.stringify(comments),
                       alertType: 'new_post',
                       monitoredSubredditId: sub.id,
+                      relevanceScore,
+                      relevanceReason,
                     },
                   })
 
@@ -110,6 +157,8 @@ export async function GET(request: NextRequest) {
                       postAuthor: post.author,
                       subreddit: post.subreddit,
                       commentOptions: comments,
+                      relevanceScore,
+                      relevanceReason,
                       createdAt: alert.createdAt,
                     },
                   })

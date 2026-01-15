@@ -261,4 +261,118 @@ export async function hasLifetimeDeal(userId: string): Promise<boolean> {
   return user?.hasLifetimeDeal ?? false
 }
 
+/**
+ * Phase 2: Check if a specific Reddit post ranks on Google for a keyword.
+ * Returns the rank and estimated CTR if the post is found in Google results.
+ */
+export interface GoogleRankResult {
+  googleRank: number | null  // Position in Google (1-100), null if not ranked
+  googleCtr: number | null   // Estimated CTR based on position
+  trafficScore: number | null // Combined visibility score (0-100)
+}
+
+// CTR estimates by Google position (based on industry data)
+const CTR_BY_POSITION: Record<number, number> = {
+  1: 0.28, 2: 0.15, 3: 0.11, 4: 0.08, 5: 0.06,
+  6: 0.05, 7: 0.04, 8: 0.03, 9: 0.03, 10: 0.02,
+}
+
+function estimateCtr(rank: number): number {
+  if (rank <= 10) return CTR_BY_POSITION[rank] || 0.01
+  if (rank <= 20) return 0.01
+  if (rank <= 50) return 0.005
+  return 0.001
+}
+
+function calculateTrafficScore(rank: number | null): number {
+  if (rank === null) return 0
+  // Higher score for better rankings
+  if (rank === 1) return 100
+  if (rank <= 3) return 90
+  if (rank <= 5) return 75
+  if (rank <= 10) return 60
+  if (rank <= 20) return 40
+  if (rank <= 50) return 20
+  return 10
+}
+
+export async function getGoogleRankForRedditPost(
+  postUrl: string,
+  keyword: string
+): Promise<GoogleRankResult> {
+  const apiKey = process.env.SERPAPI_KEY
+
+  // No API key - skip ranking check
+  if (!apiKey) {
+    console.log('[SEO Finder] No SERPAPI_KEY - skipping Google rank check')
+    return { googleRank: null, googleCtr: null, trafficScore: null }
+  }
+
+  try {
+    // Search Google for the keyword with site:reddit.com
+    const params = new URLSearchParams({
+      api_key: apiKey,
+      q: `${keyword} site:reddit.com`,
+      num: '100', // Get up to 100 results to find the post
+      engine: 'google'
+    })
+
+    const response = await fetch(`https://serpapi.com/search?${params}`)
+
+    if (!response.ok) {
+      console.error(`[SEO Finder] SerpAPI error: ${response.status}`)
+      return { googleRank: null, googleCtr: null, trafficScore: null }
+    }
+
+    const data = await response.json()
+
+    if (data.error) {
+      console.error(`[SEO Finder] SerpAPI error: ${data.error}`)
+      return { googleRank: null, googleCtr: null, trafficScore: null }
+    }
+
+    const organicResults = data.organic_results || []
+
+    // Normalize the post URL for comparison (remove trailing slash, www, etc.)
+    const normalizeUrl = (url: string) => {
+      return url
+        .replace(/^https?:\/\//, '')
+        .replace(/^www\./, '')
+        .replace(/\/$/, '')
+        .toLowerCase()
+    }
+
+    const normalizedPostUrl = normalizeUrl(postUrl)
+
+    // Find the post in the search results
+    for (const result of organicResults) {
+      const normalizedResultUrl = normalizeUrl(result.link)
+
+      // Check if URLs match (either exactly or the result URL contains the post URL)
+      if (normalizedResultUrl === normalizedPostUrl ||
+          normalizedResultUrl.includes(normalizedPostUrl.split('/comments/')[1]?.split('/')[0] || '')) {
+        const rank = result.position
+        const ctr = estimateCtr(rank)
+        const trafficScore = calculateTrafficScore(rank)
+
+        console.log(`[SEO Finder] Post ranks #${rank} for "${keyword}" (CTR: ${(ctr * 100).toFixed(1)}%)`)
+
+        return {
+          googleRank: rank,
+          googleCtr: ctr,
+          trafficScore
+        }
+      }
+    }
+
+    // Post not found in search results
+    console.log(`[SEO Finder] Post not ranked for "${keyword}"`)
+    return { googleRank: null, googleCtr: null, trafficScore: null }
+
+  } catch (error: any) {
+    console.error('[SEO Finder] Google rank check failed:', error.message)
+    return { googleRank: null, googleCtr: null, trafficScore: null }
+  }
+}
+
 export { estimateMonthlyTraffic }

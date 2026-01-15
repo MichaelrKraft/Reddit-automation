@@ -258,10 +258,10 @@ export default function Home() {
             <span className="text-sm font-medium text-slate-700">AI-Powered Reddit Marketing</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-normal font-[family-name:var(--font-montserrat)]">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-tight font-[family-name:var(--font-montserrat)]">
             <span className="block">
               <TextType
-                text="The only tool you'll ever need"
+                text="Turn Reddit Into Your"
                 typingSpeed={50}
                 initialDelay={0}
                 showCursor={false}
@@ -270,39 +270,26 @@ export default function Home() {
             </span>
             <span className="block">
               <TextType
-                text="to "
+                text="#1 "
                 typingSpeed={50}
-                initialDelay={1500}
-                showCursor={false}
-                loop={false}
-              />
-              <TextType
-                text="WIN"
-                typingSpeed={100}
-                initialDelay={1600}
+                initialDelay={1200}
                 showCursor={false}
                 loop={false}
                 className="text-red-500"
               />
               <TextType
-                text=" on "
+                text="Customer Acquisition"
                 typingSpeed={50}
-                initialDelay={1900}
+                initialDelay={1400}
                 showCursor={false}
                 loop={false}
               />
+            </span>
+            <span className="block">
               <TextType
-                text="Reddit"
+                text="Channel."
                 typingSpeed={50}
-                initialDelay={2050}
-                showCursor={false}
-                loop={false}
-                className="text-red-500"
-              />
-              <TextType
-                text="."
-                typingSpeed={50}
-                initialDelay={2350}
+                initialDelay={2400}
                 showCursor={false}
                 loop={false}
               />
@@ -310,7 +297,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl md:text-2xl text-red-500 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Build authentic credibility, automate your marketing, and drive real customers—without spam filters or bans
+            Get 10+ hours back every week while your Reddit presence grows automatically. No spam filters. No bans. Just real customers.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
