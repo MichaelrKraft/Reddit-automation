@@ -456,6 +456,13 @@ export default function OpportunitiesPage() {
   )
 }
 
+// Comment style colors (matching speed-alerts)
+const styleColors = {
+  helpful: 'bg-[#00D9FF]/10 text-[#00D9FF] border-[#00D9FF]/50',
+  curious: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
+  supportive: 'bg-green-500/10 text-green-400 border-green-500/50',
+}
+
 // Opportunity Card Component
 function OpportunityCard({
   opportunity,
@@ -470,8 +477,56 @@ function OpportunityCard({
   formatNumber: (num: number) => string
   getCategoryStyle: (category: string) => { bg: string; text: string; border: string }
 }) {
+  const [copiedComment, setCopiedComment] = useState<string | null>(null)
+  const [generatingReply, setGeneratingReply] = useState<string | null>(null)
+  const [generatedReplies, setGeneratedReplies] = useState<Record<string, string>>({})
+
   const categoryStyle = getCategoryStyle(opportunity.category)
   const mainEvidence = opportunity.evidence[0]
+
+  async function generateAndCopyComment(style: 'helpful' | 'curious' | 'supportive') {
+    if (!mainEvidence) return
+
+    const cacheKey = `${opportunity.id}-${style}`
+
+    // Check cache first
+    if (generatedReplies[cacheKey]) {
+      navigator.clipboard.writeText(generatedReplies[cacheKey])
+      setCopiedComment(cacheKey)
+      setTimeout(() => setCopiedComment(null), 2000)
+      window.open(mainEvidence.postUrl, '_blank')
+      onAction(opportunity.id, 'acted')
+      return
+    }
+
+    // Generate on-demand
+    setGeneratingReply(cacheKey)
+    try {
+      const response = await fetch('/api/keywords/generate-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          matchId: opportunity.id,
+          style,
+          postTitle: mainEvidence.title,
+          subreddit: mainEvidence.subreddit,
+        }),
+      })
+      const data = await response.json()
+      if (data.reply) {
+        setGeneratedReplies(prev => ({ ...prev, [cacheKey]: data.reply }))
+        navigator.clipboard.writeText(data.reply)
+        setCopiedComment(cacheKey)
+        setTimeout(() => setCopiedComment(null), 2000)
+        window.open(mainEvidence.postUrl, '_blank')
+        onAction(opportunity.id, 'acted')
+      }
+    } catch (err) {
+      console.error('Failed to generate reply:', err)
+    } finally {
+      setGeneratingReply(null)
+    }
+  }
 
   return (
     <div className="feature-card rounded-lg p-4 hover:border-[#00D9FF]/50 transition group">
@@ -538,8 +593,31 @@ function OpportunityCard({
         </div>
       </div>
 
+      {/* AI Comment Buttons - Copy & Open Reddit */}
+      {mainEvidence && (
+        <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-700/50">
+          {(['helpful', 'curious', 'supportive'] as const).map((style) => {
+            const cacheKey = `${opportunity.id}-${style}`
+            const isGenerating = generatingReply === cacheKey
+            const isCopied = copiedComment === cacheKey
+
+            return (
+              <button
+                key={style}
+                disabled={isGenerating}
+                onClick={() => generateAndCopyComment(style)}
+                className={`px-3 py-1.5 rounded border text-xs font-semibold uppercase ${styleColors[style]} cursor-pointer hover:opacity-80 transition disabled:opacity-50 disabled:cursor-wait`}
+                title={`Click to copy ${style} comment and open Reddit`}
+              >
+                {isGenerating ? '...' : isCopied ? '✓ Copied!' : style}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
       {/* Action Buttons */}
-      <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-700/50 opacity-0 group-hover:opacity-100 transition">
+      <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition">
         <button
           onClick={() => onAction(opportunity.id, 'bookmark')}
           className={`px-3 py-1.5 rounded text-xs font-medium transition ${
