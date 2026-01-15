@@ -133,16 +133,21 @@ async function monitorKeyword(keywordId: string) {
 
   let businessContext: BusinessContext | null = null
   if (businessAnalysis) {
-    businessContext = {
-      businessName: businessAnalysis.businessName || undefined,
-      description: businessAnalysis.description || undefined,
-      keywords: businessAnalysis.keywords ? JSON.parse(businessAnalysis.keywords) : undefined,
-      painPoints: businessAnalysis.painPoints
-        ? JSON.parse(businessAnalysis.painPoints).map((p: any) => p.pain || p)
-        : undefined,
-      targetAudience: businessAnalysis.targetAudience
-        ? JSON.parse(businessAnalysis.targetAudience).map((a: any) => a.segment || a)
-        : undefined,
+    try {
+      businessContext = {
+        businessName: businessAnalysis.businessName || undefined,
+        description: businessAnalysis.description || undefined,
+        keywords: businessAnalysis.keywords ? JSON.parse(businessAnalysis.keywords) : undefined,
+        painPoints: businessAnalysis.painPoints
+          ? JSON.parse(businessAnalysis.painPoints).map((p: any) => p.pain || p)
+          : undefined,
+        targetAudience: businessAnalysis.targetAudience
+          ? JSON.parse(businessAnalysis.targetAudience).map((a: any) => a.segment || a)
+          : undefined,
+      }
+    } catch (parseError) {
+      console.error(`[KeywordMonitor] Failed to parse business context:`, parseError)
+      // Continue without business context - relevance scoring will be skipped
     }
   }
 
@@ -301,8 +306,13 @@ async function monitorAllKeywords() {
     // Add delay between searches to avoid rate limiting
     await new Promise(resolve => setTimeout(resolve, 2000))
 
-    const result = await monitorKeyword(keyword.id)
-    totalNewMatches += result.newMatches
+    try {
+      const result = await monitorKeyword(keyword.id)
+      totalNewMatches += result.newMatches
+    } catch (error) {
+      // Log error but continue with other keywords
+      console.error(`[KeywordMonitor] Failed to scan keyword ${keyword.id} (${keyword.keyword}):`, error)
+    }
   }
 
   return { totalNewMatches, keywordsChecked: activeKeywords.length }
