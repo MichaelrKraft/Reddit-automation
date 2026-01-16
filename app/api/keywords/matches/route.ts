@@ -93,3 +93,41 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
+
+// DELETE - Delete keyword match(es)
+export async function DELETE(request: NextRequest) {
+  try {
+    const user = await getOrCreateUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const matchId = searchParams.get('id')
+    const clearAll = searchParams.get('clearAll') === 'true'
+
+    if (clearAll) {
+      // Delete all matches for this user
+      await prisma.keywordMatch.deleteMany({
+        where: { userId: user.id },
+      })
+      return NextResponse.json({ success: true })
+    }
+
+    if (matchId) {
+      // Delete single match
+      await prisma.keywordMatch.deleteMany({
+        where: {
+          id: matchId,
+          userId: user.id,
+        },
+      })
+      return NextResponse.json({ success: true })
+    }
+
+    return NextResponse.json({ error: 'No match ID provided' }, { status: 400 })
+  } catch (error: any) {
+    console.error('[KeywordMatches] DELETE error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}

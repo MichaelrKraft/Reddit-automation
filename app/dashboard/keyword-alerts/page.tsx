@@ -242,6 +242,21 @@ export default function KeywordAlertsPage() {
     }
   }
 
+  async function deleteMatch(matchId: string) {
+    try {
+      await fetch(`/api/keywords/matches?id=${matchId}`, {
+        method: 'DELETE',
+      })
+      setMatches(matches.filter(m => m.id !== matchId))
+    } catch (error) {
+      console.error('Failed to delete match:', error)
+    }
+  }
+
+  function formatExactTime(dateString: string) {
+    return new Date(dateString).toLocaleTimeString()
+  }
+
   function copySuggestion(text: string, matchId: string) {
     navigator.clipboard.writeText(text)
     setCopiedId(matchId)
@@ -532,7 +547,7 @@ export default function KeywordAlertsPage() {
                       <h3 className="text-white font-medium">{match.postTitle}</h3>
                       <p className="text-sm text-gray-500">by u/{match.postAuthor}</p>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <a
                         href={match.postUrl}
                         target="_blank"
@@ -542,6 +557,18 @@ export default function KeywordAlertsPage() {
                       >
                         Open Thread →
                       </a>
+                      <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {formatExactTime(match.matchedAt)}
+                      </span>
+                      <button
+                        onClick={() => deleteMatch(match.id)}
+                        className="text-gray-500 hover:text-red-400 transition p-1 rounded hover:bg-red-500/10"
+                        title="Dismiss alert"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
 
